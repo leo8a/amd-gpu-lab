@@ -1,0 +1,167 @@
+name: Nightly AMD Network Operator Validations
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      stages:
+        description: "Comma-separated stages (0-5) or 'all'"
+        required: false
+        default: "all"
+      sriov_profile:
+        description: "SR-IOV profile for stage 4/5"
+        required: false
+        default: "pf1_vf1"
+        type: choice
+        options:
+          - pf1_vf1
+          - hnic_pf1_vf8
+          - skip
+
+concurrency:
+  group: network-validations
+  cancel-in-progress: false
+
+env:
+  NAMESPACE: openshift-amd-network
+  REPO_DIR: /home/core/amd-gpu-lab
+  VALIDATIONS_DIR: /home/core/amd-gpu-lab/amd-openshift/openshift-reference/vendor/amd/network-operator/validations
+  LOG_DIR: /tmp/validation-logs
+
+jobs:
+  preflight:
+    runs-on: self-hosted
+    timeout-minutes: 2
+    outputs:
+      stages: ${{ steps.plan.outputs.stages }}
+      sriov_stage: ${{ steps.plan.outputs.sriov_stage }}
+    steps:
+      - name: Check cluster connectivity
+        run: |
+          set -euo pipefail
+          oc whoami
+          oc version
+          oc get nodes
+          oc get namespace "$NAMESPACE"
+          NODE_COUNT=$(oc get nodes -l feature.node.kubernetes.io/amd-nic=true --no-headers | wc -l)
+          echo "AMD NIC nodes: $NODE_COUNT"
+          if [[ $NODE_COUNT -lt 1 ]]; then
+            echo "::error::No AMD NIC nodes found"
+            exit 1
+          fi
+          mkdir -p "$LOG_DIR"
+
+      - name: Determine stages to run
+        id: plan
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            INPUT_STAGES="${{ inputs.stages }}"
+            SRIOV_PROFILE="${{ inputs.sriov_profile }}"
+          else
+            INPUT_STAGES="0,1,2,4"
+            SRIOV_PROFILE="pf1_vf1"
+          fi
+
+          if [[ "$INPUT_STAGES" == "all" ]]; then
+            STAGES_TO_RUN="0,1,2"
+            if [[ "$SRIOV_PROFILE" != "skip" ]]; then
+              STAGES_TO_RUN="${STAGES_TO_RUN},4"
+            fi
+          else
+            STAGES_TO_RUN="$INPUT_STAGES"
+          fi
+
+          case "$SRIOV_PROFILE" in
+            pf1_vf1)       SRIOV_STAGE=4 ;;
+            hnic_pf1_vf8)  SRIOV_STAGE=5 ;;
+            skip)          SRIOV_STAGE=skip ;;
+          esac
+
+          echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
+          echo "sriov_stage=$SRIOV_STAGE" >> "$GITHUB_OUTPUT"
+          echo "Stages: $STAGES_TO_RUN | SR-IOV stage: $SRIOV_STAGE"
+
+  stage-0-basic-nic:
+    needs: preflight
+    if: contains(needs.preflight.outputs.stages, '0')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Run validation
+        run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 0
+
+  stage-1-cluster-validation:
+    needs: preflight
+    if: contains(needs.preflight.outputs.stages, '1')
+    runs-on: self-hosted
+    timeout-minutes: 30
+    steps:
+      - name: Run validation
+        run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 1
+
+  stage-2-rdma-single-pod:
+    needs: [preflight, stage-1-cluster-validation]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '2')
+      && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Run validation
+        run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 2
+
+  stage-3-rdma-multi-node:
+    needs: [preflight, stage-1-cluster-validation]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '3')
+      && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Run validation
+        run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 3
+
+  stage-4-5-sriov:
+    needs: [preflight, stage-1-cluster-validation]
+    if: >-
+      always()
+      && needs.preflight.outputs.sriov_stage != 'skip'
+      && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Run validation
+        run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh ${{ needs.preflight.outputs.sriov_stage }}
+
+  cleanup:
+    needs: [preflight, stage-0-basic-nic, stage-1-cluster-validation, stage-2-rdma-single-pod, stage-3-rdma-multi-node, stage-4-5-sriov]
+    if: always()
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - name: Upload validation logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-logs-${{ github.run_id }}
+          path: /tmp/validation-logs/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Final safety cleanup
+        run: |
+          set -uo pipefail
+          echo "Running belt-and-suspenders cleanup..."
+          for dir in 00_basic-nic 01_cluster-validation 02_rdma-single-pod \
+                     03_rdma-multi-node 04_sriov-pf1_vf1-profile 05_sriov-hnic_pf1_vf8-profile; do
+            oc delete -k "${VALIDATIONS_DIR}/$dir" --ignore-not-found=true 2>/dev/null || true
+          done
+          oc label nodes --all \
+            amd.com/cluster-validation-status- \
+            amd.com/cluster-validation-candidate- \
+            amd.com/gpu-validation-test- \
+            2>/dev/null || true
+          echo "Cleanup complete"

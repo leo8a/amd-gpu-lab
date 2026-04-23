@@ -26,6 +26,7 @@ concurrency:
 env:
   NAMESPACE: openshift-amd-network
   REPO_DIR: /home/core/amd-gpu-lab
+  OPERATOR_DIR: /home/core/amd-gpu-lab/amd-openshift/openshift-reference/vendor/amd/network-operator
   VALIDATIONS_DIR: /home/core/amd-gpu-lab/amd-openshift/openshift-reference/vendor/amd/network-operator/validations
   LOG_DIR: /tmp/validation-logs
 
@@ -43,7 +44,6 @@ jobs:
           oc whoami
           oc version
           oc get nodes
-          oc get namespace "$NAMESPACE"
           NODE_COUNT=$(oc get nodes -l feature.node.kubernetes.io/amd-nic=true --no-headers | wc -l)
           echo "AMD NIC nodes: $NODE_COUNT"
           if [[ $NODE_COUNT -lt 1 ]]; then
@@ -83,8 +83,24 @@ jobs:
           echo "sriov_stage=$SRIOV_STAGE" >> "$GITHUB_OUTPUT"
           echo "Stages: $STAGES_TO_RUN | SR-IOV stage: $SRIOV_STAGE"
 
-  stage-0-basic-nic:
+  uninstall-operator:
     needs: preflight
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - name: Uninstall network operator
+        run: ${{ env.REPO_DIR }}/.github/scripts/operator-lifecycle.sh uninstall
+
+  install-operator:
+    needs: uninstall-operator
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - name: Install network operator
+        run: ${{ env.REPO_DIR }}/.github/scripts/operator-lifecycle.sh install
+
+  stage-0-basic-nic:
+    needs: [preflight, install-operator]
     if: contains(needs.preflight.outputs.stages, '0')
     runs-on: self-hosted
     timeout-minutes: 5
@@ -93,7 +109,7 @@ jobs:
         run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 0
 
   stage-1-cluster-validation:
-    needs: preflight
+    needs: [preflight, install-operator]
     if: contains(needs.preflight.outputs.stages, '1')
     runs-on: self-hosted
     timeout-minutes: 30
@@ -102,10 +118,11 @@ jobs:
         run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 1
 
   stage-2-rdma-single-pod:
-    needs: [preflight, stage-1-cluster-validation]
+    needs: [preflight, install-operator, stage-1-cluster-validation]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '2')
+      && needs.install-operator.result == 'success'
       && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
@@ -114,10 +131,11 @@ jobs:
         run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 2
 
   stage-3-rdma-multi-node:
-    needs: [preflight, stage-1-cluster-validation]
+    needs: [preflight, install-operator, stage-1-cluster-validation]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '3')
+      && needs.install-operator.result == 'success'
       && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
@@ -126,10 +144,11 @@ jobs:
         run: ${{ env.REPO_DIR }}/.github/scripts/run-validation-stage.sh 3
 
   stage-4-5-sriov:
-    needs: [preflight, stage-1-cluster-validation]
+    needs: [preflight, install-operator, stage-1-cluster-validation]
     if: >-
       always()
       && needs.preflight.outputs.sriov_stage != 'skip'
+      && needs.install-operator.result == 'success'
       && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 10

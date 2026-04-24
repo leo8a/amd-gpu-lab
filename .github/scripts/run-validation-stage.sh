@@ -2,8 +2,9 @@
 set -euo pipefail
 
 STAGE_NUM="${1:?Usage: run-validation-stage.sh <0-5>}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="${NAMESPACE:-openshift-amd-network}"
-VALIDATIONS_DIR="${VALIDATIONS_DIR:-validations}"
+VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/amd-openshift/openshift-reference/vendor/amd/network-operator/validations}"
 LOG_DIR="${LOG_DIR:-/tmp/validation-logs}"
 
 declare -A STAGE_DIRS=(
@@ -26,7 +27,7 @@ endgroup() { if [[ -n "${GITHUB_ACTIONS:-}" ]]; then echo "::endgroup::"; fi; }
 capture_logs() {
   group "Capturing logs for stage $STAGE_NUM"
   for pod in $(oc get pods -n "$NAMESPACE" -o name 2>/dev/null); do
-    oc logs -n "$NAMESPACE" "$pod" --all-containers=true \
+    timeout 10 oc logs -n "$NAMESPACE" "$pod" --all-containers=true --tail=200 \
       > "$STAGE_LOG_DIR/$(basename "$pod").log" 2>&1 || true
   done
   oc get events -n "$NAMESPACE" --sort-by='.lastTimestamp' \
@@ -36,7 +37,7 @@ capture_logs() {
 
   if [[ "$STAGE_NUM" == "1" ]]; then
     for pod in $(oc get pods -n default -l amd.com/cluster-validation-created=true -o name 2>/dev/null); do
-      oc logs -n default "$pod" --all-containers=true \
+      timeout 10 oc logs -n default "$pod" --all-containers=true --tail=200 \
         > "$STAGE_LOG_DIR/default-$(basename "$pod").log" 2>&1 || true
     done
     oc get events -n default --sort-by='.lastTimestamp' \
@@ -51,7 +52,7 @@ cleanup() {
   group "Cleanup stage $STAGE_NUM"
   capture_logs
 
-  oc delete -k "$STAGE_DIR" --ignore-not-found=true 2>/dev/null || true
+  oc delete -k "$STAGE_DIR" --ignore-not-found=true --timeout=60s 2>/dev/null || true
 
   if [[ "$STAGE_NUM" == "1" ]]; then
     oc delete job -l ci-triggered=true -n default --ignore-not-found=true 2>/dev/null || true
@@ -62,12 +63,6 @@ cleanup() {
       amd.com/gpu-validation-test- \
       2>/dev/null || true
   fi
-
-  oc wait --for=delete pod/test-amd-nic -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
-  oc wait --for=delete pod/rdma-test -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
-  oc wait --for=delete pod/rdma-server -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
-  oc wait --for=delete pod/rdma-client -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
-  oc wait --for=delete pod/test-amd-sriov -n "$NAMESPACE" --timeout=60s 2>/dev/null || true
   endgroup
   exit "$exit_code"
 }

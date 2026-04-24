@@ -3,7 +3,7 @@ set -euo pipefail
 
 STAGE_NUM="${1:?Usage: run-validation-stage.sh <0-5>}"
 NAMESPACE="${NAMESPACE:-openshift-amd-network}"
-VALIDATIONS_DIR="${VALIDATIONS_DIR:-amd-openshift/openshift-reference/vendor/amd/network-operator/validations}"
+VALIDATIONS_DIR="${VALIDATIONS_DIR:-validations}"
 LOG_DIR="${LOG_DIR:-/tmp/validation-logs}"
 
 declare -A STAGE_DIRS=(

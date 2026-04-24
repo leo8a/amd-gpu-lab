@@ -1,0 +1,84 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: amd-network-operator-device-plugin-config
+  namespace: openshift-amd-network
+  labels:
+    app.kubernetes.io/component: amd-network
+    app.kubernetes.io/part-of: amd-network
+data:
+  config.json: |
+    {
+      "resourceList": [
+        {
+          "resourceName": "nic",
+          "resourcePrefix": "amd.com",
+          "enableExporterHealthCheck": true,
+          "selectors": {
+            "vendors": ["1dd8"],
+            "devices": ["1002"],
+            "drivers": ["ionic"],
+            "isRdma": true
+          },
+          "excludeTopology": false
+        },
+        {
+          "resourceName": "vnic",
+          "resourcePrefix": "amd.com",
+          "enableExporterHealthCheck": true,
+          "selectors": {
+            "vendors": ["1dd8"],
+            "devices": ["1003"],
+            "drivers": ["ionic"],
+            "isRdma": true
+          },
+          "excludeTopology": false
+        }
+      ]
+    }
+
+# ---
+# AMD Device Plugin Configuration for pf1_vf1 Profile
+# ---
+#
+# IMPORTANT: This ConfigMap is required for the AMD Network Operator device plugin
+# to properly detect and register AMD Pensando AI NICs when using the pf1_vf1 profile.
+#
+# Why isRdma: true?
+# -----------------
+# The pf1_vf1 profile uses device_config_pf1_vf1_llc which exposes RDMA resources
+# via /sys/bus/pci/devices/*/infiniband. The device plugin needs isRdma: true to
+# properly detect these NICs.
+#
+# Profile Comparison:
+# -------------------
+# - default:        device_config_rdma_1x400G     -> isRdma: true  ✓
+# - pf1_vf1:        device_config_pf1_vf1_llc     -> isRdma: true  ✓
+# - hnic_pf1_vf8:   device_config_pf1_vf8_hnic    -> isRdma: false ✓
+#
+# Without this ConfigMap:
+# -----------------------
+# The AMD Network Operator does NOT automatically create a device plugin ConfigMap.
+# Device plugin pods will fail to start with:
+#   MountVolume.SetUp failed for volume "device-plugin-config-volume" :
+#   configmap "amd-network-operator-device-plugin-config" not found
+#
+# After applying this ConfigMap, restart the device plugin pods if already running:
+#   oc delete pods -n openshift-amd-network -l app.kubernetes.io/name=device-plugin
+#
+# Expected Result:
+# ----------------
+# oc get nodes -ojson | jq '.items[].status.allocatable | with_entries(select(.key | contains("amd.com")))'
+# {
+#   "amd.com/gpu": "8",
+#   "amd.com/nic": "7",    # <-- Physical Functions (PFs)
+#   "amd.com/vnic": "0"    # <-- Virtual Functions (VFs) - requires SR-IOV policy to activate
+# }
+#
+# References:
+# -----------
+# - https://github.com/pensando/network-operator/blob/main/bundle/manifests/device-plugin-configmap.yaml
+# - Upstream default uses isRdma: true for both nic and vnic
+# - For RDMA-enabled profiles (default, pf1_vf1), use isRdma: true
+# - For Host NIC profiles (hnic*), use isRdma: false

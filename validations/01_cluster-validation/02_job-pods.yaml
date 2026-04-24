@@ -1,0 +1,85 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rdma-validation-job
+  namespace: openshift-amd-network
+spec:
+  completions: 2
+  parallelism: 2
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: amd-rdma-net
+    spec:
+      serviceAccountName: rdma-validator
+      restartPolicy: Never
+      containers:
+      - name: rdma-validator
+        image: registry.access.redhat.com/ubi9/ubi:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # Load validation script from ConfigMap
+          /scripts/validation-script
+
+          # Network connectivity test
+          echo ""
+          echo "=== Network Connectivity Test ==="
+
+          # Get local IP
+          LOCAL_IP=$(ip addr show net1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+          echo "Local RDMA IP: $LOCAL_IP"
+
+          # Wait for peer
+          sleep 5
+
+          # Scan for peer on RDMA network
+          echo "Scanning for peers on RDMA network..."
+          PEERS_FOUND=0
+          for ip in 192.168.200.{1..254}; do
+            if [ "$ip" != "$LOCAL_IP" ]; then
+              if ping -c 1 -W 1 $ip >/dev/null 2>&1; then
+                echo "  Found peer: $ip"
+                PEERS_FOUND=$((PEERS_FOUND + 1))
+              fi
+            fi
+          done
+
+          if [ $PEERS_FOUND -gt 0 ]; then
+            echo "Successfully connected to $PEERS_FOUND peer(s) over RDMA network"
+          else
+            echo "WARNING: No peers found on RDMA network"
+          fi
+
+          echo ""
+          echo "=== Job Complete ==="
+        resources:
+          requests:
+            amd.com/nic: "1"
+          limits:
+            amd.com/nic: "1"
+        securityContext:
+          capabilities:
+            add: ["IPC_LOCK", "NET_RAW"]
+        volumeMounts:
+        - name: validation-scripts
+          mountPath: /scripts
+      nodeSelector:
+        feature.node.kubernetes.io/amd-nic: "true"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: job-name
+                operator: In
+                values:
+                - rdma-validation-job
+            topologyKey: kubernetes.io/hostname
+      volumes:
+      - name: validation-scripts
+        configMap:
+          name: rdma-validation-config
+          defaultMode: 0755

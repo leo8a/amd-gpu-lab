@@ -1,0 +1,9 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_nad-amd-rdma.yaml
+  - 01_serviceaccount.yaml
+  - 02_rdma-server.yaml
+  - 03_rdma-client.yaml

@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rdma-validation-config
+  namespace: openshift-amd-network
+data:
+  # Node selection criteria
+  node-selector: |
+    feature.node.kubernetes.io/amd-nic=true
+
+  # RDMA network configuration
+  rdma-network: |
+    amd-rdma-net
+
+  # Validation checks
+  validation-script: |
+    #!/bin/bash
+    set -e
+
+    echo "=== RDMA Device Validation ==="
+
+    # Check RDMA devices
+    if [ ! -d /sys/class/infiniband ]; then
+      echo "ERROR: No RDMA devices found"
+      exit 1
+    fi
+
+    DEVICE_COUNT=$(ls /sys/class/infiniband/ | wc -l)
+    echo "Found $DEVICE_COUNT RDMA device(s)"
+
+    # Validate each device
+    for dev in /sys/class/infiniband/*; do
+      if [ -d "$dev" ]; then
+        DEVICE=$(basename $dev)
+        NODE_TYPE=$(cat $dev/node_type 2>/dev/null || echo "unknown")
+
+        echo "Device: $DEVICE"
+        echo "  Type: $NODE_TYPE"
+
+        if [ "$NODE_TYPE" != "1" ] && [ "$NODE_TYPE" != "CA" ]; then
+          echo "  WARNING: Expected CA (Channel Adapter), got $NODE_TYPE"
+        fi
+      fi
+    done
+
+    # Verify RDMA network interface
+    if ! ip addr show net1 >/dev/null 2>&1; then
+      echo "ERROR: RDMA network interface (net1) not found"
+      exit 1
+    fi
+
+    RDMA_IP=$(ip addr show net1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+    echo "RDMA network IP: $RDMA_IP"
+
+    echo ""
+    echo "=== Validation: PASSED ==="

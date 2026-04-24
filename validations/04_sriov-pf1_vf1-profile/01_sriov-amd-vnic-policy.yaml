@@ -1,0 +1,58 @@
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: amd-vnic-policy
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: vnic
+  nodeSelector:
+    feature.node.kubernetes.io/amd-nic: "true"
+  numVfs: 1
+  nicSelector:
+    vendor: "1dd8"
+    deviceID: "1002"
+  deviceType: netdevice
+
+
+#
+# Profile Name: pf1_vf1
+# Reference: https://docs.amd.com/r/en-US/ug1801-ai-nic-pollara-400-ops-guide?tocId=25fwuCibUPiNDw1v2_r8ug
+#
+# - pf1_vf1 will expose 1 PF and 1 VF to the host.
+# - The PF will have limited Ethernet/RDMA resources (skinny device) just for functionality and not for production workloads.
+# - The VF will support full Ethernet/RDMA functionality, and can be used in a container (different network namespace).
+# - Supports the following for VFs: VF Vlan-tag, and VF Mac-address set, Trust, Spook-chk.
+
+
+# Validation:
+#
+# -> lspci -d 1dd8:1002   (Physical Functions)
+# -> lspci -d 1dd8:1003   (Virtual Functions)
+#
+# -> oc get nodes -ojson | jq '.items[] | {name: .metadata.name, allocatable: .status.allocatable, capacity: .status.capacity}'
+# {
+#   "name": "smc6216gpu.partner-accelerators.redhat.lab",
+#   "allocatable": {
+#     "amd.com/gpu": "8",
+#     "amd.com/nic": "7",
+#     "cpu": "252880m",
+#     "ephemeral-storage": "27645263362150",
+#     "hugepages-1Gi": "0",
+#     "hugepages-2Mi": "0",
+#     "memory": "1546951760Ki",
+#     "openshift.io/vnic": "7",     # <-- this
+#     "pods": "250"
+#   },
+#   "capacity": {
+#     "amd.com/gpu": "8",
+#     "amd.com/nic": "7",
+#     "cpu": "256",
+#     "ephemeral-storage": "29998195692Ki",
+#     "hugepages-1Gi": "0",
+#     "hugepages-2Mi": "0",
+#     "memory": "1584802896Ki",
+#     "openshift.io/vnic": "7",     # <-- this
+#     "pods": "250"
+#   }
+# }

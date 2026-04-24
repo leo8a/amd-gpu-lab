@@ -1,0 +1,28 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-rdma-net
+  namespace: openshift-amd-network
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "name": "amd-rdma-net",
+      "plugins": [
+        {
+          "type": "host-device",
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.200.0/24"
+          }
+        }
+      ]
+    }
+
+# Use case: RDMA workloads (vLLM, RCCL), multi-GPU training
+# Pod annotation: k8s.v1.cni.cncf.io/networks: amd-rdma-net
+# Resource request: amd.com/nic: "1" (Physical Function - AMD Pensando NICs don't support SR-IOV)
+# Security: Add IPC_LOCK capability

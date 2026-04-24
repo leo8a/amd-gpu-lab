@@ -1,0 +1,59 @@
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetworkNodePolicy
+metadata:
+  name: amd-vnic-policy
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: vnic
+  nodeSelector:
+    feature.node.kubernetes.io/amd-nic: "true"
+  numVfs: 8
+  nicSelector:
+    vendor: "1dd8"
+    deviceID: "1002"
+  deviceType: netdevice
+
+
+#
+# Profile Name: hnic_pf1_vf8
+# Reference: https://docs.amd.com/r/en-US/ug1801-ai-nic-pollara-400-ops-guide?tocId=25fwuCibUPiNDw1v2_r8ug
+#
+# - hnic_pf1_vf8 will expose 1 PF and 8 VFs to the host.
+# - 1x Ionic PFs with SR-IOV enabled
+# - 8 VFs per PF
+# - 1 MSI-X vector per queue
+# - Supports the following for VFs: VF Vlan-tag, and VF Mac-address set, Trust, Spook-chk.
+
+
+# Validation:
+#
+# -> lspci -d 1dd8:1002   (Physical Functions)
+# -> lspci -d 1dd8:1003   (Virtual Functions)
+#
+# -> oc get nodes -ojson | jq '.items[] | {name: .metadata.name, allocatable: .status.allocatable, capacity: .status.capacity}'
+# {
+#   "name": "smc6216gpu.partner-accelerators.redhat.lab",
+#   "allocatable": {
+#     "amd.com/gpu": "8",
+#     "amd.com/nic": "7",
+#     "cpu": "252880m",
+#     "ephemeral-storage": "27645263362150",
+#     "hugepages-1Gi": "0",
+#     "hugepages-2Mi": "0",
+#     "memory": "1546951760Ki",
+#     "openshift.io/vnic": "56",     # <-- this (8 VFs x 7 NICs)
+#     "pods": "250"
+#   },
+#   "capacity": {
+#     "amd.com/gpu": "8",
+#     "amd.com/nic": "7",
+#     "cpu": "256",
+#     "ephemeral-storage": "29998195692Ki",
+#     "hugepages-1Gi": "0",
+#     "hugepages-2Mi": "0",
+#     "memory": "1584802896Ki",
+#     "openshift.io/vnic": "56",     # <-- this (8 VFs x 7 NICs)
+#     "pods": "250"
+#   }
+# }

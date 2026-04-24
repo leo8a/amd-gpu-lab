@@ -41,6 +41,78 @@ Trigger via GitHub Actions UI or CLI:
 
 ```bash
 gh workflow run nightly-network-validations.yaml \
+  -R leo8a/amd-gpu-lab \
   -f stages="0,2" \
   -f sriov_profile="skip"
+```
+
+## Source of truth
+
+The **canonical repository** is the local workstation at `/home/leo8a/Projects/amd-gpu-lab/`. All edits happen here first. Two downstream targets consume from it:
+
+| Target                        | What it receives                       | How it's synced   |
+| ----------------------------- | -------------------------------------- | ----------------- |
+| GitHub (`leo8a/amd-gpu-lab`)  | `.github/` directory only              | temp-clone + push |
+| Self-hosted runner (`core@…`) | `.github/` + operator/validation YAMLs | scp               |
+
+Never edit files directly on GitHub or on the runner — changes flow one way from the local repo.
+
+## Deployment workflow
+
+### 1. Edit files locally
+
+All source files are in `/home/leo8a/Projects/amd-gpu-lab/`. Edit the workflow, scripts, manifests, or docs there.
+
+### 2. Push to GitHub
+
+The GitHub repo is maintained via a temp clone (the local repo has no git remote pointing to it). Create a fresh clone or reuse an existing one:
+
+```bash
+TMPDIR=$(mktemp -d) && cd "$TMPDIR"
+git clone https://github.com/leo8a/amd-gpu-lab.git && cd amd-gpu-lab
+```
+
+Copy the updated files and push:
+
+```bash
+cp -r /home/leo8a/Projects/amd-gpu-lab/.github/* .github/
+git add -A && git commit -m "ci: <description of changes>"
+git push
+```
+
+### 3. Sync files to the self-hosted runner
+
+The runner at `core@10.216.91.138` reads scripts and manifests from `~/amd-gpu-lab/`. After pushing to GitHub, sync the changed files:
+
+```bash
+SSH_KEY="/home/leo8a/Projects/amd-gpu-lab/amd-labs/amd-lab-virt/ssh/id_rsa"
+SSH_HOST="core@10.216.91.138"
+
+# Sync scripts and workflow
+scp -i "$SSH_KEY" .github/scripts/*.sh "$SSH_HOST":~/amd-gpu-lab/.github/scripts/
+scp -i "$SSH_KEY" .github/workflows/*.yaml "$SSH_HOST":~/amd-gpu-lab/.github/workflows/
+
+# If validation manifests changed, sync those too
+scp -i "$SSH_KEY" -r /home/leo8a/Projects/amd-gpu-lab/amd-openshift/openshift-reference/vendor/amd/network-operator/validations \
+  "$SSH_HOST":~/amd-gpu-lab/amd-openshift/openshift-reference/vendor/amd/network-operator/
+```
+
+### 4. Test
+
+```bash
+gh workflow run nightly-network-validations.yaml -R leo8a/amd-gpu-lab -f stages="0" -f sriov_profile="skip"
+gh run list -R leo8a/amd-gpu-lab -w "Nightly AMD Network Operator Validations" -L 1
+```
+
+## File layout
+
+```yaml
+.github/
+  workflows/
+    nightly-network-validations.yaml   # workflow definition
+  scripts/
+    run-validation-stage.sh            # validation stage runner (stages 0-5)
+  docs/
+    self-hosted-runner-setup.md        # runner installation guide
+  README.md                           # this file
 ```

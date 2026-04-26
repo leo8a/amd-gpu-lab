@@ -103,7 +103,9 @@ oc label nodes --all amd.com/gpu-validation-test-
 ## Prerequisites
 
 - AMD Network Operator deployed
-- **At least 2 nodes** labeled with `feature.node.kubernetes.io/amd-nic=true`
+- Nodes labeled with `feature.node.kubernetes.io/amd-gpu=true` and `feature.node.kubernetes.io/amd-nic=true`
+- **GPUs must be allocatable** (`amd.com/gpu >= 1`) on candidate nodes — DRA partitioning sets `amd.com/gpu: 0`, which prevents the test runner pods from scheduling
+- **Full SPX GPUs required** — the GST performance thresholds assume full SPX GPUs; CPX-partitioned nodes will fail every benchmark. The default config pins to a specific node via `kubernetes.io/hostname` in `NODE_SELECTOR_LABELS`
 - Kubeflow MPI Operator v0.8.0 (automatically deployed by kustomization)
 
 ## Files

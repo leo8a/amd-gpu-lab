@@ -4,14 +4,14 @@ Nightly workflow that runs AMD network-operator validation stages on a self-host
 
 ## Stages
 
-| Stage | Name                 | What it validates                          | Duration |
-| ----- | -------------------- | ------------------------------------------ | -------- |
-| 0     | Basic NIC            | NIC assignment via host-device CNI         | ~2 min   |
-| 1     | Cluster Validation   | GPU health + RCCL performance (MPI)        | ~20 min  |
-| 2     | RDMA Single Pod      | RDMA device visibility in a pod            | ~1 min   |
-| 3     | RDMA Multi-Node      | Two-node RDMA connectivity (needs 2+ nodes)| ~2 min   |
-| 4     | SR-IOV (pf1_vf1)     | SR-IOV VF assignment (1 VF/NIC, RDMA)      | ~5 min   |
-| 5     | SR-IOV (hnic_pf1_vf8)| SR-IOV VF assignment (8 VFs/NIC, no RDMA)  | ~5 min   |
+| Stage | Name                  | What it validates                           | Duration |
+| ----- | --------------------- | ------------------------------------------- | -------- |
+| 0     | Cluster Validation    | GPU health + RCCL performance (MPI)         | ~20 min  |
+| 1     | Basic NIC             | NIC assignment via host-device CNI          | ~2 min   |
+| 2     | RDMA Single Pod       | RDMA device visibility in a pod             | ~1 min   |
+| 3     | RDMA Multi-Node       | Two-node RDMA connectivity (needs 2+ nodes) | ~2 min   |
+| 4     | SR-IOV (pf1_vf1)      | SR-IOV VF assignment (1 VF/NIC, RDMA)       | ~5 min   |
+| 5     | SR-IOV (hnic_pf1_vf8) | SR-IOV VF assignment (8 VFs/NIC, no RDMA)   | ~5 min   |
 
 Nightly default: stages 0, 1, 2, 4. Stages 3 and 5 are available via manual dispatch.
 
@@ -95,10 +95,13 @@ gh run list -R leo8a/amd-gpu-lab -w "Nightly AMD Network Operator Validations" -
     self-hosted-runner-setup.md        # runner installation guide
   README.md                           # this file
 validations/
-  00_basic-nic/                        # stage 0 manifests
-  01_cluster-validation/               # stage 1 manifests
-  02_rdma-single-pod/                  # stage 2 manifests
-  03_rdma-multi-node/                  # stage 3 manifests
-  04_sriov-pf1_vf1-profile/           # stage 4 manifests
-  05_sriov-hnic_pf1_vf8-profile/      # stage 5 manifests
+  00_cluster-validation/               # stage 0 manifests
+  01_basic/
+    00_nic-assignment/                 # stage 1 manifests
+  02_rdma/
+    00_single-pod/                     # stage 2 manifests
+    01_multi-node/                     # stage 3 manifests
+  03_sriov/
+    00_pf1_vf1-profile/               # stage 4 manifests
+    01_hnic_pf1_vf8-profile/          # stage 5 manifests
 ```

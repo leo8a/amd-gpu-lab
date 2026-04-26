@@ -4,16 +4,16 @@ set -euo pipefail
 STAGE_NUM="${1:?Usage: run-validation-stage.sh <0-5>}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="${NAMESPACE:-openshift-amd-network}"
-VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/amd-openshift/openshift-reference/vendor/amd/network-operator/validations}"
+VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/validations}"
 LOG_DIR="${LOG_DIR:-/tmp/validation-logs}"
 
 declare -A STAGE_DIRS=(
-  [0]="00_basic-nic"
-  [1]="01_cluster-validation"
-  [2]="02_rdma-single-pod"
-  [3]="03_rdma-multi-node"
-  [4]="04_sriov-pf1_vf1-profile"
-  [5]="05_sriov-hnic_pf1_vf8-profile"
+  [0]="00_cluster-validation"
+  [1]="01_basic/00_nic-assignment"
+  [2]="02_rdma/00_single-pod"
+  [3]="02_rdma/01_multi-node"
+  [4]="03_sriov/00_pf1_vf1-profile"
+  [5]="03_sriov/01_hnic_pf1_vf8-profile"
 )
 
 STAGE_DIR="${VALIDATIONS_DIR}/${STAGE_DIRS[$STAGE_NUM]}"
@@ -35,7 +35,7 @@ capture_logs() {
   oc get pods -n "$NAMESPACE" -o wide \
     > "$STAGE_LOG_DIR/pods.log" 2>&1 || true
 
-  if [[ "$STAGE_NUM" == "1" ]]; then
+  if [[ "$STAGE_NUM" == "0" ]]; then
     for pod in $(oc get pods -n default -l amd.com/cluster-validation-created=true -o name 2>/dev/null); do
       timeout 10 oc logs -n default "$pod" --all-containers=true --tail=200 \
         > "$STAGE_LOG_DIR/default-$(basename "$pod").log" 2>&1 || true
@@ -54,7 +54,7 @@ cleanup() {
 
   oc delete -k "$STAGE_DIR" --ignore-not-found=true --timeout=60s 2>/dev/null || true
 
-  if [[ "$STAGE_NUM" == "1" ]]; then
+  if [[ "$STAGE_NUM" == "0" ]]; then
     oc delete job -l ci-triggered=true -n default --ignore-not-found=true 2>/dev/null || true
     oc delete job -l amd.com/cluster-validation-created=true -n default --ignore-not-found=true 2>/dev/null || true
     oc label nodes --all \
@@ -70,7 +70,7 @@ trap cleanup EXIT
 
 # --- Apply ---
 group "Apply stage $STAGE_NUM: ${STAGE_DIRS[$STAGE_NUM]}"
-if [[ "$STAGE_NUM" == "1" ]]; then
+if [[ "$STAGE_NUM" == "0" ]]; then
   oc apply --server-side -k "$STAGE_DIR"
 else
   oc apply -k "$STAGE_DIR"
@@ -81,18 +81,6 @@ endgroup
 group "Verify stage $STAGE_NUM"
 case "$STAGE_NUM" in
   0)
-    oc wait --for=condition=Ready pod/test-amd-nic -n "$NAMESPACE" --timeout=120s
-    OUTPUT=$(oc exec -n "$NAMESPACE" test-amd-nic -- ip addr show)
-    echo "$OUTPUT"
-    if echo "$OUTPUT" | grep -q "net1"; then
-      echo "PASS: net1 interface found"
-    else
-      echo "FAIL: net1 interface not found"
-      exit 1
-    fi
-    ;;
-
-  1)
     oc wait --for=condition=established crd/mpijobs.kubeflow.org --timeout=180s
 
     JOB_NAME="cluster-validation-ci-$(date +%s)"
@@ -133,6 +121,18 @@ case "$STAGE_NUM" in
       echo "PASS: $PASSED_COUNT node(s) passed cluster validation"
     else
       echo "FAIL: No nodes have cluster-validation-status=passed"
+      exit 1
+    fi
+    ;;
+
+  1)
+    oc wait --for=condition=Ready pod/test-amd-nic -n "$NAMESPACE" --timeout=120s
+    OUTPUT=$(oc exec -n "$NAMESPACE" test-amd-nic -- ip addr show)
+    echo "$OUTPUT"
+    if echo "$OUTPUT" | grep -q "net1"; then
+      echo "PASS: net1 interface found"
+    else
+      echo "FAIL: net1 interface not found"
       exit 1
     fi
     ;;

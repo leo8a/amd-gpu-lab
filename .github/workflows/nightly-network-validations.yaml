@@ -2,7 +2,7 @@ name: Nightly AMD Network Operator Validations
 
 on:
   schedule:
-    - cron: "0 4 * * *"
+    - cron: "0 3 * * *"  # 4am CET
   workflow_dispatch:
     inputs:
       stages:
@@ -50,6 +50,23 @@ jobs:
           fi
           mkdir -p "$LOG_DIR"
 
+      - name: Verify device plugin resources
+        run: |
+          set -euo pipefail
+          if ! oc get cm -n "$NAMESPACE" amd-network-operator-device-plugin-config &>/dev/null; then
+            echo "::error::Device plugin ConfigMap missing — apply it with: oc apply -f validations/03_sriov/00_pf1_vf1-profile/00_amd-device-plugin-config.yaml"
+            exit 1
+          fi
+
+          NIC_TOTAL=$(oc get nodes -l feature.node.kubernetes.io/amd-nic=true \
+            -o jsonpath='{range .items[*]}{.status.allocatable.amd\.com/nic}{"\n"}{end}' \
+            | awk '{s+=$1} END {print s+0}')
+          echo "Total amd.com/nic allocatable: $NIC_TOTAL"
+          if [[ "$NIC_TOTAL" -lt 1 ]]; then
+            echo "::error::No amd.com/nic resources — device plugin may need a restart (oc delete pods -n $NAMESPACE -l app.kubernetes.io/name=device-plugin)"
+            exit 1
+          fi
+
       - name: Determine stages to run
         id: plan
         run: |
@@ -81,32 +98,32 @@ jobs:
           echo "sriov_stage=$SRIOV_STAGE" >> "$GITHUB_OUTPUT"
           echo "Stages: $STAGES_TO_RUN | SR-IOV stage: $SRIOV_STAGE"
 
-  stage-0-basic-nic:
+  stage-0-cluster-validation:
     needs: preflight
     if: contains(needs.preflight.outputs.stages, '0')
     runs-on: self-hosted
-    timeout-minutes: 5
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Run validation
         run: .github/scripts/run-validation-stage.sh 0
 
-  stage-1-cluster-validation:
+  stage-1-basic-nic:
     needs: preflight
     if: contains(needs.preflight.outputs.stages, '1')
     runs-on: self-hosted
-    timeout-minutes: 30
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Run validation
         run: .github/scripts/run-validation-stage.sh 1
 
   stage-2-rdma-single-pod:
-    needs: [preflight, stage-1-cluster-validation]
+    needs: [preflight, stage-0-cluster-validation]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '2')
-      && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
+      && (needs.stage-0-cluster-validation.result == 'success' || needs.stage-0-cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -115,11 +132,11 @@ jobs:
         run: .github/scripts/run-validation-stage.sh 2
 
   stage-3-rdma-multi-node:
-    needs: [preflight, stage-1-cluster-validation]
+    needs: [preflight, stage-0-cluster-validation]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '3')
-      && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
+      && (needs.stage-0-cluster-validation.result == 'success' || needs.stage-0-cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -128,11 +145,11 @@ jobs:
         run: .github/scripts/run-validation-stage.sh 3
 
   stage-4-5-sriov:
-    needs: [preflight, stage-1-cluster-validation]
+    needs: [preflight, stage-0-cluster-validation]
     if: >-
       always()
       && needs.preflight.outputs.sriov_stage != 'skip'
-      && (needs.stage-1-cluster-validation.result == 'success' || needs.stage-1-cluster-validation.result == 'skipped')
+      && (needs.stage-0-cluster-validation.result == 'success' || needs.stage-0-cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 10
     steps:
@@ -141,7 +158,7 @@ jobs:
         run: .github/scripts/run-validation-stage.sh ${{ needs.preflight.outputs.sriov_stage }}
 
   cleanup:
-    needs: [preflight, stage-0-basic-nic, stage-1-cluster-validation, stage-2-rdma-single-pod, stage-3-rdma-multi-node, stage-4-5-sriov]
+    needs: [preflight, stage-0-cluster-validation, stage-1-basic-nic, stage-2-rdma-single-pod, stage-3-rdma-multi-node, stage-4-5-sriov]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5
@@ -159,8 +176,8 @@ jobs:
         run: |
           set -uo pipefail
           echo "Running belt-and-suspenders cleanup..."
-          for dir in 00_basic-nic 01_cluster-validation 02_rdma-single-pod \
-                     03_rdma-multi-node 04_sriov-pf1_vf1-profile 05_sriov-hnic_pf1_vf8-profile; do
+          for dir in 00_cluster-validation 01_basic/00_nic-assignment 02_rdma/00_single-pod \
+                     02_rdma/01_multi-node 03_sriov/00_pf1_vf1-profile 03_sriov/01_hnic_pf1_vf8-profile; do
             oc delete -k "${VALIDATIONS_DIR}/$dir" --ignore-not-found=true 2>/dev/null || true
           done
           oc label nodes --all \

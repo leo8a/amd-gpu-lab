@@ -59,6 +59,19 @@ sudo systemctl status actions.runner.<owner>-<repo>.<runner-name>.service
 gh api repos/<owner>/<repo>/actions/runners -q '.runners[] | "\(.name) | \(.status)"'
 ```
 
+## Known warnings
+
+### "Free space left: 0 MB" — false positive on RHCOS
+
+GitHub Actions checks free space on `/`, which on RHCOS is a read-only composefs mount that is always 100% full by design. The actual writable partition is `/sysroot` (mounted on `/var`), which typically has terabytes of free space. This warning does NOT indicate a real disk space problem and can be safely ignored.
+
+```
+$ df -h / /var
+Filesystem      Size  Used Avail Use% Mounted on
+composefs       5.9M  5.9M     0 100% /          <-- always full, read-only image
+/dev/nvme1n1p4   28T  305G   28T   2% /var        <-- actual writable storage
+```
+
 ## Service management
 
 ```bash

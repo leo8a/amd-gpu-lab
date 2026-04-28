@@ -191,4 +191,6 @@ jobs:
             amd.com/cluster-validation-candidate- \
             amd.com/gpu-validation-test- \
             2>/dev/null || true
+          echo "Restoring device-plugin ConfigMap..."
+          oc apply -f "${VALIDATIONS_DIR}/../07_amd-device-plugin-config.yaml" || true
           echo "Cleanup complete"

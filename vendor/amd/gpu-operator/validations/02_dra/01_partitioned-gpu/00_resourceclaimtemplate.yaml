@@ -1,0 +1,27 @@
+# ResourceClaimTemplate for a single GPU partition via the gpu.amd.com DeviceClass.
+#
+# The CEL selector filters for type == "amdgpu-partition" to only match partitioned
+# devices (e.g. CPX/NPS4) and avoid claiming full SPX GPUs on non-partitioned nodes.
+#
+# Prerequisites:
+#   - GPU partitioning must be configured on the node (e.g. via Device Config Manager
+#     with computePartition: CPX).
+#   - The DRA driver must be running and publishing ResourceSlices with partition attributes.
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: dra-partitioned-gpu-claim
+  namespace: openshift-amd-gpu
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu-partition
+          exactly:
+            deviceClassName: gpu.amd.com
+            allocationMode: ExactCount
+            count: 1
+            selectors:
+              - cel:
+                  expression: "device.attributes['gpu.amd.com'].type == 'amdgpu-partition'"

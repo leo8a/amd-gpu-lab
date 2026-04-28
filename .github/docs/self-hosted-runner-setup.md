@@ -65,7 +65,7 @@ gh api repos/<owner>/<repo>/actions/runners -q '.runners[] | "\(.name) | \(.stat
 
 GitHub Actions checks free space on `/`, which on RHCOS is a read-only composefs mount that is always 100% full by design. The actual writable partition is `/sysroot` (mounted on `/var`), which typically has terabytes of free space. This warning does NOT indicate a real disk space problem and can be safely ignored.
 
-```
+```bash
 $ df -h / /var
 Filesystem      Size  Used Avail Use% Mounted on
 composefs       5.9M  5.9M     0 100% /          <-- always full, read-only image

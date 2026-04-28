@@ -1,0 +1,43 @@
+# Ref: https://github.com/ROCm/gpu-operator/blob/main/docs/autoremediation/auto-remediation.md#device-config-configuration
+#
+# Merge patch for the DeviceConfig CR — adds remediationWorkflow without overwriting existing fields.
+# Usage: oc patch deviceconfig amdgpu-driver-install -n openshift-amd-gpu --type merge --patch-file 00_deviceconfig-remediation-patch.yaml
+---
+spec:
+  remediationWorkflow:
+    # Activates automatic remediation workflows when GPU issues are detected (disabled by default)
+    enable: true
+
+    # How long to keep failed workflow objects/pods for post-mortem analysis before garbage collection (default: 24h)
+    # ttlForFailedWorkflows: 24h
+
+    # Image used to run GPU validation tests (RVS/AGFHC) after remediation completes (default: docker.io/rocm/test-runner:v1.4.1)
+    # testerImage: docker.io/rocm/test-runner:v1.4.1
+
+    # If true, workflows start automatically on condition match; if false, they pause for manual approval (default: true)
+    # autoStartWorkflow: true
+
+    # Max concurrent remediation workflows across the cluster, 0 = no limit (default: 0)
+    # maxParallelWorkflows: 0
+
+    # ConfigMap with error-to-workflow mappings (default: operator-managed 'default-conditional-workflow-mappings')
+    # config:
+    #   name: default-conditional-workflow-mappings
+
+    # nodeDrainPolicy:
+      # Force-remove pods that don't respond to graceful termination signals (default: false)
+      # force: false
+
+      # Max seconds to wait for drain to finish, 0 = infinite (default: 300)
+      # timeoutSeconds: 300
+
+      # Override pod's terminationGracePeriodSeconds, -1 = respect each pod's own setting (default: -1)
+      # gracePeriodSeconds: -1
+
+      # Skip DaemonSet pods during drain, they reschedule automatically (default: true)
+      # ignoreDaemonSets: true
+
+      # Namespaces whose pods stay on the node during drain (default: kube-system, cert-manager, operator namespace)
+      # ignoreNamespaces:
+      #   - kube-system
+      #   - cert-manager

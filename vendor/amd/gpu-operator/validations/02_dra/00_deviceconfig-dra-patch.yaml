@@ -1,0 +1,9 @@
+# Enables the DRA driver and disables the legacy Device Plugin on the DeviceConfig CR.
+# DRA and Device Plugin are mutually exclusive — both cannot be enabled at the same time.
+spec:
+  draDriver:
+    enable: true
+    # image: rocm/k8s-gpu-dra-driver:latest
+    # imagePullPolicy: IfNotPresent
+  devicePlugin:
+    enableDevicePlugin: false

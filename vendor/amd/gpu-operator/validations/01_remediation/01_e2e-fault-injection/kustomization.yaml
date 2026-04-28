@@ -1,0 +1,7 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_npd-fault-injection-config.yaml
+  - 01_remediation-scc-binding.yaml

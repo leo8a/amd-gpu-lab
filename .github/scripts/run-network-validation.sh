@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-STAGE_NUM="${1:?Usage: run-validation-stage.sh <0-5>}"
+STAGE_NUM="${1:?Usage: run-network-validation.sh <0-5>}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="${NAMESPACE:-openshift-amd-network}"
-VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/validations}"
+VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/vendor/amd/network-operator/validations}"
 LOG_DIR="${LOG_DIR:-/tmp/validation-logs}"
 
 declare -A STAGE_DIRS=(
@@ -53,6 +53,12 @@ cleanup() {
   capture_logs
 
   oc delete -k "$STAGE_DIR" --ignore-not-found=true --timeout=60s 2>/dev/null || true
+
+  if [[ "$STAGE_NUM" == "5" ]]; then
+    echo "Restoring original device-plugin ConfigMap (isRdma: true)..."
+    oc apply -f "${VALIDATIONS_DIR}/../07_amd-device-plugin-config.yaml" 2>/dev/null || true
+    oc delete pods -n "$NAMESPACE" -l app.kubernetes.io/name=device-plugin --ignore-not-found=true 2>/dev/null || true
+  fi
 
   if [[ "$STAGE_NUM" == "0" ]]; then
     oc delete job -l ci-triggered=true -n default --ignore-not-found=true 2>/dev/null || true

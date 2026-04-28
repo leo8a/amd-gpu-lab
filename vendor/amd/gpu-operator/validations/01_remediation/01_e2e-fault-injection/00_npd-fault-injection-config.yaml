@@ -1,0 +1,39 @@
+# Replaces the NPD ConfigMap with a rule that always exits 1, simulating a GPU hardware assertion.
+# /bin/false always returns exit code 1, which NPD interprets as "problem detected".
+# This triggers the AMDGPUHardwareAssertionHwa condition on every node running NPD.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-problem-detector-config
+  namespace: node-problem-detector
+data:
+  custom-plugin-monitor.json: |
+    {
+      "plugin": "custom",
+      "pluginConfig": {
+        "invoke_interval": "30s",
+        "timeout": "15s",
+        "max_output_length": 80,
+        "concurrency": 1,
+        "enable_message_change_based_condition_update": false
+      },
+      "source": "amdgpu-custom-plugin-monitor",
+      "metricsReporting": true,
+      "conditions": [
+        {
+          "type": "AMDGPUHardwareAssertionHwa",
+          "reason": "AMDGPUIsUp",
+          "message": "AMDGPU is up"
+        }
+      ],
+      "rules": [
+        {
+          "type": "permanent",
+          "condition": "AMDGPUHardwareAssertionHwa",
+          "reason": "AMDGPU Hardware Assertion",
+          "path": "/bin/false",
+          "timeout": "5s"
+        }
+      ]
+    }

@@ -1,0 +1,14 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: amd-gpu-operators
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: <registry.io>/amd-gpu-operator-index:<version>
+  displayName: AMD GPU Operators
+  publisher: AMD
+  updateStrategy:
+    registryPoll:
+      interval: 30m

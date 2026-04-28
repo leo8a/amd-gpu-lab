@@ -126,6 +126,7 @@ oc describe node <node-name> | grep "openshift.io/vnic"
 ### `amd.com/nic` shows "0" instead of "7"
 
 **Symptom:**
+
 ```bash
 oc get nodes -ojson | jq '.items[].status.allocatable | with_entries(select(.key | contains("amd.com")))'
 {
@@ -137,6 +138,7 @@ oc get nodes -ojson | jq '.items[].status.allocatable | with_entries(select(.key
 **Cause:** The default AMD device plugin ConfigMap has `isRdma: true`, but `hnic_pf1_vf8` profile doesn't expose RDMA resources.
 
 **Solution:** Apply the ConfigMap with `isRdma: false`:
+
 ```bash
 oc apply -f 00_amd-device-plugin-config.yaml
 
@@ -152,11 +154,13 @@ oc get nodes -ojson | jq '.items[].status.allocatable | with_entries(select(.key
 ### Pod stays in Pending state
 
 **Check VF resources:**
+
 ```bash
 oc get nodes -ojson | jq '.items[] | {name: .metadata.name, vnic: .status.allocatable."openshift.io/vnic"}'
 ```
 
 If `openshift.io/vnic` is "0" or missing, verify:
+
 1. NIC profile is `hnic_pf1_vf8` (run `nicctl show card profile` on node)
 2. Node has been rebooted after profile update
 3. SriovNetworkNodePolicy is created and `numVfs: 8` matches profile capability

@@ -1,0 +1,94 @@
+---
+apiVersion: amd.com/v1alpha1
+kind: NetworkConfig
+metadata:
+  name: amd-network
+  namespace: openshift-amd-network
+spec:
+  # -----------------------------------------------------------------------------
+  # Node Selector - Target nodes with AMD NICs
+  # -----------------------------------------------------------------------------
+  selector:
+    feature.node.kubernetes.io/amd-nic: "true"
+
+  # -----------------------------------------------------------------------------
+  # Driver Configuration - Manages AMD AINIC kernel modules
+  # -----------------------------------------------------------------------------
+  driver:
+    enable: true
+
+    # IMPORTANT: Driver & Tools version needs to match the firmware version.
+    # See: https://instinct.docs.amd.com/projects/system-acceptance/en/latest/network/nic-installation.html#update-firmware
+    #
+    # To check current firmware version on the node, see below Verification commands.
+    #
+    # Available driver versions: https://repo.radeon.com/amdainic/pensando/el9/
+    # OpenShift CoreOS requires packages with .el9 kernel variants (all versions seem to provide these).
+    # - 1.110.0: Has both .el9 and .uek.el9 variants, but uses old naming (tawk_ipc with underscore)
+    # - RDMA minimum required version: 1.117.5-a-28
+    #
+    # Target NIC firmware version: 1.117.5-a-56 (matches current firmware on NICs)
+    version: "1.117.5-a-56"
+
+    # Blacklist inbox drivers to use out-of-tree drivers
+    blacklist: true
+
+    # Registry TLS configuration for OpenShift internal registry
+    imageRegistryTLS:
+      insecure: true
+      insecureSkipTLSVerify: true
+
+  # -----------------------------------------------------------------------------
+  # Device Plugin & Node Labeller - Detect and label AMD NICs
+  # -----------------------------------------------------------------------------
+  # IMPORTANT: Match driver version with NIC firmware version to avoid IPC protocol errors
+  # when using the Node Labeller feature below.
+  # The nicctl tool version must be compatible with the firmware version running on the NICs.
+  devicePlugin:
+    # Enable node labeller to add labels like amd.com/nic.* to nodes
+    enableNodeLabeller: true
+
+    devicePluginImagePullPolicy: "IfNotPresent"
+
+  # Issues:
+  # - It fails when the driver nicctl version is different than the firmware, it could
+  # automatically install the proper firmware version for the user.
+  # nicctl 1.117.5 won't work with firmware 1.110.1.
+
+  # -----------------------------------------------------------------------------
+  # Metrics Exporter - Prometheus-compatible metrics for AMD NICs
+  # -----------------------------------------------------------------------------
+  metricsExporter:
+    enable: true
+
+  # -----------------------------------------------------------------------------
+  # Secondary Network - CNI plugins for network attachments
+  # -----------------------------------------------------------------------------
+  secondaryNetwork:
+    cniPlugins:
+      enable: true
+
+      imagePullPolicy: "IfNotPresent"
+
+
+
+# -----------------------------------------------------------------------------
+# Verification Commands
+# -----------------------------------------------------------------------------
+
+# Driver
+# (check current firmware)
+# oc debug node/smc6216gpu.partner-accelerators.redhat.lab -- chroot /host bash -c "echo '=== AMD Pensando NIC Firmware Versions ==='; for pci in 08:00.2 18:00.2 68:00.2 78:00.2 88:00.2 98:00.2 f8:00.2; do serial=\$(devlink dev info pci/0000:\$pci 2>/dev/null | grep serial_number | awk '{print \$2}'); fw=\$(devlink dev info pci/0000:\$pci 2>/dev/null | grep 'fw.a35_uboota' | awk '{print \$2}'); cpld=\$(devlink dev info pci/0000:\$pci 2>/dev/null | grep 'fw.cpld' | head -1 | awk '{print \$2}'); echo \"PCI \$pci (S/N:\$serial): FW \$fw, CPLD \$cpld\"; done"
+# (nicctl commands)
+# oc exec -n openshift-amd-network amd-network-metrics-exporter-cmw8f -- nicctl show card
+# oc exec -n openshift-amd-network amd-network-metrics-exporter-cmw8f -- nicctl show version host-software
+
+# NodeLabeller
+# oc get node -ojson | jq '.items[].metadata.labels | with_entries(select(.key | contains("amd.com/nic")))'
+# oc get nodes -ojson | jq '.items[] | {name: .metadata.name, allocatable: .status.allocatable, capacity: .status.capacity}'
+
+# Metrics Exporter
+# oc debug node/$(oc get nodes -o jsonpath='{.items[0].metadata.name}') -- chroot /host bash -c "lspci -d 1dd8:" 2>&1
+# oc run -n openshift-amd-network curl-test --image=curlimages/curl:latest --rm -i --restart=Never -- curl -s http://amd-network-metrics-exporter:5001/metrics
+
+# SecondaryNetworks

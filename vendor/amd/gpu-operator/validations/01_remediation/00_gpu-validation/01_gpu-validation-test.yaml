@@ -1,0 +1,152 @@
+# Ref: https://github.com/ROCm/gpu-operator/blob/main/docs/test/manual-test.md
+#
+# Simulates Workflow Step 7 (GPU Validation Testing) from the auto-remediation flow.
+# Mounts GPU devices directly (/dev/dri, /dev/kfd) and runs the RVS gst_single recipe
+# to validate GPU health — the same check the remediation workflow performs after a reboot.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gpu-validation-test
+  namespace: openshift-amd-gpu
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gpu-validation-test-privileged-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:privileged
+subjects:
+  - kind: ServiceAccount
+    name: gpu-validation-test
+    namespace: openshift-amd-gpu
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gpu-validation-test
+rules:
+  # Test runner exports result events
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch", "create", "update"]
+  # Test runner labels nodes with test status
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gpu-validation-test
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gpu-validation-test
+subjects:
+  - kind: ServiceAccount
+    name: gpu-validation-test
+    namespace: openshift-amd-gpu
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpu-validation-test-config
+  namespace: openshift-amd-gpu
+data:
+  config.json: |
+    {
+      "TestConfig": {
+        "GPU_HEALTH_CHECK": {
+          "TestLocationTrigger": {
+            "global": {
+              "TestParameters": {
+                "MANUAL": {
+                  "TestCases": [
+                    {
+                      "Recipe": "gst_single",
+                      "Iterations": 1,
+                      "StopOnFailure": true,
+                      "TimeoutSeconds": 1200,
+                      "Arguments": "--parallel"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gpu-validation-test
+  namespace: openshift-amd-gpu
+spec:
+  backoffLimit: 0
+  # Auto-cleanup after 5 minutes
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: gpu-validation-test
+      nodeSelector:
+        feature.node.kubernetes.io/amd-gpu: "true"
+      containers:
+        - name: test-runner
+          image: docker.io/rocm/test-runner:v1.4.1
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          env:
+            # Triggers a manual test run (same as remediation workflow step 7)
+            - name: TEST_TRIGGER
+              value: "MANUAL"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            # GPU device interfaces
+            - name: dri
+              mountPath: /dev/dri
+            - name: kfd
+              mountPath: /dev/kfd
+            # Test config
+            - name: config
+              mountPath: /etc/test-runner/
+            # Persist test logs on the host
+            - name: logs
+              mountPath: /var/log/amd-test-runner
+      volumes:
+        - name: dri
+          hostPath:
+            path: /dev/dri
+            type: Directory
+        - name: kfd
+          hostPath:
+            path: /dev/kfd
+            type: CharDevice
+        - name: config
+          configMap:
+            name: gpu-validation-test-config
+        - name: logs
+          hostPath:
+            path: /var/log/amd-test-runner
+            type: DirectoryOrCreate

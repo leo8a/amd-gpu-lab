@@ -1,0 +1,157 @@
+name: gpu-operator (nightly validations)
+
+on:
+  schedule:
+    - cron: "0 2 * * *"  # 3am CET
+  workflow_dispatch:
+    inputs:
+      stages:
+        description: "Comma-separated DRA stages (0=full-gpu, 1=partitioned-gpu) or 'all'"
+        required: false
+        default: "all"
+
+concurrency:
+  group: gpu-validations
+  cancel-in-progress: false
+
+env:
+  GPU_NAMESPACE: openshift-amd-gpu
+  VALIDATIONS_DIR: vendor/amd/gpu-operator/validations
+  LOG_DIR: /tmp/validation-logs
+
+jobs:
+  preflight:
+    runs-on: self-hosted
+    timeout-minutes: 2
+    outputs:
+      stages: ${{ steps.plan.outputs.stages }}
+    steps:
+      - name: Check cluster connectivity
+        run: |
+          set -euo pipefail
+          oc whoami
+          oc version
+          oc get nodes
+          GPU_NODES=$(oc get nodes -l feature.node.kubernetes.io/amd-gpu=true --no-headers | wc -l)
+          echo "AMD GPU nodes: $GPU_NODES"
+          if [[ $GPU_NODES -lt 1 ]]; then
+            echo "::error::No AMD GPU nodes found"
+            exit 1
+          fi
+          mkdir -p "$LOG_DIR"
+
+      - name: Determine stages to run
+        id: plan
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            INPUT_STAGES="${{ inputs.stages }}"
+          else
+            INPUT_STAGES="all"
+          fi
+
+          if [[ "$INPUT_STAGES" == "all" ]]; then
+            STAGES_TO_RUN="0,1"
+          else
+            STAGES_TO_RUN="$INPUT_STAGES"
+          fi
+
+          echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
+          echo "DRA stages: $STAGES_TO_RUN"
+
+  dra-setup:
+    needs: preflight
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable DRA on DeviceConfig
+        run: |
+          set -euo pipefail
+          echo "Enabling DRA driver and disabling Device Plugin..."
+          oc patch deviceconfig amdgpu-driver-install -n "$GPU_NAMESPACE" --type merge \
+            --patch-file "${VALIDATIONS_DIR}/02_dra/00_deviceconfig-dra-patch.yaml"
+
+          echo "Restarting kubelet on GPU nodes to clear stale device plugin resources..."
+          for node in $(oc get nodes -l feature.node.kubernetes.io/amd-gpu=true -o name); do
+            echo "  Restarting kubelet on ${node}..."
+            oc debug "${node}" -- chroot /host systemctl restart kubelet
+          done
+
+          echo "Waiting for DRA driver DaemonSet to be ready..."
+          SECONDS=0
+          while [[ $SECONDS -lt 120 ]]; do
+            READY=$(oc get daemonset -n "$GPU_NAMESPACE" -l app=dra-driver \
+              -o jsonpath='{.items[0].status.numberReady}' 2>/dev/null || echo "0")
+            DESIRED=$(oc get daemonset -n "$GPU_NAMESPACE" -l app=dra-driver \
+              -o jsonpath='{.items[0].status.desiredNumberScheduled}' 2>/dev/null || echo "0")
+            if [[ "$READY" -gt 0 && "$READY" == "$DESIRED" ]]; then
+              echo "DRA driver ready ($READY/$DESIRED)"
+              break
+            fi
+            echo "  DRA driver: $READY/$DESIRED ready..."
+            sleep 5
+          done
+          if [[ $SECONDS -ge 120 ]]; then
+            echo "::error::DRA driver DaemonSet not ready within 2 minutes"
+            exit 1
+          fi
+
+          echo "Verifying ResourceSlices are published..."
+          SLICES=$(oc get resourceslices --no-headers 2>/dev/null | wc -l)
+          if [[ "$SLICES" -lt 1 ]]; then
+            echo "::error::No ResourceSlices found after DRA driver startup"
+            exit 1
+          fi
+          echo "ResourceSlices: $SLICES"
+
+  dra-full-gpu:
+    needs: [preflight, dra-setup]
+    if: contains(needs.preflight.outputs.stages, '0')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run validation
+        run: .github/scripts/run-gpu-validation.sh 0
+
+  dra-partitioned-gpu:
+    needs: [preflight, dra-setup, dra-full-gpu]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '1')
+      && needs.dra-setup.result == 'success'
+      && (needs.dra-full-gpu.result == 'success' || needs.dra-full-gpu.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run validation
+        run: .github/scripts/run-gpu-validation.sh 1
+
+  cleanup:
+    needs: [preflight, dra-setup, dra-full-gpu, dra-partitioned-gpu]
+    if: always()
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload validation logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpu-validation-logs-${{ github.run_id }}
+          path: /tmp/validation-logs/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Restore base DeviceConfig
+        run: |
+          set -uo pipefail
+          echo "Restoring base DeviceConfig (Device Plugin enabled, DRA disabled)..."
+          oc apply -f "${VALIDATIONS_DIR}/../07_amd-deviceconfig.yaml" || true
+
+          echo "Final safety cleanup of test resources..."
+          for dir in 00_full-gpu 01_partitioned-gpu; do
+            oc delete -k "${VALIDATIONS_DIR}/02_dra/$dir" --ignore-not-found=true 2>/dev/null || true
+          done
+          echo "Cleanup complete"

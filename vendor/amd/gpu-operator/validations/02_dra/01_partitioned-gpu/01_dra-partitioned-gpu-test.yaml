@@ -1,0 +1,37 @@
+# Runs rocm-smi inside a workload pod to confirm the GPU partition allocated
+# via DRA is visible and correctly configured.
+#
+# NOTE: GPU virtualization (vGPU / Virt) is NOT supported with AMD DRA at this time.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dra-partitioned-gpu-test
+  namespace: openshift-amd-gpu
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        feature.node.kubernetes.io/amd-gpu: "true"
+      resourceClaims:
+        - name: gpu-partition-claim
+          resourceClaimTemplateName: dra-partitioned-gpu-claim
+      containers:
+        - name: gpu-check
+          image: docker.io/rocm/rocm-terminal:6.4
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== DRA Partitioned GPU Validation ==="
+              echo "--- rocm-smi ---"
+              rocm-smi || exit 1
+              echo "--- rocm-smi --showcomputepartition ---"
+              rocm-smi --showcomputepartition || exit 1
+              echo "=== PASS ==="
+          resources:
+            claims:
+              - name: gpu-partition-claim

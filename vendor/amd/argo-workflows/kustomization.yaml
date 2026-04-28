@@ -1,0 +1,11 @@
+# Rendered from: helm template argo-workflows argo/argo-workflows --version 1.0.6 --namespace argo-workflows --set crds.install=false --set server.enabled=false
+# Chart version 1.0.6 = Argo Workflows app version v4.0.3
+# Ref: https://github.com/ROCm/gpu-operator/blob/main/docs/autoremediation/auto-remediation.md#installation---openshift
+
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_argo-workflows-namespace.yaml
+  - 01_argo-workflows-controller.yaml

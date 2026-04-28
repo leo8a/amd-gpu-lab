@@ -1,0 +1,8 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_sriov-amd-vnic-policy.yaml
+  - 01_sriov-amd-vnic-net.yaml
+  - 02_sriov-nic-test.yaml

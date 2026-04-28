@@ -1,4 +1,4 @@
-name: Nightly AMD Network Operator Validations
+name: network-operator (nightly validations)
 
 on:
   schedule:
@@ -6,15 +6,16 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0-5) or 'all'"
+        description: "Comma-separated stages (0=cluster, 1=basic, 2=rdma, 3=sriov) or 'all'"
         required: false
         default: "all"
       sriov_profile:
-        description: "SR-IOV profile for stage 4/5"
+        description: "SR-IOV profile for stage 3"
         required: false
-        default: "pf1_vf1"
+        default: "all"
         type: choice
         options:
+          - all
           - pf1_vf1
           - hnic_pf1_vf8
           - skip
@@ -25,7 +26,7 @@ concurrency:
 
 env:
   NAMESPACE: openshift-amd-network
-  VALIDATIONS_DIR: validations
+  VALIDATIONS_DIR: vendor/amd/network-operator/validations
   LOG_DIR: /tmp/validation-logs
 
 jobs:
@@ -34,7 +35,7 @@ jobs:
     timeout-minutes: 2
     outputs:
       stages: ${{ steps.plan.outputs.stages }}
-      sriov_stage: ${{ steps.plan.outputs.sriov_stage }}
+      sriov_profile: ${{ steps.plan.outputs.sriov_profile }}
     steps:
       - name: Check cluster connectivity
         run: |
@@ -75,30 +76,21 @@ jobs:
             INPUT_STAGES="${{ inputs.stages }}"
             SRIOV_PROFILE="${{ inputs.sriov_profile }}"
           else
-            INPUT_STAGES="0,1,2,4"
-            SRIOV_PROFILE="pf1_vf1"
+            INPUT_STAGES="all"
+            SRIOV_PROFILE="all"
           fi
 
           if [[ "$INPUT_STAGES" == "all" ]]; then
-            STAGES_TO_RUN="0,1,2"
-            if [[ "$SRIOV_PROFILE" != "skip" ]]; then
-              STAGES_TO_RUN="${STAGES_TO_RUN},4"
-            fi
+            STAGES_TO_RUN="0,1,2,3"
           else
             STAGES_TO_RUN="$INPUT_STAGES"
           fi
 
-          case "$SRIOV_PROFILE" in
-            pf1_vf1)       SRIOV_STAGE=4 ;;
-            hnic_pf1_vf8)  SRIOV_STAGE=5 ;;
-            skip)          SRIOV_STAGE=skip ;;
-          esac
-
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
-          echo "sriov_stage=$SRIOV_STAGE" >> "$GITHUB_OUTPUT"
-          echo "Stages: $STAGES_TO_RUN | SR-IOV stage: $SRIOV_STAGE"
+          echo "sriov_profile=$SRIOV_PROFILE" >> "$GITHUB_OUTPUT"
+          echo "Stages: $STAGES_TO_RUN | SR-IOV profile: $SRIOV_PROFILE"
 
-  stage-0-cluster-validation:
+  cluster-validation:
     needs: preflight
     if: contains(needs.preflight.outputs.stages, '0')
     runs-on: self-hosted
@@ -106,59 +98,79 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run validation
-        run: .github/scripts/run-validation-stage.sh 0
+        run: .github/scripts/run-network-validation.sh 0
 
-  stage-1-basic-nic:
-    needs: preflight
-    if: contains(needs.preflight.outputs.stages, '1')
+  basic-nic:
+    needs: [preflight, cluster-validation]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '1')
+      && (needs.cluster-validation.result == 'success' || needs.cluster-validation.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Run validation
-        run: .github/scripts/run-validation-stage.sh 1
+        run: .github/scripts/run-network-validation.sh 1
 
-  stage-2-rdma-single-pod:
-    needs: [preflight, stage-0-cluster-validation]
+  rdma-single-pod:
+    needs: [preflight, basic-nic]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '2')
-      && (needs.stage-0-cluster-validation.result == 'success' || needs.stage-0-cluster-validation.result == 'skipped')
+      && (needs.basic-nic.result == 'success' || needs.basic-nic.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Run validation
-        run: .github/scripts/run-validation-stage.sh 2
+        run: .github/scripts/run-network-validation.sh 2
 
-  stage-3-rdma-multi-node:
-    needs: [preflight, stage-0-cluster-validation]
+  rdma-multi-node:
+    needs: [preflight, basic-nic]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '2')
+      && (needs.basic-nic.result == 'success' || needs.basic-nic.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run validation
+        run: .github/scripts/run-network-validation.sh 3
+
+  sriov-pf1-vf1:
+    needs: [preflight, rdma-single-pod, rdma-multi-node]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '3')
-      && (needs.stage-0-cluster-validation.result == 'success' || needs.stage-0-cluster-validation.result == 'skipped')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-validation-stage.sh 3
-
-  stage-4-5-sriov:
-    needs: [preflight, stage-0-cluster-validation]
-    if: >-
-      always()
-      && needs.preflight.outputs.sriov_stage != 'skip'
-      && (needs.stage-0-cluster-validation.result == 'success' || needs.stage-0-cluster-validation.result == 'skipped')
+      && (needs.preflight.outputs.sriov_profile == 'all' || needs.preflight.outputs.sriov_profile == 'pf1_vf1')
+      && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
+      && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Run validation
-        run: .github/scripts/run-validation-stage.sh ${{ needs.preflight.outputs.sriov_stage }}
+        run: .github/scripts/run-network-validation.sh 4
+
+  sriov-hnic:
+    needs: [preflight, rdma-single-pod, rdma-multi-node]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '3')
+      && (needs.preflight.outputs.sriov_profile == 'all' || needs.preflight.outputs.sriov_profile == 'hnic_pf1_vf8')
+      && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
+      && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run validation
+        run: .github/scripts/run-network-validation.sh 5
 
   cleanup:
-    needs: [preflight, stage-0-cluster-validation, stage-1-basic-nic, stage-2-rdma-single-pod, stage-3-rdma-multi-node, stage-4-5-sriov]
+    needs: [preflight, cluster-validation, basic-nic, rdma-single-pod, rdma-multi-node, sriov-pf1-vf1, sriov-hnic]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5

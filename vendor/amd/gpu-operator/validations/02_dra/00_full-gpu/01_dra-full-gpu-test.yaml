@@ -1,0 +1,35 @@
+# Runs rocm-smi inside a workload pod to confirm the GPU allocated via DRA
+# is visible and healthy.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dra-full-gpu-test
+  namespace: openshift-amd-gpu
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        feature.node.kubernetes.io/amd-gpu: "true"
+      resourceClaims:
+        - name: gpu-claim
+          resourceClaimTemplateName: dra-full-gpu-claim
+      containers:
+        - name: gpu-check
+          image: docker.io/rocm/rocm-terminal:6.4
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== DRA Full GPU Validation ==="
+              echo "--- rocm-smi ---"
+              rocm-smi || exit 1
+              echo "--- rocm-smi --showid ---"
+              rocm-smi --showid || exit 1
+              echo "=== PASS ==="
+          resources:
+            claims:
+              - name: gpu-claim

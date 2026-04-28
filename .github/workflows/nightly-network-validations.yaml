@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0=cluster, 1=basic, 2=rdma, 3=sriov) or 'all'"
+        description: "Comma-separated stages (0=cluster, 1=basic, 2=rdma-single, 3=rdma-multi, 4=sriov-pf1, 5=sriov-hnic) or 'all'"
         required: false
         default: "all"
       sriov_profile:
@@ -124,7 +124,7 @@ jobs:
     needs: [preflight, basic-nic]
     if: >-
       always()
-      && contains(needs.preflight.outputs.stages, '2')
+      && contains(needs.preflight.outputs.stages, '3')
       && (needs.basic-nic.result == 'success' || needs.basic-nic.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 5
@@ -137,7 +137,7 @@ jobs:
     needs: [preflight, rdma-single-pod, rdma-multi-node]
     if: >-
       always()
-      && contains(needs.preflight.outputs.stages, '3')
+      && contains(needs.preflight.outputs.stages, '4')
       && (needs.preflight.outputs.sriov_profile == 'all' || needs.preflight.outputs.sriov_profile == 'pf1_vf1')
       && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
       && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')
@@ -152,7 +152,7 @@ jobs:
     needs: [preflight, rdma-single-pod, rdma-multi-node]
     if: >-
       always()
-      && contains(needs.preflight.outputs.stages, '3')
+      && contains(needs.preflight.outputs.stages, '5')
       && (needs.preflight.outputs.sriov_profile == 'all' || needs.preflight.outputs.sriov_profile == 'hnic_pf1_vf8')
       && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
       && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')

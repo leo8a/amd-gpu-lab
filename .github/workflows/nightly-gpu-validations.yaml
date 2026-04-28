@@ -45,15 +45,9 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            INPUT_STAGES="${{ inputs.stages }}"
+            STAGES_TO_RUN="${{ inputs.stages }}"
           else
-            INPUT_STAGES="all"
-          fi
-
-          if [[ "$INPUT_STAGES" == "all" ]]; then
-            STAGES_TO_RUN="0,1"
-          else
-            STAGES_TO_RUN="$INPUT_STAGES"
+            STAGES_TO_RUN="0"
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
@@ -78,13 +72,14 @@ jobs:
             oc debug "${node}" -- chroot /host systemctl restart kubelet
           done
 
-          echo "Waiting for DRA driver DaemonSet to be ready..."
+          DRA_DS="amdgpu-driver-install-dra-driver"
+          echo "Waiting for DRA driver DaemonSet ($DRA_DS) to be ready..."
           SECONDS=0
-          while [[ $SECONDS -lt 120 ]]; do
-            READY=$(oc get daemonset -n "$GPU_NAMESPACE" -l app=dra-driver \
-              -o jsonpath='{.items[0].status.numberReady}' 2>/dev/null || echo "0")
-            DESIRED=$(oc get daemonset -n "$GPU_NAMESPACE" -l app=dra-driver \
-              -o jsonpath='{.items[0].status.desiredNumberScheduled}' 2>/dev/null || echo "0")
+          while [[ $SECONDS -lt 300 ]]; do
+            READY=$(oc get daemonset "$DRA_DS" -n "$GPU_NAMESPACE" \
+              -o jsonpath='{.status.numberReady}' 2>/dev/null || echo "0")
+            DESIRED=$(oc get daemonset "$DRA_DS" -n "$GPU_NAMESPACE" \
+              -o jsonpath='{.status.desiredNumberScheduled}' 2>/dev/null || echo "0")
             if [[ "$READY" -gt 0 && "$READY" == "$DESIRED" ]]; then
               echo "DRA driver ready ($READY/$DESIRED)"
               break
@@ -92,8 +87,8 @@ jobs:
             echo "  DRA driver: $READY/$DESIRED ready..."
             sleep 5
           done
-          if [[ $SECONDS -ge 120 ]]; then
-            echo "::error::DRA driver DaemonSet not ready within 2 minutes"
+          if [[ $SECONDS -ge 300 ]]; then
+            echo "::error::DRA driver DaemonSet not ready within 5 minutes"
             exit 1
           fi
 
@@ -116,12 +111,8 @@ jobs:
         run: .github/scripts/run-gpu-validation.sh 0
 
   dra-partitioned-gpu:
-    needs: [preflight, dra-setup, dra-full-gpu]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '1')
-      && needs.dra-setup.result == 'success'
-      && (needs.dra-full-gpu.result == 'success' || needs.dra-full-gpu.result == 'skipped')
+    needs: [preflight, dra-setup]
+    if: contains(needs.preflight.outputs.stages, '1')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:

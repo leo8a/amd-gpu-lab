@@ -47,6 +47,13 @@ Override defaults with environment variables:
 NAMESPACE=my-ns LOG_DIR=./logs .github/scripts/run-network-validation.sh 2
 ```
 
+> **Note:** The scripts default `VALIDATIONS_DIR` to `${REPO_ROOT}/vendor/amd/...` (the downstream layout). When running locally from the canonical repo, override it:
+>
+> ```bash
+> VALIDATIONS_DIR=amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations .github/scripts/run-gpu-validation.sh 0
+> VALIDATIONS_DIR=amd-openshift/openshift-reference/vendor/amd/network-operator/validations .github/scripts/run-network-validation.sh 1
+> ```
+
 Logs are written to `$LOG_DIR/stage-<N>/` (defaults to `/tmp/validation-logs/`).
 
 ## Manual dispatch

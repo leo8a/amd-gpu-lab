@@ -73,17 +73,11 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            INPUT_STAGES="${{ inputs.stages }}"
+            STAGES_TO_RUN="${{ inputs.stages }}"
             SRIOV_PROFILE="${{ inputs.sriov_profile }}"
           else
-            INPUT_STAGES="all"
-            SRIOV_PROFILE="all"
-          fi
-
-          if [[ "$INPUT_STAGES" == "all" ]]; then
-            STAGES_TO_RUN="0,1,2,3"
-          else
-            STAGES_TO_RUN="$INPUT_STAGES"
+            STAGES_TO_RUN="0,1,2,4"
+            SRIOV_PROFILE="pf1_vf1"
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"

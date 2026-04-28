@@ -55,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           if ! oc get cm -n "$NAMESPACE" amd-network-operator-device-plugin-config &>/dev/null; then
-            echo "::error::Device plugin ConfigMap missing — apply it with: oc apply -f validations/03_sriov/00_pf1_vf1-profile/00_amd-device-plugin-config.yaml"
+            echo "::error::Device plugin ConfigMap missing — apply it with: oc apply -f vendor/amd/network-operator/07_amd-device-plugin-config.yaml"
             exit 1
           fi
 

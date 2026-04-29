@@ -26,7 +26,7 @@ echo " -> kubectl logs -n openshift-amd-gpu -l app.kubernetes.io/name=device-con
 # Wait for DCM to confirm NodeModulesConfig deletion
 echo "Waiting for NodeModulesConfig deletion..."
 for i in {1..150}; do
-  if kubectl logs -n openshift-amd-gpu -l app.kubernetes.io/name=device-config-manager --tail=50 2>/dev/null | \
+  if kubectl logs -n $NAMESPACE -l app.kubernetes.io/name=device-config-manager --tail=50 2>/dev/null | \
      grep -q "NodeModulesConfig for node $NODE_NAME deleted successfully"; then
     echo "✓ NodeModulesConfig deleted"
     break

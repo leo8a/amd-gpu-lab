@@ -8,6 +8,7 @@ spec:
   resourceName: vnic
   nodeSelector:
     feature.node.kubernetes.io/amd-nic: "true"
+    kubernetes.io/hostname: "smc6216gpu.partner-accelerators.redhat.lab"
   numVfs: 8
   nicSelector:
     vendor: "1dd8"

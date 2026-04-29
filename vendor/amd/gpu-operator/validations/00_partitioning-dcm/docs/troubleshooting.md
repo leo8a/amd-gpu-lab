@@ -111,6 +111,7 @@ Node shows `dcm.amd.com/gpu-config-profile-state: failure`.
 Incorrectly adding the `amd-dcm` toleration to the entire `openshift-amd-gpu` namespace prevents GPU operator operands from restarting after partitioning.
 
 **Per AMD best practices:**
+
 - **DCM pod**: Gets toleration automatically via DeviceConfig spec
 - **Operands** (device-plugin, node-labeller, metrics-exporter): Must NOT have tolerations
   - They need to be evicted during partitioning and restart afterward to detect new GPU resources
@@ -122,3 +123,51 @@ Reference: [AMD DCM - Applying Partition Profiles](https://instinct.docs.amd.com
 Remove `"openshift-amd-gpu"` from the toleration namespace list in `01-add-tolerations.sh` (line 51).
 
 The DCM pod gets its toleration automatically, and operands must restart to detect the partitioned GPUs.
+
+---
+
+## DCM Pod Not Scheduling After Node Taint (Chicken-and-Egg Bug)
+
+### Symptoms
+
+After tainting a node with `amd-dcm=up:NoExecute`, the DCM pod disappears from the target node. The DaemonSet shows `desired: 1` instead of `2`, and partitioning cannot proceed because DCM is not running on the node.
+
+```bash
+kubectl get pods -n openshift-amd-gpu -l app.kubernetes.io/name=device-config-manager -o wide
+# Only shows pod on the OTHER node, not the one being partitioned
+```
+
+### Root Cause
+
+The DCM DaemonSet has a `nodeSelector` that requires the KMM driver-ready label:
+
+```yaml
+kmm.node.kubernetes.io/openshift-amd-gpu.amdgpu-driver-install.ready: ""
+```
+
+When the node is tainted, the KMM driver pod is evicted, and KMM removes the `.ready` label from the node. The DCM DaemonSet then considers the node ineligible for scheduling, even though the DCM pod itself has the `amd-dcm` toleration.
+
+This is set in the operator source at `internal/configmanager/configmanager.go`:
+
+```go
+if utils.ShouldUseKMM(devConfig) {
+    nodeSelector[labels.GetKernelModuleReadyNodeLabel(...)] = ""
+}
+```
+
+The `feature.node.kubernetes.io/amd-gpu` label (set by node-labeller) may also be removed after eviction.
+
+### Workaround
+
+Manually re-add the required labels before or immediately after tainting:
+
+```bash
+kubectl label node <NODE_NAME> \
+  "feature.node.kubernetes.io/amd-gpu=true" \
+  "kmm.node.kubernetes.io/openshift-amd-gpu.amdgpu-driver-install.ready=" \
+  --overwrite
+```
+
+### Upstream Fix
+
+The DCM DaemonSet should not gate on the KMM driver-ready label, since DCM needs to run on the node precisely when the driver is being reconfigured. The `amd-dcm` toleration is correctly set but the `nodeSelector` defeats its purpose.

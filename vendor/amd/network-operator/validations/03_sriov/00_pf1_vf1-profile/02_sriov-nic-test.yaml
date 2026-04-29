@@ -22,3 +22,4 @@ spec:
         openshift.io/vnic: "1"
   nodeSelector:
     feature.node.kubernetes.io/amd-nic: "true"
+    kubernetes.io/hostname: "smc6217gpu.partner-accelerators.redhat.lab"

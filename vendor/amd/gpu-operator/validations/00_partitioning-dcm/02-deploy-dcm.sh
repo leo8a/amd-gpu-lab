@@ -82,7 +82,7 @@ kubectl patch deviceconfig amdgpu-driver-install -n $NAMESPACE --type='merge' -p
   "spec": {
     "configManager": {
       "enable": true,
-      "image": "docker.io/rocm/device-config-manager:v1.4.0",
+      "image": "docker.io/rocm/device-config-manager:v1.4.1",
       "imagePullPolicy": "IfNotPresent",
       "config": {
         "name": "config-manager-config"

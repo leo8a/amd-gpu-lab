@@ -4,9 +4,6 @@ kind: ConfigMap
 metadata:
   name: amd-network-operator-device-plugin-config
   namespace: openshift-amd-network
-  labels:
-    app.kubernetes.io/component: amd-network
-    app.kubernetes.io/part-of: amd-network
 data:
   config.json: |
     {
@@ -19,7 +16,7 @@ data:
             "vendors": ["1dd8"],
             "devices": ["1002"],
             "drivers": ["ionic"],
-            "isRdma": true
+            "isRdma": false
           },
           "excludeTopology": false
         },
@@ -31,7 +28,7 @@ data:
             "vendors": ["1dd8"],
             "devices": ["1003"],
             "drivers": ["ionic"],
-            "isRdma": true
+            "isRdma": false
           },
           "excludeTopology": false
         }
@@ -39,23 +36,34 @@ data:
     }
 
 # ---
-# AMD Device Plugin Configuration for pf1_vf1 Profile
+# AMD Device Plugin Configuration
 # ---
 #
 # IMPORTANT: This ConfigMap is required for the AMD Network Operator device plugin
-# to properly detect and register AMD Pensando AI NICs when using the pf1_vf1 profile.
+# to properly detect and register AMD Pensando AI NICs.
 #
-# Why isRdma: true?
-# -----------------
-# The pf1_vf1 profile uses device_config_pf1_vf1_llc which exposes RDMA resources
-# via /sys/bus/pci/devices/*/infiniband. The device plugin needs isRdma: true to
-# properly detect these NICs.
+# Why isRdma: false?
+# ------------------
+# The upstream default uses isRdma: true, which works for RDMA-enabled profiles
+# (default, pf1_vf1) where NICs expose RDMA resources via /sys/class/infiniband/.
+# However, the hnic_pf1_vf8 profile does NOT expose RDMA resources, so the device
+# plugin filters out all NICs and registers 0 devices (amd.com/nic: 0).
+#
+# Setting isRdma: false relaxes the filter — the device plugin registers NICs
+# regardless of RDMA capability. This is safe because:
+# - isRdma is a registration filter, not an RDMA enabler
+# - Nodes with RDMA-capable profiles still have full RDMA at the driver level
+# - This allows mixed-profile clusters (e.g., pf1_vf1 on one node, hnic_pf1_vf8
+#   on another) to work with a single cluster-wide ConfigMap
+#
+# Note: The AMD network-operator does not support per-node device plugin configs,
+# so isRdma must be the same across all nodes.
 #
 # Profile Comparison:
 # -------------------
-# - default:        device_config_rdma_1x400G     -> isRdma: true  ✓
-# - pf1_vf1:        device_config_pf1_vf1_llc     -> isRdma: true  ✓
-# - hnic_pf1_vf8:   device_config_pf1_vf8_hnic    -> isRdma: false ✓
+# - default:        device_config_rdma_1x400G     -> isRdma: true  works, but false also works
+# - pf1_vf1:        device_config_pf1_vf1_llc     -> isRdma: true  works, but false also works
+# - hnic_pf1_vf8:   device_config_pf1_vf8_hnic    -> isRdma: false required
 #
 # Without this ConfigMap:
 # -----------------------
@@ -80,5 +88,3 @@ data:
 # -----------
 # - https://github.com/pensando/network-operator/blob/main/bundle/manifests/device-plugin-configmap.yaml
 # - Upstream default uses isRdma: true for both nic and vnic
-# - For RDMA-enabled profiles (default, pf1_vf1), use isRdma: true
-# - For Host NIC profiles (hnic*), use isRdma: false

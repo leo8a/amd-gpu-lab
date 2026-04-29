@@ -170,6 +170,24 @@ EVEN AFTER.
 
 ---
 
-## Enhancement: To use control-plabe toleration instead of amd-dcm
+## Bug: DCM DaemonSet nodeSelector gates on KMM ready label
 
-This would require to patch the controller and the DCM pod, so they don't die when tainint the node.
+**Filed**: 2026-04-28
+
+The DCM DaemonSet includes `kmm.node.kubernetes.io/<ns>.<name>.ready` in its `nodeSelector` (set in `internal/configmanager/configmanager.go` when `ShouldUseKMM` returns true). This creates a chicken-and-egg problem during partitioning:
+
+1. Taint evicts KMM driver pod → KMM removes the `.ready` label
+2. DCM DaemonSet no longer considers the node eligible → DCM pod can't schedule
+3. Without DCM on the node, partitioning cannot proceed
+
+The `feature.node.kubernetes.io/amd-gpu` label (set by node-labeller) is also removed after eviction, compounding the issue.
+
+**Workaround**: manually re-add both labels after tainting.
+
+**Upstream fix needed**: DCM should not require the KMM ready label in its nodeSelector, since it specifically needs to run when the driver is being reconfigured.
+
+---
+
+## Enhancement: To use control-plane toleration instead of amd-dcm
+
+This would require to patch the controller and the DCM pod, so they don't die when tainting the node.

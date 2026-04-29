@@ -74,6 +74,7 @@ jobs:
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             STAGES_TO_RUN="${{ inputs.stages }}"
+            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2,4,5"
             SRIOV_PROFILE="${{ inputs.sriov_profile }}"
           else
             STAGES_TO_RUN="0,1,2,4"
@@ -193,4 +194,8 @@ jobs:
             2>/dev/null || true
           echo "Restoring device-plugin ConfigMap..."
           oc apply -f "${VALIDATIONS_DIR}/../07_amd-device-plugin-config.yaml" || true
+
+          echo "Restoring SR-IOV network node policies..."
+          oc apply -f "${VALIDATIONS_DIR}/03_sriov/00_pf1_vf1-profile/00_sriov-amd-vnic-policy.yaml" || true
+          oc apply -f "${VALIDATIONS_DIR}/03_sriov/01_hnic_pf1_vf8-profile/00_sriov-amd-vnic-policy.yaml" || true
           echo "Cleanup complete"

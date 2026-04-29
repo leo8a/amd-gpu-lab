@@ -2,7 +2,7 @@
 apiVersion: sriovnetwork.openshift.io/v1
 kind: SriovNetworkNodePolicy
 metadata:
-  name: amd-vnic-policy
+  name: amd-vnic-policy-vf1
   namespace: openshift-sriov-network-operator
 spec:
   resourceName: vnic

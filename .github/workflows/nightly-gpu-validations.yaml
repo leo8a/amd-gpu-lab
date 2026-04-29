@@ -46,8 +46,21 @@ jobs:
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             STAGES_TO_RUN="${{ inputs.stages }}"
+            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1"
           else
             STAGES_TO_RUN="0"
+
+            PARTITIONED_NODES=$(oc get nodes \
+              -l "feature.node.kubernetes.io/amd-gpu=true,dcm.amd.com/gpu-config-profile=cpx-profile-nps4,dcm.amd.com/gpu-config-profile-state=success" \
+              --no-headers 2>/dev/null || true)
+
+            if [[ -n "$PARTITIONED_NODES" ]]; then
+              echo "DCM partitioned GPU nodes detected:"
+              echo "$PARTITIONED_NODES"
+              STAGES_TO_RUN="0,1"
+            else
+              echo "No DCM partitioned GPU nodes found, skipping partitioned-gpu stage"
+            fi
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"

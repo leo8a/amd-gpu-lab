@@ -6,8 +6,8 @@ Two NIC profiles are covered, each in its own subfolder:
 
 | Test                      | What it validates                                              |
 | ------------------------- | -------------------------------------------------------------- |
-| `00_pf1_vf1-profile/`    | 1 VF per PF — standard SR-IOV with RDMA support               |
-| `01_hnic_pf1_vf8-profile/`| 8 VFs per PF — higher density SR-IOV without RDMA             |
+| `00_pf1_vf1-profile/`     | 1 VF per PF — standard SR-IOV with RDMA support                |
+| `01_hnic_pf1_vf8-profile/`| 8 VFs per PF — higher density SR-IOV without RDMA              |
 
 ## Prerequisites
 

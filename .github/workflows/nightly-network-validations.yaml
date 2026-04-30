@@ -77,8 +77,8 @@ jobs:
             [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2,4,5"
             SRIOV_PROFILE="${{ inputs.sriov_profile }}"
           else
-            STAGES_TO_RUN="0,1,2,4"
-            SRIOV_PROFILE="pf1_vf1"
+            STAGES_TO_RUN="0,1,2,4,5"
+            SRIOV_PROFILE="all"
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"

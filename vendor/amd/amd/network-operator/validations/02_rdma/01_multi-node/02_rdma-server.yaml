@@ -1,0 +1,70 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-server
+  namespace: openshift-amd-network
+  annotations:
+    k8s.v1.cni.cncf.io/networks: amd-rdma-net
+  labels:
+    app: rdma-test
+    role: server
+spec:
+  restartPolicy: Never
+  containers:
+  - name: server
+    image: registry.access.redhat.com/ubi9/ubi:latest
+    command:
+    - /bin/bash
+    - -c
+    - |
+      echo "=== RDMA Server Starting ==="
+      echo "Waiting for RDMA network interface..."
+
+      # Wait for net1 interface
+      timeout=60
+      while [ $timeout -gt 0 ]; do
+        if ip addr show net1 2>/dev/null | grep -q "inet "; then
+          SERVER_IP=$(ip addr show net1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+          echo "Server ready on RDMA network: $SERVER_IP"
+          break
+        fi
+        sleep 1
+        ((timeout--))
+      done
+
+      if [ -z "$SERVER_IP" ]; then
+        echo "ERROR: RDMA network interface not ready"
+        exit 1
+      fi
+
+      echo "Listening for ICMP pings on $SERVER_IP..."
+      echo "RDMA device check:"
+      ls /sys/class/infiniband/ 2>/dev/null || echo "No RDMA devices found"
+
+      # Keep container running
+      sleep 300
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "100Mi"
+        amd.com/nic: "1"
+      limits:
+        cpu: "100m"
+        memory: "100Mi"
+        amd.com/nic: "1"
+    securityContext:
+      capabilities:
+        add: ["IPC_LOCK", "NET_RAW"]
+  nodeSelector:
+    feature.node.kubernetes.io/amd-nic: "true"
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: role
+            operator: In
+            values:
+            - client
+        topologyKey: kubernetes.io/hostname

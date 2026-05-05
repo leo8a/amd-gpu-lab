@@ -1,0 +1,23 @@
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: amd-vnic-network
+  namespace: openshift-sriov-network-operator
+spec:
+  resourceName: vnic
+  networkNamespace: openshift-amd-network
+  ipam: |
+    {
+      "type": "whereabouts",
+      "range": "192.168.100.0/24",
+      "range_start": "192.168.100.100",
+      "range_end": "192.168.100.200"
+    }
+
+# This SriovNetwork CR automatically creates a NetworkAttachmentDefinition
+# in the target namespace (openshift-amd-network) with proper SR-IOV CNI configuration
+#
+# Use case: Multi-tenant workloads with automatic IP allocation
+# Pod annotation: k8s.v1.cni.cncf.io/networks: amd-vnic-network
+# Resource request: openshift.io/vnic: "1"

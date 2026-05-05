@@ -1,0 +1,17 @@
+# Validates DRA partitioned-GPU allocation using CEL selectors.
+# Requests a single GPU device from the CPX compute partition via the gpu.amd.com driver.
+#
+# Prerequisites:
+#   - GPU partitioning must be configured on the node (e.g. via Device Config Manager
+#     with computePartition: CPX). Adjust the CEL expression below to match your
+#     partition profile.
+#   - The DRA driver must be running and publishing ResourceSlices with partition attributes.
+#
+# NOTE: GPU virtualization (vGPU / Virt) is NOT supported with AMD DRA at this time.
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_resourceclaimtemplate.yaml
+  - 01_dra-partitioned-gpu-test.yaml

@@ -1,0 +1,35 @@
+# MachineConfig to blacklist inbox ionic driver
+# This ensures the out-of-tree AMD ionic driver is used instead
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-amd-ionic-module-blacklist-master
+spec:
+  kernelArguments:
+    - modprobe.blacklist=ionic
+
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 99-amd-ionic-module-blacklist-worker
+spec:
+  kernelArguments:
+    - modprobe.blacklist=ionic
+
+
+
+# -----------------------------------------------------------------------------
+# Verification
+# -----------------------------------------------------------------------------
+#
+# Check kernel command line:
+# oc debug node/$(oc get nodes -o jsonpath='{.items[0].metadata.name}') -- chroot /host cat /proc/cmdline 2>&1 | grep -o "modprobe.blacklist=ionic"
+#
+# Verify ionic module is NOT loaded (should return empty):
+# oc debug node/$(oc get nodes -o jsonpath='{.items[0].metadata.name}') -- chroot /host lsmod | grep ionic 2>&1

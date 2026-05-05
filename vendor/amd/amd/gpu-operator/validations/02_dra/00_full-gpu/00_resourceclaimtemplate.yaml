@@ -1,0 +1,21 @@
+# ResourceClaimTemplate for a single full AMD GPU via the gpu.amd.com DeviceClass.
+#
+# The CEL selector filters for type == "amdgpu" (full/SPX GPUs) to avoid matching
+# "amdgpu-partition" devices on nodes with CPX or other partitioning profiles.
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: dra-full-gpu-claim
+  namespace: openshift-amd-gpu
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          exactly:
+            deviceClassName: gpu.amd.com
+            count: 1
+            selectors:
+              - cel:
+                  expression: "device.attributes['gpu.amd.com'].type == 'amdgpu'"

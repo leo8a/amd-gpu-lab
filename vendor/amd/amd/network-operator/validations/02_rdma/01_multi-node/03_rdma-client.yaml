@@ -1,0 +1,98 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-client
+  namespace: openshift-amd-network
+  annotations:
+    k8s.v1.cni.cncf.io/networks: amd-rdma-net
+  labels:
+    app: rdma-test
+    role: client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: client
+    image: registry.access.redhat.com/ubi9/ubi:latest
+    command:
+    - /bin/bash
+    - -c
+    - |
+      echo "=== RDMA Client Starting ==="
+      echo "Waiting for RDMA network interface..."
+
+      # Wait for net1 interface
+      timeout=60
+      while [ $timeout -gt 0 ]; do
+        if ip addr show net1 2>/dev/null | grep -q "inet "; then
+          CLIENT_IP=$(ip addr show net1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+          echo "Client ready on RDMA network: $CLIENT_IP"
+          break
+        fi
+        sleep 1
+        ((timeout--))
+      done
+
+      if [ -z "$CLIENT_IP" ]; then
+        echo "ERROR: RDMA network interface not ready"
+        exit 1
+      fi
+
+      echo "Waiting for server to be ready..."
+      sleep 10
+
+      # Get server IP (assumes 192.168.200.0/24 network)
+      echo "Scanning for server on RDMA network..."
+      for ip in 192.168.200.{1..254}; do
+        if [ "$ip" != "$CLIENT_IP" ]; then
+          if ping -c 1 -W 1 $ip >/dev/null 2>&1; then
+            SERVER_IP=$ip
+            echo "Found server at: $SERVER_IP"
+            break
+          fi
+        fi
+      done
+
+      if [ -z "$SERVER_IP" ]; then
+        echo "ERROR: Could not find server on RDMA network"
+        exit 1
+      fi
+
+      echo ""
+      echo "=== Testing RDMA Connectivity ==="
+      ping -c 5 $SERVER_IP
+
+      if [ $? -eq 0 ]; then
+        echo ""
+        echo "=== RDMA Connectivity Test: PASSED ==="
+        echo "Client: $CLIENT_IP -> Server: $SERVER_IP"
+      else
+        echo "ERROR: RDMA connectivity test failed"
+        exit 1
+      fi
+
+      sleep 30
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "100Mi"
+        amd.com/nic: "1"
+      limits:
+        cpu: "100m"
+        memory: "100Mi"
+        amd.com/nic: "1"
+    securityContext:
+      capabilities:
+        add: ["IPC_LOCK", "NET_RAW"]
+  nodeSelector:
+    feature.node.kubernetes.io/amd-nic: "true"
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: role
+            operator: In
+            values:
+            - server
+        topologyKey: kubernetes.io/hostname

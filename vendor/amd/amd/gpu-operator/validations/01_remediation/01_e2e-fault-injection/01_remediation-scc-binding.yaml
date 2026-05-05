@@ -1,0 +1,14 @@
+# Grants privileged SCC to the operator SA used by remediation workflow pods (reboot, drain, taint).
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: amd-gpu-operator-remediation-privileged-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:privileged
+subjects:
+  - kind: ServiceAccount
+    name: amd-gpu-operator-controller-manager
+    namespace: openshift-amd-gpu

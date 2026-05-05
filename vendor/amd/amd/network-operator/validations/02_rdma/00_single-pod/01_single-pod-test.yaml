@@ -1,0 +1,53 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rdma-test
+  namespace: openshift-amd-network
+  annotations:
+    k8s.v1.cni.cncf.io/networks: amd-rdma-net
+spec:
+  restartPolicy: Never
+  containers:
+  - name: rdma-test
+    image: registry.access.redhat.com/ubi9/ubi:latest
+    command:
+    - /bin/bash
+    - -c
+    - |
+      echo "=== RDMA Device Check ==="
+      if [ -d /sys/class/infiniband ]; then
+        ls -l /sys/class/infiniband/
+        for dev in /sys/class/infiniband/*; do
+          if [ -d "$dev" ]; then
+            echo "Device: $(basename $dev)"
+            echo "  Type: $(cat $dev/node_type 2>/dev/null || echo 'N/A')"
+            echo "  GUID: $(cat $dev/node_guid 2>/dev/null || echo 'N/A')"
+          fi
+        done
+      else
+        echo "ERROR: No RDMA devices found"
+        exit 1
+      fi
+
+      echo ""
+      echo "=== Network Interfaces ==="
+      ip addr show
+
+      echo ""
+      echo "=== RDMA Validation: PASSED ==="
+      sleep 30
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+        amd.com/nic: "1"
+      limits:
+        cpu: 100m
+        memory: 100Mi
+        amd.com/nic: "1"
+    securityContext:
+      capabilities:
+        add: ["IPC_LOCK"]
+  nodeSelector:
+    feature.node.kubernetes.io/amd-nic: "true"

@@ -1,0 +1,622 @@
+NIC : 42424650-4c32-3532-3230-313235000000 (0000:06:00.0)
+
+Port : 04908136-72a8-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900004
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 30 34
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 4d 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------
+
+NIC : 42424650-4c32-3532-3230-313938000000 (0000:16:00.0)
+
+Port : 04908136-7d70-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900003
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 30 33
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 4c 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------
+
+NIC : 42424650-4c32-3532-3230-333537000000 (0000:66:00.0)
+
+Port : 04908136-a758-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900011
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 31 31
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 4b 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------
+
+NIC : 42424650-4c32-3532-3230-304536000000 (0000:76:00.0)
+
+Port : 04908136-6cc0-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900005
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 30 35
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 4e 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------
+
+NIC : 42424650-4c32-3532-3230-304446000000 (0000:86:00.0)
+
+Port : 04908136-6c18-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900009
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 30 39
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 52 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------
+
+NIC : 42424650-4c32-3532-3230-324635000000 (0000:96:00.0)
+
+Port : 04908136-9e28-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900012
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 31 32
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 4c 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------
+
+NIC : 42424650-4c32-3532-3230-314333000000 (0000:f6:00.0)
+
+Port : 04908136-8178-4242-4242-000011010000 (eth1/1)
+Type                           : QSFP_CMIS
+State                          : SPROM-READ
+Length Single Mode Fiber       : 0.000000 KM
+Length 62.5um OM1 Fiber        : 0 Meters
+Length 50um   OM2 Fiber        : 0 Meters
+Length 50um   OM3 Fiber        : 0 Meters
+Length 50um   OM4 Fiber        : 0 Meters
+Length 50um   OM5 Fiber        : 0 Meters
+Length Copper                  : 2.000000 Meters
+Length AOC Fiber               : 0.000000 Meters
+Vendor name                    : ColorChip
+Vendor part number             : C-DQQ4X2R0A1-00
+Vendor serial number           : 2530900016
+Vendor revision                : 01
+Xcvr sprom (hex dump)          :
+                                 1e 50 80 07 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 03 48 01 44 01 32 01 44 01 ff 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 1e 43 6f 6c 6f 72 43 68 69 70 20 20 20 20 20 20
+                                 20 e4 25 e9 43 2d 44 51 51 34 58 32 52 30 41 31
+                                 2d 30 30 20 30 31 32 35 33 30 39 30 30 30 31 36
+                                 20 20 20 20 20 20 32 35 30 37 32 34 20 20 20 20
+                                 00 00 00 00 00 00 00 00 00 01 14 23 05 06 09 00
+                                 00 00 00 03 0a 00 00 00 00 00 00 00 00 00 50 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+                                 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+transceiver lane               : 0
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 1
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 2
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+transceiver lane               : 3
+---------------
+Tx los                         : N/A
+Tx cdr lol                     : N/A
+Rx los                         : N/A
+Rx cdr lol                     : N/A
+Tx bias in mA                  : N/A
+Tx power in dBm                : N/A
+Rx power in dBm                : N/A
+----------------------------------------
+Tx bias high alarm in mA       : N/A
+Tx bias low alarm in mA        : N/A
+Tx bias high warning in mA     : N/A
+Tx bias low warning in mA      : N/A
+Tx power high alarm in dBm     : N/A
+Tx power low alarm in dBm      : N/A
+Tx power high warning in dBm   : N/A
+Tx power low warning in dBm    : N/A
+Rx power high alarm in dBm     : N/A
+Rx power low alarm in dBm      : N/A
+Rx power high warning in dBm   : N/A
+Rx power low warning in dBm    : N/A
+-------------------------------------------------------------------------------------

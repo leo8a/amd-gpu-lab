@@ -1,0 +1,80 @@
+# Reference: https://instinct.docs.amd.com/projects/gpu-operator/en/latest/installation/openshift-olm.html#create-deviceconfig
+---
+apiVersion: amd.com/v1alpha1
+kind: DeviceConfig
+metadata:
+  name: amdgpu-driver-install
+  namespace: openshift-amd-gpu
+spec:
+  driver:
+    enable: true
+    useSourceImage: true
+    driverType: container
+    # image: image-registry.openshift-image-registry.svc:5000/$MOD_NAMESPACE/amdgpu_kmod
+    # Ensure driver selected is >6.3.1 (minimum supported version for MI325X), see amdgpu released versions
+    # at https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/user-kernel-space-compat-matrix.html.
+    version: 30.20.1
+
+  # Device Plugin and Node Labeller
+  # This section enables:
+  # 1. AMD GPU device plugin for resource management (amd.com/gpu)
+  # 2. Node labeller for detailed GPU information labels (device-id, vram, cu-count, etc.)
+  devicePlugin:
+    enableDevicePlugin: true
+    enableNodeLabeller: true
+
+  draDriver:
+    enable: false
+
+  metricsExporter:
+    enable: true
+    # v1.4.2 is the minimum version with inband-RAS errors support (required by NPD)
+    image: docker.io/rocm/device-metrics-exporter:v1.4.2
+    prometheus:
+      serviceMonitor:
+        enable: true
+        interval: "60s"         # Metrics scrape interval (reduced for better real-time visibility)
+        attachMetadata:
+          node: true
+        # Add label for Prometheus discovery
+        labels:
+          monitoring: amd-gpu
+
+  # Nightly build includes jq, required by the remediation drain script (missing in released images)
+  commonConfig:
+    utilsContainer:
+      image: quay.io/lochoa/rocm/amd-gpu-operator-utils:main
+
+  selector:
+    "feature.node.kubernetes.io/amd-gpu": "true"
+
+
+# ================== #
+# CONFIGURATION NOTE #
+# ================== #
+# Remember that from ROCm 7.0.0 release, the AMD GPU driver (amdgpu) is now versioned separately from ROCm.
+# See reference at https://rocm.docs.amd.com/en/docs-7.0.0/about/release-notes.html#amd-gpu-driver-rocm-packaging-separation.
+#
+# So, to determine which amdgpu .spec.driver.version to use for my specific GPU, we need to check
+# the "User space, driver, and firmware dependent changes" in the release notes of ROCm.
+# See reference at https://rocm.docs.amd.com/en/latest/about/release-notes.html#user-space-driver-and-firmware-dependent-changes.
+#
+# Other references that may be useful to check:
+# - https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/user-kernel-space-compat-matrix.html
+# - https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html
+#
+
+# NOTE: Starting from ROCm 7.1 the amdgpu version is using new versioning schema
+# please refer to https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/user-kernel-space-compat-matrix.html
+
+# =============== #
+# VALIDATION NOTE #
+# =============== #
+# Check for any errors in the pod logs during the driver installation process.
+# -> oc logs amdgpu-driver-install-build-xxxxx-build -f
+#
+# Check for "new" allocatable resources and node labels regarding your AMD DPU.
+# -> oc get nodes -ojson | jq '.items[].status.allocatable'
+# -> oc get nodes -ojson | jq '.items[] | {name: .metadata.name, allocatable: .status.allocatable}'
+# -> oc get nodes -ojson | jq '.items[].metadata.labels'
+#

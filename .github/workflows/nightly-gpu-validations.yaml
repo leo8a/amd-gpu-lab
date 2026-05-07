@@ -16,7 +16,7 @@ concurrency:
 
 env:
   GPU_NAMESPACE: openshift-amd-gpu
-  VALIDATIONS_DIR: vendor/amd/gpu-operator/validations
+  VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations
   LOG_DIR: /tmp/validation-logs
 
 jobs:

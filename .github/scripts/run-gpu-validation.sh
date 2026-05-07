@@ -4,7 +4,7 @@ set -euo pipefail
 STAGE_NUM="${1:?Usage: run-gpu-validation.sh <0|1>}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 GPU_NAMESPACE="${GPU_NAMESPACE:-openshift-amd-gpu}"
-VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/vendor/amd/gpu-operator/validations}"
+VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations}"
 DRA_DIR="${VALIDATIONS_DIR}/02_dra"
 LOG_DIR="${LOG_DIR:-/tmp/validation-logs}"
 

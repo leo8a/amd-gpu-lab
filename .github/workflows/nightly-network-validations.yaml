@@ -26,7 +26,7 @@ concurrency:
 
 env:
   NAMESPACE: openshift-amd-network
-  VALIDATIONS_DIR: vendor/amd/network-operator/validations
+  VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/network-operator/validations
   LOG_DIR: /tmp/validation-logs
 
 jobs:

@@ -4,7 +4,7 @@ set -euo pipefail
 STAGE_NUM="${1:?Usage: run-network-validation.sh <0-5>}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NAMESPACE="${NAMESPACE:-openshift-amd-network}"
-VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/vendor/amd/network-operator/validations}"
+VALIDATIONS_DIR="${VALIDATIONS_DIR:-${REPO_ROOT}/amd-openshift/openshift-reference/vendor/amd/network-operator/validations}"
 LOG_DIR="${LOG_DIR:-/tmp/validation-logs}"
 
 declare -A STAGE_DIRS=(

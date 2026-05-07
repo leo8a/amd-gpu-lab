@@ -1,0 +1,14 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: amd-network-operators
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: <registry.io>/amd-network-operator-catalog:<version>
+  displayName: AMD Network Operators
+  publisher: AMD
+  updateStrategy:
+    registryPoll:
+      interval: 30m

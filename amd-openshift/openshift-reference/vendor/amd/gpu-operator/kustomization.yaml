@@ -1,0 +1,29 @@
+# Ref: https://docs.redhat.com/en/documentation/red_hat_ai_inference_server/3.2/html/deploying_red_hat_ai_inference_server_in_openshift_container_platform/installing-amd-gpu-operator_install
+
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_amd-gpu-cs.yaml
+  - 01_amd-gpu-ns.yaml
+  - 02_amd-gpu-og.yaml
+  - 03_amd-gpu-sub.yaml
+  - 04_amd-gpu-imageregistry.yaml
+  - 05_amdgpu-blacklist.yaml
+  - 06_amd-kernel-params.yaml
+  - 07_amd-deviceconfig.yaml
+  - 08_amd-gpu-config-manager-cm.yaml
+
+
+# -----------------------------------------------------------------------------
+# Operator Releases
+# -----------------------------------------------------------------------------
+patches:
+  - target:
+      kind: CatalogSource
+      name: amd-gpu-operators
+    patch: |-
+      - op: replace
+        path: /spec/image
+        value: quay.io/lochoa/rocm/amd-gpu-operator-index:main

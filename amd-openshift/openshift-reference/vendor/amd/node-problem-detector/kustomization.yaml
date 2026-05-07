@@ -1,0 +1,17 @@
+# Ref: https://github.com/ROCm/gpu-operator/blob/main/docs/npd/node-problem-detector.md
+
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_npd-namespace.yaml
+  - 01_npd-serviceaccount.yaml
+  - 02_npd-scc-binding.yaml
+  - 03_npd-rbac.yaml
+  - 04_npd-config.yaml
+  - 05_npd-daemonset.yaml
+
+
+# NOTE: The upstream node-problem-detector repo has zero OpenShift-specific content — no SCCs, no OpenShift docs, no special manifests. Hence,
+#       we need to create our own customizations.

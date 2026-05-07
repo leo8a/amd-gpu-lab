@@ -195,7 +195,4 @@ jobs:
           echo "Restoring device-plugin ConfigMap..."
           oc apply -f "${VALIDATIONS_DIR}/../07_amd-device-plugin-config.yaml" || true
 
-          echo "Restoring SR-IOV network node policies..."
-          oc apply -f "${VALIDATIONS_DIR}/03_sriov/00_pf1_vf1-profile/00_sriov-amd-vnic-policy.yaml" || true
-          oc apply -f "${VALIDATIONS_DIR}/03_sriov/01_hnic_pf1_vf8-profile/00_sriov-amd-vnic-policy.yaml" || true
           echo "Cleanup complete"

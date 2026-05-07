@@ -1,0 +1,14 @@
+---
+apiVersion: imageregistry.operator.openshift.io/v1
+kind: Config
+metadata:
+  name: cluster
+spec:
+  managementState: "Managed"
+  storage:
+    emptyDir: {}
+
+# OpenShift Image Registry configuration
+# docs: https://docs.openshift.com/container-platform/4.20/registry/configuring-registry-operator.html
+
+# In-cluster image build: required by kmm-operator and amd-gpu-operator for building driver images.

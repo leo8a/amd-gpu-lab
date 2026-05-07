@@ -1,0 +1,225 @@
+
+NIC  : 42424650-4c32-3532-3230-313235000000 (0000:06:00.0)
+
+Port : 04908136-72a8-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:72:a8
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+
+NIC  : 42424650-4c32-3532-3230-313938000000 (0000:16:00.0)
+
+Port : 04908136-7d70-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:7d:70
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+
+NIC  : 42424650-4c32-3532-3230-333537000000 (0000:66:00.0)
+
+Port : 04908136-a758-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:a7:58
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+
+NIC  : 42424650-4c32-3532-3230-304536000000 (0000:76:00.0)
+
+Port : 04908136-6cc0-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:6c:c0
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+
+NIC  : 42424650-4c32-3532-3230-304446000000 (0000:86:00.0)
+
+Port : 04908136-6c18-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:6c:18
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+
+NIC  : 42424650-4c32-3532-3230-324635000000 (0000:96:00.0)
+
+Port : 04908136-9e28-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:9e:28
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+
+NIC  : 42424650-4c32-3532-3230-314333000000 (0000:f6:00.0)
+
+Port : 04908136-8178-4242-4242-000011010000 (eth1/1)
+  Spec:
+    Ifindex                                  : 0x11010000
+    Type                                     : ETH
+    speed                                    : 400G
+    Admin state                              : UP
+    FEC type                                 : RS
+    Pause type                               : PFC
+    Number of lanes                          : 4
+    MTU                                      : 9216
+    TX pause                                 : enabled
+    RX pause                                 : enabled
+    Auto negotiation                         : disabled
+  Status:
+    Physical port                            : 1
+    Operational status                       : UP
+    Link FSM state                           : UP
+    FEC type                                 : RS
+    Cable type                               : Copper
+    Number of lanes                          : 4
+    speed                                    : 400G
+    Auto negotiation                         : disabled
+    MAC ID                                   : 0
+    MAC channel                              : 0
+    MAC address                              : 04:90:81:36:81:78
+    Transceiver type                         : QSFP_CMIS
+    Transceiver state                        : SPROM-READ
+    Transceiver PID                          : QSFP-400G-CR4
+-------------------------------------------------------------------------------------
+

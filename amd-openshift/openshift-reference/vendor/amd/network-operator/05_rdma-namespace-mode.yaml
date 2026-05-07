@@ -1,0 +1,54 @@
+# MachineConfig to set RDMA namespace mode to exclusive
+#
+# WHY THIS IS NEEDED:
+# ==================
+# By default, RDMA devices use namespace-isolated mode (netns_mode=1), where
+# each network namespace gets its own isolated RDMA resources. However, this
+# breaks RDMA functionality in Kubernetes pods because:
+#
+# 1. Pod Network Isolation: Each pod runs in its own network namespace
+# 2. RDMA Device Access: RDMA devices need direct hardware access
+# 3. Conflict: Namespace isolation prevents pods from accessing host RDMA devices
+#
+# SOLUTION:
+# =========
+# Setting ib_core.netns_mode=0 enables "exclusive mode" where:
+# - RDMA devices are accessible globally across all namespaces
+# - Pods can access RDMA hardware directly via sysfs (/sys/class/infiniband/)
+# - The RDMA CNI plugin can properly configure RDMA resources in pods
+#
+# TRADE-OFFS:
+# ===========
+# ✓ Enables RDMA in containerized workloads (vLLM, RCCL, etc.)
+# ✗ Reduces isolation (all pods share the same RDMA namespace)
+# ✓ Required for AMD Pensando NICs and most RDMA setups in Kubernetes
+#
+# VERIFICATION:
+# =============
+# Check if exclusive mode is enabled:
+#   oc debug node/<node-name> -- chroot /host cat /proc/cmdline | grep "ib_core.netns_mode=0"
+#
+# Verify RDMA devices are visible:
+#   oc exec -n <namespace> <rdma-pod> -- ls /sys/class/infiniband/
+#
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-rdma-exclusive-netns-master
+spec:
+  kernelArguments:
+    - ib_core.netns_mode=0
+
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 99-rdma-exclusive-netns-worker
+spec:
+  kernelArguments:
+    - ib_core.netns_mode=0

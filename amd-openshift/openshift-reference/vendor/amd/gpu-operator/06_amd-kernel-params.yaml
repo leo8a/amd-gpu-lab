@@ -1,0 +1,176 @@
+# Ref: https://instinct.docs.amd.com/projects/system-acceptance/en/latest/common/kernel-parameters.html
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-amd-instinct-kernel-params-master
+spec:
+  kernelArguments:
+  # =============================================================================
+  # Required Kernel Parameters
+  # =============================================================================
+
+    # Disables automatic reallocation of PCI resources, enabling Linux to clearly detect all GPUs.
+    # This is useful when SR-IOV BARs have not been allocated by the BIOS.
+    - pci=realloc=off
+
+    # Forces breadth-first device enumeration to ensure predictable device ordering.
+    # Prevents accessing an unintended GPU over the network.
+    - pci=bfsort
+
+    # Enables IOMMU pass-through mode, allowing the adapter to bypass DMA translation
+    # to memory for improved performance.
+    - iommu=pt
+
+    # Necessary for systems with Intel host CPUs (not required for AMD CPUs).
+    - intel_iommu=on
+
+    # Disables NUMA balancing to reduce overhead from OS memory migration attempts.
+    - numa_balancing=disable
+
+    # Blacklists the amdgpu driver to prevent instances where the GPU may not be ready
+    # when the driver loads. The driver must be loaded post-boot for proper functionality.
+    # Ref: https://instinct.docs.amd.com/projects/gpu-operator/en/latest/installation/openshift-olm.html#create-blacklist-for-installing-out-of-tree-kernel-module
+    - modprobe.blacklist=amdgpu
+
+  # =============================================================================
+  # Optional Kernel Parameters (not applied)
+  # =============================================================================
+
+    # Disables KASLR (Kernel Address Space Layout Randomization) to reduce boot time
+    # and increase cache locality.
+    # - nokaslr
+
+    # Disables random memory allocation, which increases performance, but can reduce
+    # system security. Not recommended for systems with multiple users without
+    # virtualization safety restrictions.
+    # - norandmaps
+
+    # Disables many security features, resulting in an increase in performance in some
+    # scenarios.
+    # - mitigations=off
+
+    # Disables ASPM power management at the cost of slightly higher power usage from
+    # the PCIe bus. This setting is highly recommended when prioritizing performance.
+    # - pcie_aspm=off
+
+    # Limits the CPU to the active state, making the CPU more responsive. This setting
+    # is highly recommended when prioritizing performance.
+    # - processor.max_cstate=0
+
+    # Disables predictable system devices naming. This decreases boot time and has
+    # minimal performance increase.
+    # - biosdevname=0
+
+    # Reduces the number of messages logged to dmesg to only the critical messages.
+    # - quiet
+
+    # Allows applications to automatically allocate huge (2MB) memory pages without
+    # application changes. This allows for faster memory allocation and easier memory
+    # management at the cost of increased RAM usage. This feature may reduce
+    # performance if RAM is constrained.
+    # - transparent_hugepage=always
+
+    # The kernel stops periodically checking TSC accuracy, reducing background activity
+    # and optimizing performance.
+    # - tsc=nowatchdog
+
+    # Disables the NMI watchdog that detects hard lockups. Disabling this improves
+    # high-performance and low-latency workloads.
+    # - nmi_watchdog=0
+
+    # Disables the kernel's soft and hard lockup watchdog timers, which are normally
+    # used to detect and recover from CPU hangs. While this can slightly improve
+    # performance by reducing monitoring overhead, it removes a key safeguard against
+    # system lockups, making debugging and stability tracking more difficult.
+    # - nowatchdog
+
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 99-amd-instinct-kernel-params-worker
+spec:
+  kernelArguments:
+  # =============================================================================
+  # Required Kernel Parameters
+  # =============================================================================
+
+    # Disables automatic reallocation of PCI resources, enabling Linux to clearly detect all GPUs.
+    # This is useful when SR-IOV BARs have not been allocated by the BIOS.
+    - pci=realloc=off
+
+    # Forces breadth-first device enumeration to ensure predictable device ordering.
+    # Prevents accessing an unintended GPU over the network.
+    - pci=bfsort
+
+    # Enables IOMMU pass-through mode, allowing the adapter to bypass DMA translation
+    # to memory for improved performance.
+    - iommu=pt
+
+    # Necessary for systems with Intel host CPUs (not required for AMD CPUs).
+    - intel_iommu=on
+
+    # Disables NUMA balancing to reduce overhead from OS memory migration attempts.
+    - numa_balancing=disable
+
+    # Blacklists the amdgpu driver to prevent instances where the GPU may not be ready
+    # when the driver loads. The driver must be loaded post-boot for proper functionality.
+    # Ref: https://instinct.docs.amd.com/projects/gpu-operator/en/latest/installation/openshift-olm.html#create-blacklist-for-installing-out-of-tree-kernel-module
+    - modprobe.blacklist=amdgpu
+
+  # =============================================================================
+  # Optional Kernel Parameters (not applied)
+  # =============================================================================
+
+    # Disables KASLR (Kernel Address Space Layout Randomization) to reduce boot time
+    # and increase cache locality.
+    # - nokaslr
+
+    # Disables random memory allocation, which increases performance, but can reduce
+    # system security. Not recommended for systems with multiple users without
+    # virtualization safety restrictions.
+    # - norandmaps
+
+    # Disables many security features, resulting in an increase in performance in some
+    # scenarios.
+    # - mitigations=off
+
+    # Disables ASPM power management at the cost of slightly higher power usage from
+    # the PCIe bus. This setting is highly recommended when prioritizing performance.
+    # - pcie_aspm=off
+
+    # Limits the CPU to the active state, making the CPU more responsive. This setting
+    # is highly recommended when prioritizing performance.
+    # - processor.max_cstate=0
+
+    # Disables predictable system devices naming. This decreases boot time and has
+    # minimal performance increase.
+    # - biosdevname=0
+
+    # Reduces the number of messages logged to dmesg to only the critical messages.
+    # - quiet
+
+    # Allows applications to automatically allocate huge (2MB) memory pages without
+    # application changes. This allows for faster memory allocation and easier memory
+    # management at the cost of increased RAM usage. This feature may reduce
+    # performance if RAM is constrained.
+    # - transparent_hugepage=always
+
+    # The kernel stops periodically checking TSC accuracy, reducing background activity
+    # and optimizing performance.
+    # - tsc=nowatchdog
+
+    # Disables the NMI watchdog that detects hard lockups. Disabling this improves
+    # high-performance and low-latency workloads.
+    # - nmi_watchdog=0
+
+    # Disables the kernel's soft and hard lockup watchdog timers, which are normally
+    # used to detect and recover from CPU hangs. While this can slightly improve
+    # performance by reducing monitoring overhead, it removes a key safeguard against
+    # system lockups, making debugging and stability tracking more difficult.
+    # - nowatchdog

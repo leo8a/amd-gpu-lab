@@ -1,0 +1,56 @@
+# Reference: https://instinct.docs.amd.com/projects/amdgpu-docs/en/latest/gpu-partitioning/mi300x/overview.html
+# Optimal Pairings, derived from https://instinct.docs.amd.com/projects/amdgpu-docs/en/latest/gpu-partitioning/mi300x/overview.html#b-memory-partitioning-nps
+#     - SPX + NPS1: Maximum performance per GPU (single tenant)
+#     - CPX + NPS4: Maximum partitioning (8 GPUs, best for multi-tenant)
+#     - DPX + NPS2: Balanced locality
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-manager-config
+  namespace: openshift-amd-gpu
+data:
+  config.json: |
+    {
+      "gpu-config-profiles": {
+        "spx-profile-nps1": {
+          "skippedGPUs": {
+            "ids": []
+          },
+          "profiles": [
+            {
+              "computePartition": "SPX",
+              "memoryPartition": "NPS1",
+              "numGPUsAssigned": 8
+            }
+          ]
+        },
+        "dpx-profile-nps2": {
+          "skippedGPUs": {
+            "ids": []
+          },
+          "profiles": [
+            {
+              "computePartition": "DPX",
+              "memoryPartition": "NPS2",
+              "numGPUsAssigned": 8
+            }
+          ]
+        },
+        "cpx-profile-nps4": {
+          "skippedGPUs": {
+            "ids": []
+          },
+          "profiles": [
+            {
+              "computePartition": "CPX",
+              "memoryPartition": "NPS4",
+              "numGPUsAssigned": 8
+            }
+          ]
+        }
+      },
+      "gpuClientSystemdServices": {
+        "names": ["amd-metrics-exporter", "gpuagent"]
+      }
+    }

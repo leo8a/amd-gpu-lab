@@ -1,0 +1,70 @@
+# Docs: https://instinct.docs.amd.com/projects/network-operator/en/latest/cluster_validation_framework/README.html
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # Kubeflow MPI Operator (remote resource dependency) -> enables distributed MPI job execution
+  # Blog: https://medium.com/kubeflow/introduction-to-kubeflow-mpi-operator-and-industry-adoption-296d5f2e6edc
+  # Docs: https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/mpi/
+  # Code: https://github.com/kubeflow/mpi-operator/blob/master/README.md
+  - https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.8.0/deploy/v2beta1/mpi-operator.yaml
+
+  # NetworkAttachmentDefinition for RDMA network (default namespace)
+  - 00_nad-amd-rdma.yaml
+
+  # AMD Cluster Validation Framework ConfigMap -> centralized configuration hub for the validation workflow
+  # Contains: node selection criteria for candidates, MPIJob templates for distributed RCCL tests,
+  #           performance thresholds/benchmarks for validation, and candidate selection logic
+  # Enables customization of validation tests without modifying the core CronJob logic
+  #- https://instinct.docs.amd.com/projects/network-operator/en/latest/_downloads/1f09b6f0983f090ba870c62f134447ba/cluster-validation-config.yaml
+  - cluster-validation-config.yaml
+
+  # AMD Cluster Validation CronJob -> orchestrates periodic cluster validation checks on a schedule
+  # Contains: CronJob definition, MPIJob template for distributed RCCL tests, and RBAC resources
+  # Note: Update image tags (roce-workload, network-operator-utils) and CronJob schedule as needed
+  #- https://instinct.docs.amd.com/projects/network-operator/en/latest/_downloads/4194a713ba2e2dae336c93fe485e3dda/cluster-validation-job.yaml
+  - cluster-validation-job.yaml
+
+
+# ------------------------------------------------------------------------------------------------ #
+# This framework would perform the following
+# ------------------------------------------------------------------------------------------------ #
+
+# - Perform Single Node AGFHC tests on the node and apply label that indicates the node is ready for MPI-RCCL tests
+# - Perform Single Node and Multi Node RCCL tests
+# - Validate the Frontend connectivity of the newly added Nodes.
+# - Validate the GPU, AINIC, and RDMA connectivity to the backend RoCE network.
+# - Validate RDMA performance results by running multiple RCCL collectives such as All Reduce, Reduce Scatter, etc.
+# - Compare the performance results with existing benchmarks to determine whether the node should be added to the production cluster.
+# - If deemed suitable, apply the appropriate Node-ready labels on the newly added node.
+
+
+# Results:
+# - ✅ Node selection: Found 1 candidate node
+# - ✅ GPU validation test: Passed
+# - ✅ MPIJob created and completed
+# - ✅ All RCCL tests passed:
+#   - all_reduce_perf: 121.99 GB/s (expected >5)
+#   - broadcast_perf: 97.725 GB/s (expected >5)
+#   - reduce_scatter_perf: 114.917 GB/s (expected >5)
+# - ✅ Node labeled: amd.com/cluster-validation-status=passed
+
+# Key fixes that made it work:
+# 1. Added SYS_CHROOT capability to worker pods for SSH
+# 2. Changed node selector from amd-vnic to amd-nic (physical NICs)
+# 3. Reduced NIC request from 8 to 7 (matching node capacity)
+# 4. Set WORKER_REPLICAS to 1 for single-node testing
+# 5. Increased timeouts to 600s
+# 6. Added RBAC permission for pods/exec
+# 7. Created NAD in default namespace
+# 8. Fixed fluent-bit from init container to sidecar
+
+
+# -> oc get nodes -o json | jq '.items[] | {name: .metadata.name, labels: .metadata.labels | with_entries(select(.key | contains("cluster-validation")))}'
+# {
+#   "name": "smc6216gpu.partner-accelerators.redhat.lab",
+#   "labels": {
+#     "cluster-validation-status": "passed"
+#   }
+# }

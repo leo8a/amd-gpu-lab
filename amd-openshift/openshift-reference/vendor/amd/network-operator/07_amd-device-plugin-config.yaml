@@ -19,22 +19,21 @@ data:
             "isRdma": true
           },
           "excludeTopology": false
+        },
+        {
+          "resourceName": "vnic",
+          "resourcePrefix": "amd.com",
+          "enableExporterHealthCheck": true,
+          "selectors": {
+            "vendors": ["1dd8"],
+            "devices": ["1003"],
+            "drivers": ["ionic"],
+            "isRdma": false
+          },
+          "excludeTopology": false
         }
       ]
     }
-    # Uncomment to add vnic (SR-IOV VF) resource when using pf1_vf1 or hnic_pf1_vf8 profiles:
-    #   ,{
-    #     "resourceName": "vnic",
-    #     "resourcePrefix": "amd.com",
-    #     "enableExporterHealthCheck": true,
-    #     "selectors": {
-    #       "vendors": ["1dd8"],
-    #       "devices": ["1003"],
-    #       "drivers": ["ionic"],
-    #       "isRdma": false
-    #     },
-    #     "excludeTopology": false
-    #   }
 
 # ---
 # AMD Device Plugin Configuration

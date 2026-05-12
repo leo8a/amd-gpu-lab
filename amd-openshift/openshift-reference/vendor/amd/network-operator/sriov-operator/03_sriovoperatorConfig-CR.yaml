@@ -1,0 +1,11 @@
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovOperatorConfig
+metadata:
+  name: default
+  namespace: openshift-sriov-network-operator
+spec:
+  logLevel: 2
+  disableDrain: true        # We are testing this in SNOs
+  enableInjector: true
+  enableOperatorWebhook: true

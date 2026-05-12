@@ -11,6 +11,7 @@ spec:
   containers:
   - name: rdma-test
     image: docker.io/alpine:latest
+    imagePullPolicy: IfNotPresent
     command:
     - /bin/sh
     - -c

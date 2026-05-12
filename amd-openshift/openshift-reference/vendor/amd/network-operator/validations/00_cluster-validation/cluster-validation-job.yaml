@@ -32,7 +32,7 @@ data:
                   emptyDir: {}
               initContainers:
                 - name: wait-for-worker-pods
-                  image: docker.io/rocm/network-operator-utils:v1.1.0
+                  image: docker.io/rocm/network-operator-utils:v1.2.0
                   imagePullPolicy: IfNotPresent
                   envFrom:
                     - configMapRef:
@@ -51,7 +51,7 @@ data:
               containers:
               - name: rccl-launcher
                 image: $$RCCL_WORKLOAD_IMAGE
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 envFrom:
                   - configMapRef:
                       name: cluster-validation-config
@@ -161,7 +161,7 @@ data:
               containers:
               - name: rccl-test-worker
                 image: $$RCCL_WORKLOAD_IMAGE
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 securityContext:
                   capabilities:
                     add: ["IPC_LOCK", "SYS_CHROOT"]
@@ -349,7 +349,7 @@ spec:
                   mountPath: /fluent-bit/etc/
               args: ['-c', '/fluent-bit/etc/fluent-bit.conf']
             - name: submit-mpijob
-              image: docker.io/rocm/network-operator-utils:v1.1.0
+              image: docker.io/rocm/network-operator-utils:v1.2.0
               imagePullPolicy: IfNotPresent
               command: ["/bin/bash", "-c"]
               envFrom:

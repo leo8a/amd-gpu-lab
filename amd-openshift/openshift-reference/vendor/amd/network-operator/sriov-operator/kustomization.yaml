@@ -1,0 +1,11 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_sriov-namespace.yaml
+  - 01_sriov-operatorgroup.yaml
+  - 02_sriov-sub.yaml
+  - 03_sriovoperatorConfig-CR.yaml
+
+# ref: https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/networking_operators/sr-iov-operator

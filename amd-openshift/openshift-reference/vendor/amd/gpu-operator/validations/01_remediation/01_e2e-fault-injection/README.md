@@ -7,8 +7,8 @@ Triggers a full auto-remediation workflow by simulating a GPU hardware assertion
 ## Prerequisites
 
 - AMD GPU Operator deployed with `remediationWorkflow.enable: true`
-- Node Problem Detector deployed (`vendor/amd/node-problem-detector/`)
-- Argo Workflows controller running (`vendor/amd/argo-workflows/`)
+- Node Problem Detector deployed (`vendor/amd/gpu-operator/node-problem-detector/`)
+- Argo Workflows controller running (`vendor/amd/gpu-operator/argo-workflows/`)
 - Device Metrics Exporter >= v1.4.2
 
 ## What happens
@@ -57,7 +57,7 @@ fake fault and trigger another remediation cycle (reboot loop).
 
 ```bash
 # Restore the original NPD config
-oc apply -f ../../../../node-problem-detector/04_npd-config.yaml
+oc apply -f ../../../node-problem-detector/04_npd-config.yaml
 
 # Restore NPD to run on all GPU nodes
 oc -n node-problem-detector patch daemonset node-problem-detector --type json \

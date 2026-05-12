@@ -10,3 +10,5 @@ spec:
   source: amd-gpu-operators
   sourceNamespace: openshift-marketplace
   installPlanApproval: Automatic
+
+# oc-mirror list operators --catalog registry.redhat.io/redhat/certified-operator-index:v4.21 --package amd-gpu-operator --v1

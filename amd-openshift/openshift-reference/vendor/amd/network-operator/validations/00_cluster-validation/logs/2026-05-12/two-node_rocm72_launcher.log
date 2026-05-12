@@ -1,0 +1,506 @@
+Namespace: default
+Waiting for 2 worker pods...
+pod/cluster-validation-mpi-job-20260512-0702-worker-0 condition met
+pod/cluster-validation-mpi-job-20260512-0702-worker-1 condition met
+Checking SSH connectivity across workers...
+__ Testing SSH to 10.129.0.189 ...
+__ SSH OK for 10.129.0.189
+__ Testing SSH to 10.128.0.165 ...
+__ SSH OK for 10.128.0.165
+__ SSH connectivity verified across all worker pods.
+Found 3 tests
+MPI NP = 16
+-------------------------------------------
+Running all_reduce_perf (threshold: 5)...
+Warning: Permanently added 'cluster-validation-mpi-job-20260512-0702-worker-1.cluster-validation-mpi-job-20260512-0702.default.svc' (ED25519) to the list of known hosts.
+Warning: Permanently added 'cluster-validation-mpi-job-20260512-0702-worker-0.cluster-validation-mpi-job-20260512-0702.default.svc' (ED25519) to the list of known hosts.
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 1 minBytes 1024 maxBytes 2147483648 step: 2(factor) warmup iters: 20 iters: 6 agg iters: 1 validation: 0 graph: 0
+#
+rccl-tests: Version develop_deprecated:40b1b17
+# Using devices
+#  Rank  0 Group  0 Pid     31 on cluster-validation-mpi-job-20260512-0702-worker-0 device  0 [0000:05:00] AMD Radeon Graphics
+#  Rank  1 Group  0 Pid     32 on cluster-validation-mpi-job-20260512-0702-worker-0 device  1 [0000:15:00] AMD Radeon Graphics
+#  Rank  2 Group  0 Pid     33 on cluster-validation-mpi-job-20260512-0702-worker-0 device  2 [0000:65:00] AMD Radeon Graphics
+#  Rank  3 Group  0 Pid     34 on cluster-validation-mpi-job-20260512-0702-worker-0 device  3 [0000:75:00] AMD Radeon Graphics
+#  Rank  4 Group  0 Pid     35 on cluster-validation-mpi-job-20260512-0702-worker-0 device  4 [0000:85:00] AMD Radeon Graphics
+#  Rank  5 Group  0 Pid     36 on cluster-validation-mpi-job-20260512-0702-worker-0 device  5 [0000:95:00] AMD Radeon Graphics
+#  Rank  6 Group  0 Pid     37 on cluster-validation-mpi-job-20260512-0702-worker-0 device  6 [0000:e5:00] AMD Radeon Graphics
+#  Rank  7 Group  0 Pid     38 on cluster-validation-mpi-job-20260512-0702-worker-0 device  7 [0000:f5:00] AMD Radeon Graphics
+#  Rank  8 Group  0 Pid     28 on cluster-validation-mpi-job-20260512-0702-worker-1 device  0 [0000:05:00] AMD Radeon Graphics
+#  Rank  9 Group  0 Pid     29 on cluster-validation-mpi-job-20260512-0702-worker-1 device  1 [0000:15:00] AMD Radeon Graphics
+#  Rank 10 Group  0 Pid     30 on cluster-validation-mpi-job-20260512-0702-worker-1 device  2 [0000:65:00] AMD Radeon Graphics
+#  Rank 11 Group  0 Pid     31 on cluster-validation-mpi-job-20260512-0702-worker-1 device  3 [0000:75:00] AMD Radeon Graphics
+#  Rank 12 Group  0 Pid     32 on cluster-validation-mpi-job-20260512-0702-worker-1 device  4 [0000:85:00] AMD Radeon Graphics
+#  Rank 13 Group  0 Pid     33 on cluster-validation-mpi-job-20260512-0702-worker-1 device  5 [0000:95:00] AMD Radeon Graphics
+#  Rank 14 Group  0 Pid     34 on cluster-validation-mpi-job-20260512-0702-worker-1 device  6 [0000:e5:00] AMD Radeon Graphics
+#  Rank 15 Group  0 Pid     35 on cluster-validation-mpi-job-20260512-0702-worker-1 device  7 [0000:f5:00] AMD Radeon Graphics
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:28:28 [0] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:28:28 [0] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:28:28 [0] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:29:29 [1] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:29:29 [1] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:29:29 [1] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:30:30 [2] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:30:30 [2] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:30:30 [2] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:31:31 [3] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:31:31 [3] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:31:31 [3] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:32:32 [4] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:32:32 [4] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:32:32 [4] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO Dmabuf feature disabled without NCCL_DMABUF_ENABLE=1
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:28:28 [0] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:31:31 [0] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:29:29 [1] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:31:31 [3] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:32:32 [4] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:30:30 [2] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO Kernel version: 5.14.0-570.112.1.el9_6.x86_64
+pthread_mutex_unlock: No such file or directory
+35 init_mutex /rocm_smi_renderD128: unlock timed lock, ret: 1
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:36:36 [5] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:32:32 [1] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:34:34 [3] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+[cluster-validation-mpi-job-20260512-0702-worker-1:29   :0:29] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x7fde71fd16e0)
+==== backtrace (tid:     29) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f938032deb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f938032e0ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f938032e2e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(+0xa1604) [0x7f93853f3604]
+ 4  /opt/rocm/lib/librocm_smi64.so.1(rsmi_dev_firmware_version_get+0x2b9) [0x7f93852ff719]
+ 5  /root/rccl/build/release/librccl.so.1.0(+0x1774b57) [0x7f9388fa2b57]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x17525e5) [0x7f9388f805e5]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x175b5a6) [0x7f9388f895a6]
+ 8  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f93853f3ed3]
+ 9  /root/rccl/build/release/librccl.so.1.0(+0x1752c15) [0x7f9388f80c15]
+10  /root/rccl/build/release/librccl.so.1.0(+0x1754ad9) [0x7f9388f82ad9]
+11  /root/rccl/build/release/librccl.so.1.0(+0x1754828) [0x7f9388f82828]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6632fb]
+13  /root/rccl-tests/build/all_reduce_perf() [0x65fc27]
+14  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f938537c1ca]
+15  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f938537c28b]
+16  /root/rccl-tests/build/all_reduce_perf() [0x6503b5]
+=================================
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] *** Process received signal ***
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] Signal code:  (-6)
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] Failing at address: 0x1d
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f9385397330]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 1] /lib/x86_64-linux-gnu/libc.so.6(+0xa1604)[0x7f93853f3604]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 2] /opt/rocm/lib/librocm_smi64.so.1(rsmi_dev_firmware_version_get+0x2b9)[0x7f93852ff719]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 3] /root/rccl/build/release/librccl.so.1.0(+0x1774b57)[0x7f9388fa2b57]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x17525e5)[0x7f9388f805e5]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x175b5a6)[0x7f9388f895a6]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 6] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f93853f3ed3]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 7] /root/rccl/build/release/librccl.so.1.0(+0x1752c15)[0x7f9388f80c15]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 8] /root/rccl/build/release/librccl.so.1.0(+0x1754ad9)[0x7f9388f82ad9]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [ 9] /root/rccl/build/release/librccl.so.1.0(+0x1754828)[0x7f9388f82828]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [10] /root/rccl-tests/build/all_reduce_perf[0x6632fb]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [11] /root/rccl-tests/build/all_reduce_perf[0x65fc27]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [12] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f938537c1ca]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [13] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f938537c28b]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] [14] /root/rccl-tests/build/all_reduce_perf[0x6503b5]
+[cluster-validation-mpi-job-20260512-0702-worker-1:00029] *** End of error message ***
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:38:38 [7] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:33:33 [2] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:35:35 [4] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO Bootstrap: Using eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:37:37 [6] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-0
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO ncclCommInitRank_impl comm 0x3dbea40 rank 0 nranks 16 cudaDev 0 nvmlDev 0 busId 5000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO Successfully loaded external plugin librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.129.0.189<0>
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:17] cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 1272770081392973109; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 5392992908305231137; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 6835838856380496280; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 7931487818563356360; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 8916096625505687722; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 14483408080023563307; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15446124330441387829; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 16060439296964473136; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO ncclCommInitRank_impl comm 0x3f10650 rank 5 nranks 16 cudaDev 5 nvmlDev 5 busId 95000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO ncclCommInitRank_impl comm 0x3ed8780 rank 1 nranks 16 cudaDev 1 nvmlDev 1 busId 15000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO ncclCommInitRank_impl comm 0x2765070 rank 3 nranks 16 cudaDev 3 nvmlDev 3 busId 75000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:38:100 [7] NCCL INFO ncclCommInitRank_impl comm 0x3e951d0 rank 7 nranks 16 cudaDev 7 nvmlDev 7 busId f5000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO ncclCommInitRank_impl comm 0x344b690 rank 4 nranks 16 cudaDev 4 nvmlDev 4 busId 85000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO ncclCommInitRank_impl comm 0x30f2b40 rank 6 nranks 16 cudaDev 6 nvmlDev 6 busId e5000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO ncclCommInitRank_impl comm 0x24a43c0 rank 2 nranks 16 cudaDev 2 nvmlDev 2 busId 65000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:37:102 [6] NCCL INFO RAS client listening socket at ::1<28028>
+cluster-validation-mpi-job-20260512-0702-worker-0:36:97 [5] NCCL INFO RAS client listening socket at ::1<28028>
+cluster-validation-mpi-job-20260512-0702-worker-0:33:101 [2] NCCL INFO RAS client listening socket at ::1<28028>
+cluster-validation-mpi-job-20260512-0702-worker-0:35:103 [4] NCCL INFO RAS client listening socket at ::1<28028>
+cluster-validation-mpi-job-20260512-0702-worker-0:32:99 [1] NCCL INFO RAS client listening socket at ::1<28028>
+cluster-validation-mpi-job-20260512-0702-worker-0:34:98 [3] NCCL INFO RAS client listening socket at ::1<28028>
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO Bootstrap: Using eth0:10.128.0.165<0>
+cluster-validation-mpi-job-20260512-0702-worker-1:33:33 [5] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-1
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO Bootstrap: Using eth0:10.128.0.165<0>
+cluster-validation-mpi-job-20260512-0702-worker-1:35:35 [7] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-1
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO Hipruntime version: 70226015, firmware version: 191
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO Bootstrap: Using eth0:10.128.0.165<0>
+cluster-validation-mpi-job-20260512-0702-worker-1:34:34 [6] NCCL INFO RCCL version : 2.27.7-HEAD:0d2c4fd
+HIP version  : 7.2.26015-fc0010cf6a
+ROCm version : 7.2.0.0-43-fc0010cf6a
+Hostname     : cluster-validation-mpi-job-20260512-0702-worker-1
+Librccl path : /root/rccl/build/release/librccl.so.1.0
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:18] cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.128.0.165<0>
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:18] cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 2801025083361630074; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 3544527364394189162; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 8037050671044158262; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 10038296463489214695; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 14337731799709259092; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 15063026452352501957; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15304281370883402400; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 16292873513633822930; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-1:35:92 [7] NCCL INFO ncclCommInitRank_impl comm 0x3faf140 rank 15 nranks 16 cudaDev 7 nvmlDev 7 busId f5000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Plugin name set by env to librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Loaded net plugin RCCL-ANP (v10)
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v10 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v9 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v8 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v7 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/Plugin: Failed to find ncclCollNetPlugin_v6 symbol.
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO Successfully loaded external plugin librccl-anp.so
+
+[2026-05-12 07:02:18] cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] src/net_ib.cc:833 NCCL WARN ANP plugin loaded successfully with telemetry disabled : /root/amd-anp/build/librccl-anp.so
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NET/IB : Using [0]ionic_0:1/RoCE [1]ionic_1:1/RoCE [2]ionic_2:1/RoCE [3]ionic_3:1/RoCE [4]ionic_4:1/RoCE [5]ionic_5:1/RoCE [6]ionic_6:1/RoCE [RO]; OOB eth0:10.128.0.165<0>
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO Initialized NET plugin RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 0.
+
+[2026-05-12 07:02:18] cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] src/net_ib.cc:1036 NCCL WARN DMABUF Disabled
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO Assigned NET plugin RCCL-ANP to comm
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO Using network RCCL-ANP
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 6; gpu_id = 26567; unique_id = 2801025083361630074; location_id = 34048; bdf = 34048; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 8; gpu_id = 20463; unique_id = 3544527364394189162; location_id = 58624; bdf = 58624; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 9; gpu_id = 33762; unique_id = 8037050671044158262; location_id = 62720; bdf = 62720; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 5; gpu_id = 9091; unique_id = 10038296463489214695; location_id = 29952; bdf = 29952; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 4; gpu_id = 61326; unique_id = 14337731799709259092; location_id = 25856; bdf = 25856; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 2; gpu_id = 51110; unique_id = 15063026452352501957; location_id = 1280; bdf = 1280; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 7; gpu_id = 43978; unique_id = 15304281370883402400; location_id = 38144; bdf = 38144; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO [node_id = 3; gpu_id = 2987; unique_id = 16292873513633822930; location_id = 5376; bdf = 5376; domain = 0; partition = 0], 
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO initialized internal alternative rsmi functionality
+cluster-validation-mpi-job-20260512-0702-worker-1:33:93 [5] NCCL INFO ncclCommInitRank_impl comm 0x25bea20 rank 13 nranks 16 cudaDev 5 nvmlDev 5 busId 95000 commId 0x9318e14fa210a84b - Init START
+cluster-validation-mpi-job-20260512-0702-worker-0:31:96 [0] NCCL INFO RAS client listening socket at ::1<28028>
+--------------------------------------------------------------------------
+mpirun noticed that process rank 9 with PID 29 on node cluster-validation-mpi-job-20260512-0702-worker-1.cluster-validation-mpi-job-20260512-0702.default.svc exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------
+MPI rccl-launcher failed. Holding for 660s...

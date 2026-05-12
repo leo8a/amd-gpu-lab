@@ -12,7 +12,7 @@ Two test scenarios are covered, each in its own subfolder:
 ## Prerequisites
 
 - AMD GPU Operator deployed
-- Node Problem Detector deployed (`vendor/amd/node-problem-detector/`)
+- Node Problem Detector deployed (`vendor/amd/gpu-operator/node-problem-detector/`)
 - Device Metrics Exporter >= v1.4.2 (inband-RAS support)
 - Argo Workflows CRDs present (installed by OpenShift AI or manually)
 - For the E2E test: `remediationWorkflow.enable: true` on DeviceConfig (applied by `00_gpu-validation/`)

@@ -77,6 +77,16 @@ oc logs job/cluster-validation-mpi-job-<timestamp>-launcher
 | node-b | `amd.com/cluster-validation-status=failed` | Node failed one or more tests |
 | node-c | (no label)                                 | Node not in candidate set     |
 
+## Validation Results (2026-05-11)
+
+Single-node run on `smc6217gpu` with `network-operator-utils:v1.2.0` and `roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-56`:
+
+| Test                  | Result | Avg Bus BW (GB/s)  | Threshold (GB/s)  |
+| --------------------- | ------ | ------------------ | ----------------- |
+| `all_reduce_perf`     | PASS   | 122.167            | > 5               |
+| `broadcast_perf`      | PASS   | 101.799            | > 5               |
+| `reduce_scatter_perf` | PASS   | 115.102            | > 5.0             |
+
 ## Expected Behavior
 
 The CronJob runs on schedule (default: hourly) and:

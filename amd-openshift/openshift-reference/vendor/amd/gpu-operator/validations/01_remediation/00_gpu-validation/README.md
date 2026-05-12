@@ -5,7 +5,7 @@ Runs a GPU validation test (the same check the remediation workflow performs in 
 ## Prerequisites
 
 - AMD GPU Operator deployed
-- Node Problem Detector deployed (`vendor/amd/node-problem-detector/`)
+- Node Problem Detector deployed (`vendor/amd/gpu-operator/node-problem-detector/`)
 - Device Metrics Exporter >= v1.4.2 (inband-RAS support)
 - Argo Workflows CRDs present (installed by OpenShift AI or manually)
 

@@ -53,6 +53,42 @@ sudo ${NICCTL} update port -p <port-uuid> --auto-neg disable
 
 After disabling AN, all ports came up immediately at 400G with RS FEC.
 
+### Running nicctl without the ainic_bundle on the node
+
+If the `ainic_bundle` is not present on the host, `nicctl` is available inside
+the `openshift-amd-network` namespace pods (`node-labeller` and `metrics-exporter`
+containers) at `/usr/sbin/nicctl`.
+
+```bash
+# List port status
+oc exec -n openshift-amd-network <node-labeller-pod> -c node-labeller-container \
+  -- /usr/sbin/nicctl show port
+
+# Disable auto-negotiation on a port
+oc exec -n openshift-amd-network <node-labeller-pod> -c node-labeller-container \
+  -- /usr/sbin/nicctl update port -p <port-uuid> --auto-neg disable
+```
+
+### Verifying L2 connectivity between nodes
+
+After bringing ports UP, verify L2 with temporary IPs and arping:
+
+```bash
+# On node A (via oc debug)
+oc debug node/<node-a> -- chroot /host bash -c 'ip addr add 10.99.99.1/24 dev <ionic-iface>'
+
+# On node B — arping node A
+oc debug node/<node-b> -- chroot /host bash -c \
+  'ip addr add 10.99.99.2/24 dev <ionic-iface>; arping -c 3 -I <ionic-iface> 10.99.99.1'
+
+# Cleanup
+oc debug node/<node-a> -- chroot /host bash -c 'ip addr del 10.99.99.1/24 dev <ionic-iface>'
+oc debug node/<node-b> -- chroot /host bash -c 'ip addr del 10.99.99.2/24 dev <ionic-iface>'
+```
+
+To find ionic interfaces: `ls /sys/class/net/ | grep enp` and check the driver
+symlink at `/sys/class/net/<iface>/device/driver` points to `ionic`.
+
 #### smc6217gpu (applied 2026-05-04)
 
 ```bash
@@ -98,3 +134,65 @@ ${SSH_CMD} "sudo ${NICCTL} show port" | grep -E "(NIC |Port |Operational status)
 > **Note:** This setting is not persistent across NIC reboots. It needs to be
 > applied via the NIC profile or re-applied after firmware updates. See
 > `docs/update-ai-nic-profile.md` for making this change permanent.
+
+### Switch cabling status (2026-05-06)
+
+IT only cabled **one port on smc6216gpu** (`enp25s0np0`) to the backend switch.
+smc6217gpu was fully connected (all 7 ports). The NAD had to pin pods to the
+working interface on each node.
+
+**smc6217gpu &rarr; smc6216gpu** (any src reaches smc6216gpu only via `enp25s0np0`):
+
+| src \ dst           | .1 (9s0) | .2 (25s0) | .3 (105s0) | .4 (121s0) | .5 (137s0) | .6 (153s0) | .7 (249s0) |
+| ------------------- | -------- | --------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+| .11 (9s0np0)        | --       | OK        | --         | --         | --         | --         | --         |
+| .12 (25s0np0)       | --       | OK        | --         | --         | --         | --         | --         |
+| .13 (105s0np0)      | --       | OK        | --         | --         | --         | --         | --         |
+| .14 (121s0np0)      | --       | OK        | --         | --         | --         | --         | --         |
+| .15 (137s0np0)      | --       | OK        | --         | --         | --         | --         | --         |
+| .16 (153s0np0)      | --       | OK        | --         | --         | --         | --         | --         |
+| .17 (249s0np0)      | --       | OK        | --         | --         | --         | --         | --         |
+
+**smc6216gpu &rarr; smc6217gpu** (only `enp25s0np0` can reach any dst):
+
+| src \ dst           | .11 (9s0) | .12 (25s0) | .13 (105s0) | .14 (121s0) | .15 (137s0) | .16 (153s0) | .17 (249s0) |
+| ------------------- | --------- | ---------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| .1 (9s0np0)         | --        | --         | --          | --          | --          | --          | --          |
+| .2 (25s0np0)        | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .3 (105s0np0)       | --        | --         | --          | --          | --          | --          | --          |
+| .4 (121s0np0)       | --        | --         | --          | --          | --          | --          | --          |
+| .5 (137s0np0)       | --        | --         | --          | --          | --          | --          | --          |
+| .6 (153s0np0)       | --        | --         | --          | --          | --          | --          | --          |
+| .7 (249s0np0)       | --        | --         | --          | --          | --          | --          | --          |
+
+### Switch cabling status (2026-05-11)
+
+IT fully cabled all 7 ports on **both nodes**. All 49 pairs (7x7) pass in
+both directions — full multi-rail RDMA is available.
+
+**smc6217gpu &rarr; smc6216gpu** (all OK):
+
+| src \ dst           | .1 (9s0) | .2 (25s0) | .3 (105s0) | .4 (121s0) | .5 (137s0) | .6 (153s0) | .7 (249s0) |
+| ------------------- | -------- | --------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+| .11 (9s0np0)        | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+| .12 (25s0np0)       | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+| .13 (105s0np0)      | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+| .14 (121s0np0)      | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+| .15 (137s0np0)      | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+| .16 (153s0np0)      | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+| .17 (249s0np0)      | OK       | OK        | OK         | OK         | OK         | OK         | OK         |
+
+**smc6216gpu &rarr; smc6217gpu** (all OK):
+
+| src \ dst           | .11 (9s0) | .12 (25s0) | .13 (105s0) | .14 (121s0) | .15 (137s0) | .16 (153s0) | .17 (249s0) |
+| ------------------- | --------- | ---------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| .1 (9s0np0)         | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .2 (25s0np0)        | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .3 (105s0np0)       | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .4 (121s0np0)       | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .5 (137s0np0)       | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .6 (153s0np0)       | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+| .7 (249s0np0)       | OK        | OK         | OK          | OK          | OK          | OK          | OK          |
+
+> **Takeaway:** Full 7-rail multi-node RDMA is now available. NAD no longer
+> needs to pin to a specific interface.

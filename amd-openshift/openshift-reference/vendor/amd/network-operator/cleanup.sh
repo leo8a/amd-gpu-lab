@@ -29,14 +29,17 @@ oc delete -f "$SCRIPT_DIR"/00_amd-network-cs.yaml --ignore-not-found
 # 5. Remove CRDs
 oc delete crd networkconfigs.amd.com --ignore-not-found
 
-# 6. Clear stale amd.com/nic and amd.com/vnic extended resources from nodes
+# 6. Clear stale amd.com/nic, amd.com/vnic, and openshift.io/vnic extended resources from nodes
 # Kubelet never removes device plugin resources from node status (kubernetes#53395),
-# so we must delete its checkpoint (to stop re-advertising) and patch the API (to remove the stale value).
+# so we patch the API to remove the stale values. The device plugin pods are already gone
+# after step 4, so kubelet will not re-advertise these resources after its next restart.
+# NOTE: Do NOT delete kubelet_internal_checkpoint — it is shared across ALL device plugins
+# and wiping it disrupts other operators (e.g. GPU operator labels disappear).
 for node in $(oc get nodes -o jsonpath='{.items[?(@.status.capacity.amd\.com/nic)].metadata.name}'); do
-  oc debug node/"$node" -- chroot /host bash -c \
-    'rm -f /var/lib/kubelet/device-plugins/kubelet_internal_checkpoint && systemctl restart kubelet'
   oc patch node "$node" --subresource=status --type=json \
-    -p '[{"op":"remove","path":"/status/capacity/amd.com~1nic"},{"op":"remove","path":"/status/allocatable/amd.com~1nic"}]'
+    -p '[{"op":"remove","path":"/status/capacity/amd.com~1nic"},{"op":"remove","path":"/status/allocatable/amd.com~1nic"}]' || true
   oc patch node "$node" --subresource=status --type=json \
-    -p '[{"op":"remove","path":"/status/capacity/amd.com~1vnic"},{"op":"remove","path":"/status/allocatable/amd.com~1vnic"}]'
+    -p '[{"op":"remove","path":"/status/capacity/amd.com~1vnic"},{"op":"remove","path":"/status/allocatable/amd.com~1vnic"}]' || true
+  oc patch node "$node" --subresource=status --type=json \
+    -p '[{"op":"remove","path":"/status/capacity/openshift.io~1vnic"},{"op":"remove","path":"/status/allocatable/openshift.io~1vnic"}]' || true
 done

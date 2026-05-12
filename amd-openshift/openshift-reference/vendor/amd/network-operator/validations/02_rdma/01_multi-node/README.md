@@ -34,7 +34,55 @@ oc logs -n openshift-amd-network rdma-server
 oc logs -n openshift-amd-network rdma-client
 ```
 
-Expected: Client discovers server and successfully pings over RDMA network.
+### Expected Output
+
+Server gets an IP from the RDMA subnet and lists all infiniband devices on the node.
+Client discovers the server via ICMP scan and pings it over the RDMA network with 0% packet loss.
+
+`oc logs -n openshift-amd-network rdma-server` (smc6217gpu):
+
+```logs
+=== RDMA Server Starting ===
+Waiting for RDMA network interface...
+Server ready on RDMA network: 192.168.200.2
+Listening for ICMP pings on 192.168.200.2...
+RDMA device check:
+ionic_0
+ionic_1
+ionic_2
+ionic_3
+ionic_4
+ionic_5
+ionic_6
+mlx5_0
+```
+
+`oc logs -n openshift-amd-network rdma-client` (smc6216gpu):
+
+```logs
+=== RDMA Client Starting ===
+Waiting for RDMA network interface...
+Client ready on RDMA network: 192.168.200.1
+Waiting for server to be ready...
+Scanning for server on RDMA network...
+Scan attempt 1/5...
+Found server at: 192.168.200.2
+
+=== Testing RDMA Connectivity ===
+PING 192.168.200.2 (192.168.200.2): 56 data bytes
+64 bytes from 192.168.200.2: seq=0 ttl=64 time=0.088 ms
+64 bytes from 192.168.200.2: seq=1 ttl=64 time=0.092 ms
+64 bytes from 192.168.200.2: seq=2 ttl=64 time=0.108 ms
+64 bytes from 192.168.200.2: seq=3 ttl=64 time=0.092 ms
+64 bytes from 192.168.200.2: seq=4 ttl=64 time=0.090 ms
+
+--- 192.168.200.2 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.088/0.094/0.108 ms
+
+=== RDMA Connectivity Test: PASSED ===
+Client: 192.168.200.1 -> Server: 192.168.200.2
+```
 
 ## Cleanup
 

@@ -6,12 +6,23 @@ Nightly workflows that run AMD GPU and network operator validations on a self-ho
 
 Workflow: `nightly-gpu-validations.yaml` — runs at 03:00 UTC.
 
+### DCM partitioning (always runs)
+
+| Job                    | Node       | Profile        | Purpose          |
+| ---------------------- | ---------- | -------------- | ---------------- |
+| partition-smc6216gpu   | smc6216gpu | SPX + NPS1     | Test non-default |
+| partition-smc6217gpu   | smc6217gpu | DPX + NPS2     | Test non-default |
+| restore-smc6216gpu     | smc6216gpu | CPX + NPS4     | Restore default  |
+| restore-smc6217gpu     | smc6217gpu | SPX + NPS1     | Restore default  |
+
+### DRA validation (after restore)
+
 | Stage | Name            | What it validates                  | Duration |
 | ----- | --------------- | ---------------------------------- | -------- |
 | 0     | DRA Full GPU    | DRA resource claim for full GPU    | ~5 min   |
 | 1     | DRA Partitioned | DRA resource claim for partitioned | ~5 min   |
 
-Nightly default: all stages (0, 1). Individual stages are available via manual dispatch.
+Nightly default: DCM partitioning + all DRA stages. DRA stages are selectable via manual dispatch.
 
 ## Network operator stages
 

@@ -16,10 +16,16 @@ concurrency:
 
 env:
   GPU_NAMESPACE: openshift-amd-gpu
-  VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations
   CI_TOOLS_IMAGE: quay.io/lochoa/ci-tools:latest
+  VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations
+  SMC6216GPU: smc6216gpu.partner-accelerators.redhat.lab
+  SMC6217GPU: smc6217gpu.partner-accelerators.redhat.lab
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Preflight
+  # ─────────────────────────────────────────────────────────────────────────────
+
   preflight:
     runs-on: self-hosted
     timeout-minutes: 2
@@ -65,9 +71,94 @@ jobs:
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
           echo "DRA stages: $STAGES_TO_RUN"
 
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DCM Partitioning
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  dcm-deploy:
+    needs: preflight
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy DCM
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
+            ${CI_TOOLS_IMAGE} make deploy-dcm NAMESPACE=${GPU_NAMESPACE} NODE_NAME=${SMC6216GPU}
+
+  partition-smc6216gpu:
+    needs: dcm-deploy
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Partition to SPX + NPS1
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
+            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+              NODE_NAME=${SMC6216GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
+
+  partition-smc6217gpu:
+    needs: dcm-deploy
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Partition to DPX + NPS2
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
+            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+              NODE_NAME=${SMC6217GPU} PROFILE_NAME=dpx-profile-nps2 NAMESPACE=${GPU_NAMESPACE}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Restore Defaults
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  restore-smc6216gpu:
+    needs: [partition-smc6216gpu, partition-smc6217gpu]
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore to CPX + NPS4 (default)
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
+            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+              NODE_NAME=${SMC6216GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
+
+  restore-smc6217gpu:
+    needs: [partition-smc6216gpu, partition-smc6217gpu]
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore to SPX + NPS1 (default)
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
+            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+              NODE_NAME=${SMC6217GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # DRA Validation
+  # ─────────────────────────────────────────────────────────────────────────────
 
   dra-setup:
-    needs: preflight
+    needs: [restore-smc6216gpu, restore-smc6217gpu]
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -110,17 +201,25 @@ jobs:
             -w /workspace/${VALIDATIONS_DIR}/02_dra \
             ${CI_TOOLS_IMAGE} make partitioned-gpu NAMESPACE=${GPU_NAMESPACE}
 
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Cleanup
+  # ─────────────────────────────────────────────────────────────────────────────
+
   cleanup:
-    needs: [preflight, dra-setup, dra-full-gpu, dra-partitioned-gpu]
+    needs: [dcm-deploy, partition-smc6216gpu, partition-smc6217gpu, restore-smc6216gpu, restore-smc6217gpu, dra-setup, dra-full-gpu, dra-partitioned-gpu]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Restore base DeviceConfig
+      - name: Restore base DeviceConfig and remove DCM
         run: |
           podman run --rm --network=host \
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_dra \
-            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${GPU_NAMESPACE}
+            -w /workspace/${VALIDATIONS_DIR} \
+            ${CI_TOOLS_IMAGE} bash -c "
+              make -C 02_dra cleanup NAMESPACE=${GPU_NAMESPACE} || true
+              make -C 00_partitioning-dcm cleanup NODE_NAME=${SMC6216GPU} NAMESPACE=${GPU_NAMESPACE} || true
+              make -C 00_partitioning-dcm cleanup NODE_NAME=${SMC6217GPU} NAMESPACE=${GPU_NAMESPACE} || true
+            "

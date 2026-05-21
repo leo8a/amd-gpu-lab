@@ -1,0 +1,11 @@
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+RUN microdnf install -y make tar gzip && microdnf clean all
+
+ARG OC_VERSION=4.18
+RUN curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable-${OC_VERSION}/openshift-client-linux.tar.gz \
+    | tar xz -C /usr/local/bin oc kubectl
+
+LABEL name="ci-tools" \
+      summary="Minimal CI tools image for GitHub Actions workflows" \
+      description="UBI9 minimal with make and oc/kubectl for running Makefile-based validations."

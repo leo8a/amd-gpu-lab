@@ -17,6 +17,7 @@ concurrency:
 env:
   GPU_NAMESPACE: openshift-amd-gpu
   VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations
+  CI_TOOLS_IMAGE: quay.io/lochoa/ci-tools:latest
 
 jobs:
   preflight:
@@ -64,6 +65,7 @@ jobs:
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
           echo "DRA stages: $STAGES_TO_RUN"
 
+
   dra-setup:
     needs: preflight
     runs-on: self-hosted
@@ -71,7 +73,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Enable DRA on DeviceConfig
-        run: make -C ${VALIDATIONS_DIR}/02_dra enable-dra NAMESPACE=${GPU_NAMESPACE}
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_dra \
+            ${CI_TOOLS_IMAGE} make enable-dra NAMESPACE=${GPU_NAMESPACE}
 
   dra-full-gpu:
     needs: [preflight, dra-setup]
@@ -81,7 +88,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run full-gpu validation
-        run: make -C ${VALIDATIONS_DIR}/02_dra full-gpu NAMESPACE=${GPU_NAMESPACE}
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_dra \
+            ${CI_TOOLS_IMAGE} make full-gpu NAMESPACE=${GPU_NAMESPACE}
 
   dra-partitioned-gpu:
     needs: [preflight, dra-setup]
@@ -91,7 +103,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run partitioned-gpu validation
-        run: make -C ${VALIDATIONS_DIR}/02_dra partitioned-gpu NAMESPACE=${GPU_NAMESPACE}
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_dra \
+            ${CI_TOOLS_IMAGE} make partitioned-gpu NAMESPACE=${GPU_NAMESPACE}
 
   cleanup:
     needs: [preflight, dra-setup, dra-full-gpu, dra-partitioned-gpu]
@@ -101,4 +118,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Restore base DeviceConfig
-        run: make -C ${VALIDATIONS_DIR}/02_dra cleanup NAMESPACE=${GPU_NAMESPACE}
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_dra \
+            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${GPU_NAMESPACE}

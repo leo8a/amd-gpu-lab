@@ -22,7 +22,12 @@ enable-dra:
 	@oc patch deviceconfig amdgpu-driver-install -n $(NAMESPACE) --type merge \
 	  --patch-file 00_deviceconfig-dra-patch.yaml
 	@echo ""
-	@echo "Waiting for DRA driver DaemonSet..."
+	@echo "Waiting for DRA driver DaemonSet to be created..."
+	@for i in $$(seq 1 60); do \
+	  oc get daemonset/amdgpu-driver-install-dra-driver -n $(NAMESPACE) >/dev/null 2>&1 && break; \
+	  sleep 2; \
+	done
+	@echo "Waiting for DRA driver rollout..."
 	@oc rollout status daemonset/amdgpu-driver-install-dra-driver -n $(NAMESPACE) --timeout=$(TIMEOUT)
 
 # Usage: $(call wait-for-job,<job-name>)

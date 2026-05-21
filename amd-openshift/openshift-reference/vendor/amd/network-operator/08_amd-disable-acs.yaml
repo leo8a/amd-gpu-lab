@@ -1,0 +1,104 @@
+# MachineConfig to disable PCIe ACS (Access Control Services) at boot
+#
+# Required for GPU Direct RDMA (GDR) on bare-metal systems with AMD GPUs
+# and AMD Pensando Pollara AI NICs. ACS redirects P2P PCIe transactions
+# through the root complex, which breaks direct GPU-to-NIC DMA.
+#
+# Reference: https://instinct.docs.amd.com/projects/gpu-cluster-networking/en/develop/how-to/single-node-config.html
+# Script source: https://github.com/ROCm/cluster-networking/blob/main/general_scripts/dis_acs.sh
+#
+# Must run after every reboot — BIOS-level ACS disable alone is not sufficient.
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-amd-gpu-acs-disable-master
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+        - path: /usr/local/bin/dis_acs.sh
+          mode: 0755
+          overwrite: true
+          contents:
+            source: data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKIwojIERpc2FibGUgQUNTIG9uIGV2ZXJ5IGRldmljZSB0aGF0IHN1cHBvcnRzIGl0CiMgU291cmNlOiBodHRwczovL2dpdGh1Yi5jb20vUk9DbS9jbHVzdGVyLW5ldHdvcmtpbmcKIwpQTEFURk9STT0kKGRtaWRlY29kZSAtLXN0cmluZyBzeXN0ZW0tcHJvZHVjdC1uYW1lIDI+L2Rldi9udWxsIHx8IGVjaG8gIlVua25vd24iKQpsb2dnZXIgImRpc19hY3M6IFBMQVRGT1JNPSR7UExBVEZPUk19IgoKIyBtdXN0IGJlIHJvb3QgdG8gYWNjZXNzIGV4dGVuZGVkIFBDSSBjb25maWcgc3BhY2UKaWYgWyAiJEVVSUQiIC1uZSAwIF07IHRoZW4KICAgIGxvZ2dlciAiRVJST1I6IGRpc19hY3MgbXVzdCBiZSBydW4gYXMgcm9vdCIKICAgIGV4aXQgMQpmaQoKIyBDaGVjayBpZiBzZXRwY2kgaXMgYXZhaWxhYmxlCmlmICEgY29tbWFuZCAtdiBzZXRwY2kgJj4gL2Rldi9udWxsOyB0aGVuCiAgICBsb2dnZXIgIkVSUk9SOiBzZXRwY2kgY29tbWFuZCBub3QgZm91bmQgKGluc3RhbGwgcGNpdXRpbHMpIgogICAgZXhpdCAxCmZpCgpESVNBQkxFRF9DT1VOVD0wCmZvciBCREYgaW4gJChsc3BjaSAtZCAiKjoqOioiIHwgYXdrICd7cHJpbnQgJDF9Jyk7IGRvCiAgICAjIHNraXAgaWYgaXQgZG9lc24ndCBzdXBwb3J0IEFDUwogICAgc2V0cGNpIC12IC1zICR7QkRGfSBFQ0FQX0FDUysweDYudyA+IC9kZXYvbnVsbCAyPiYxCiAgICBpZiBbICQ/IC1uZSAwIF07IHRoZW4KICAgICAgICBjb250aW51ZQogICAgZmkKCiAgICBsb2dnZXIgImRpc19hY3M6IERpc2FibGluZyBBQ1Mgb24gJChsc3BjaSAtcyAke0JERn0pIgogICAgc2V0cGNpIC12IC1zICR7QkRGfSBFQ0FQX0FDUysweDYudz0wMDAwCiAgICBpZiBbICQ/IC1uZSAwIF07IHRoZW4KICAgICAgICBsb2dnZXIgImRpc19hY3M6IEVSUk9SIGVuYWJsaW5nIGRpcmVjdFRyYW5zIEFDUyBvbiAke0JERn0iCiAgICAgICAgY29udGludWUKICAgIGZpCgogICAgTkVXX1ZBTD0kKHNldHBjaSAtdiAtcyAke0JERn0gRUNBUF9BQ1MrMHg2LncgfCBhd2sgJ3twcmludCAkTkZ9JykKICAgIGlmIFsgIiR7TkVXX1ZBTH0iICE9ICIwMDAwIiBdOyB0aGVuCiAgICAgICAgbG9nZ2VyICJkaXNfYWNzOiBGQUlMRUQgdG8gZW5hYmxlIGRpcmVjdFRyYW5zIEFDUyBvbiAke0JERn0iCiAgICAgICAgY29udGludWUKICAgIGZpCgogICAgKChESVNBQkxFRF9DT1VOVCsrKSkKZG9uZQoKbG9nZ2VyICJkaXNfYWNzOiBTdWNjZXNzZnVsbHkgZGlzYWJsZWQgQUNTIG9uICR7RElTQUJMRURfQ09VTlR9IGRldmljZShzKSIKZXhpdCAwCg==
+    systemd:
+      units:
+        - name: dis-acs.service
+          enabled: true
+          contents: |
+            [Unit]
+            Description=Disable PCIe Access Control Services (ACS) for AMD GPUs
+            Documentation=https://instinct.docs.amd.com/projects/gpu-cluster-networking/en/develop/how-to/single-node-config.html
+            DefaultDependencies=no
+            After=sysinit.target
+            Before=basic.target
+
+            [Service]
+            Type=oneshot
+            ExecStart=/usr/local/bin/dis_acs.sh
+            RemainAfterExit=yes
+            StandardOutput=journal
+            StandardError=journal
+
+            [Install]
+            WantedBy=multi-user.target
+
+---
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 99-amd-gpu-acs-disable-worker
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+        - path: /usr/local/bin/dis_acs.sh
+          mode: 0755
+          overwrite: true
+          contents:
+            source: data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKIwojIERpc2FibGUgQUNTIG9uIGV2ZXJ5IGRldmljZSB0aGF0IHN1cHBvcnRzIGl0CiMgU291cmNlOiBodHRwczovL2dpdGh1Yi5jb20vUk9DbS9jbHVzdGVyLW5ldHdvcmtpbmcKIwpQTEFURk9STT0kKGRtaWRlY29kZSAtLXN0cmluZyBzeXN0ZW0tcHJvZHVjdC1uYW1lIDI+L2Rldi9udWxsIHx8IGVjaG8gIlVua25vd24iKQpsb2dnZXIgImRpc19hY3M6IFBMQVRGT1JNPSR7UExBVEZPUk19IgoKIyBtdXN0IGJlIHJvb3QgdG8gYWNjZXNzIGV4dGVuZGVkIFBDSSBjb25maWcgc3BhY2UKaWYgWyAiJEVVSUQiIC1uZSAwIF07IHRoZW4KICAgIGxvZ2dlciAiRVJST1I6IGRpc19hY3MgbXVzdCBiZSBydW4gYXMgcm9vdCIKICAgIGV4aXQgMQpmaQoKIyBDaGVjayBpZiBzZXRwY2kgaXMgYXZhaWxhYmxlCmlmICEgY29tbWFuZCAtdiBzZXRwY2kgJj4gL2Rldi9udWxsOyB0aGVuCiAgICBsb2dnZXIgIkVSUk9SOiBzZXRwY2kgY29tbWFuZCBub3QgZm91bmQgKGluc3RhbGwgcGNpdXRpbHMpIgogICAgZXhpdCAxCmZpCgpESVNBQkxFRF9DT1VOVD0wCmZvciBCREYgaW4gJChsc3BjaSAtZCAiKjoqOioiIHwgYXdrICd7cHJpbnQgJDF9Jyk7IGRvCiAgICAjIHNraXAgaWYgaXQgZG9lc24ndCBzdXBwb3J0IEFDUwogICAgc2V0cGNpIC12IC1zICR7QkRGfSBFQ0FQX0FDUysweDYudyA+IC9kZXYvbnVsbCAyPiYxCiAgICBpZiBbICQ/IC1uZSAwIF07IHRoZW4KICAgICAgICBjb250aW51ZQogICAgZmkKCiAgICBsb2dnZXIgImRpc19hY3M6IERpc2FibGluZyBBQ1Mgb24gJChsc3BjaSAtcyAke0JERn0pIgogICAgc2V0cGNpIC12IC1zICR7QkRGfSBFQ0FQX0FDUysweDYudz0wMDAwCiAgICBpZiBbICQ/IC1uZSAwIF07IHRoZW4KICAgICAgICBsb2dnZXIgImRpc19hY3M6IEVSUk9SIGVuYWJsaW5nIGRpcmVjdFRyYW5zIEFDUyBvbiAke0JERn0iCiAgICAgICAgY29udGludWUKICAgIGZpCgogICAgTkVXX1ZBTD0kKHNldHBjaSAtdiAtcyAke0JERn0gRUNBUF9BQ1MrMHg2LncgfCBhd2sgJ3twcmludCAkTkZ9JykKICAgIGlmIFsgIiR7TkVXX1ZBTH0iICE9ICIwMDAwIiBdOyB0aGVuCiAgICAgICAgbG9nZ2VyICJkaXNfYWNzOiBGQUlMRUQgdG8gZW5hYmxlIGRpcmVjdFRyYW5zIEFDUyBvbiAke0JERn0iCiAgICAgICAgY29udGludWUKICAgIGZpCgogICAgKChESVNBQkxFRF9DT1VOVCsrKSkKZG9uZQoKbG9nZ2VyICJkaXNfYWNzOiBTdWNjZXNzZnVsbHkgZGlzYWJsZWQgQUNTIG9uICR7RElTQUJMRURfQ09VTlR9IGRldmljZShzKSIKZXhpdCAwCg==
+    systemd:
+      units:
+        - name: dis-acs.service
+          enabled: true
+          contents: |
+            [Unit]
+            Description=Disable PCIe Access Control Services (ACS) for AMD GPUs
+            Documentation=https://instinct.docs.amd.com/projects/gpu-cluster-networking/en/develop/how-to/single-node-config.html
+            DefaultDependencies=no
+            After=sysinit.target
+            Before=basic.target
+
+            [Service]
+            Type=oneshot
+            ExecStart=/usr/local/bin/dis_acs.sh
+            RemainAfterExit=yes
+            StandardOutput=journal
+            StandardError=journal
+
+            [Install]
+            WantedBy=multi-user.target
+
+
+# -----------------------------------------------------------------------------
+# Verification
+# -----------------------------------------------------------------------------
+#
+# Check ACS is disabled on all bridges:
+# oc debug node/<node> -- chroot /host bash -c "lspci -vvv | grep -i 'ACSCtl:'"
+# Expected output: If you see SrcValid+ among any of the outputs, then ACS isn't disabled.
+#
+# Check systemd service ran:
+# oc debug node/<node> -- chroot /host systemctl status dis-acs.service
+#
+# Check journal logs:
+# oc debug node/<node> -- chroot /host journalctl -u dis-acs.service

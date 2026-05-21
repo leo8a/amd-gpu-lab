@@ -1,6 +1,6 @@
-# Self-Hosted Runner Setup on RHCOS
+# Self-Hosted Runner Setup
 
-Steps to install and configure a GitHub Actions self-hosted runner on a Red Hat Enterprise Linux CoreOS (RHCOS) node.
+Steps to install and configure a GitHub Actions self-hosted runner on a Red Hat Enterprise Linux (RHEL) or CoreOS (RHCOS) node.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ gh api -X POST repos/<owner>/<repo>/actions/runners/registration-token -q '.toke
 
 ```bash
 mkdir -p ~/actions-runner && cd ~/actions-runner
-curl -sL https://github.com/actions/runner/releases/download/v2.323.0/actions-runner-linux-x64-2.323.0.tar.gz | tar xz
+curl -sL https://github.com/actions/runner/releases/download/v2.334.0/actions-runner-linux-x64-2.323.0.tar.gz | tar xz
 ./config.sh --url https://github.com/<owner>/<repo> --token <TOKEN> --name amd-lab-runner --labels self-hosted --unattended --replace
 ```
 
@@ -63,12 +63,12 @@ gh api repos/<owner>/<repo>/actions/runners -q '.runners[] | "\(.name) | \(.stat
 
 ### "Free space left: 0 MB" — false positive on RHCOS
 
-GitHub Actions checks free space on `/`, which on RHCOS is a read-only composefs mount that is always 100% full by design. The actual writable partition is `/sysroot` (mounted on `/var`), which typically has terabytes of free space. This warning does NOT indicate a real disk space problem and can be safely ignored.
+On RHCOS, GitHub Actions checks free space on `/`, which is a read-only composefs mount that is always 100% full by design. The actual writable partition is `/sysroot` (mounted on `/var`), which typically has terabytes of free space. This warning does NOT indicate a real disk space problem and can be safely ignored. This does not apply to standard RHEL installations.
 
 ```bash
 $ df -h / /var
 Filesystem      Size  Used Avail Use% Mounted on
-composefs       5.9M  5.9M     0 100% /          <-- always full, read-only image
+composefs       5.9M  5.9M     0 100% /          <-- always full, read-only image (RHCOS only)
 /dev/nvme1n1p4   28T  305G   28T   2% /var        <-- actual writable storage
 ```
 

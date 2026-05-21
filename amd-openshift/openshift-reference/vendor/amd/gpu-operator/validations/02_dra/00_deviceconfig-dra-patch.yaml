@@ -4,6 +4,6 @@ spec:
   draDriver:
     enable: true
     # image: rocm/k8s-gpu-dra-driver:latest
-    # imagePullPolicy: IfNotPresent
+    imagePullPolicy: IfNotPresent
   devicePlugin:
     enableDevicePlugin: false

@@ -28,9 +28,15 @@ spec:
             - |
               echo "=== DRA Partitioned GPU Validation ==="
               echo "--- rocm-smi ---"
-              rocm-smi || exit 1
+              rocm-smi
+              GPU_COUNT=$(rocm-smi --showid --csv 2>/dev/null | grep -c 'card')
+              if [ "$GPU_COUNT" -eq 0 ]; then
+                echo "FAIL: No GPU partitions visible in container"
+                exit 1
+              fi
+              echo "Found $GPU_COUNT GPU partition(s)"
               echo "--- rocm-smi --showcomputepartition ---"
-              rocm-smi --showcomputepartition || exit 1
+              rocm-smi --showcomputepartition
               echo "=== PASS ==="
           resources:
             claims:

@@ -1,0 +1,14 @@
+FROM quay.io/centos/centos:stream9
+
+RUN dnf install -y \
+      perftest \
+      libibverbs-utils \
+      rdma-core \
+      iproute \
+      iputils \
+    && dnf clean all
+
+LABEL name="amd-tools" \
+      summary="RDMA validation tools for AMD Pensando NICs" \
+      description="CentOS Stream 9 image with perftest (ib_write_bw, ib_read_bw), \
+libibverbs-utils (ibv_devinfo, ibv_devices), and network utilities."

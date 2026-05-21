@@ -24,8 +24,8 @@ spec:
     # to memory for improved performance.
     - iommu=pt
 
-    # Necessary for systems with Intel host CPUs (not required for AMD CPUs).
-    - intel_iommu=on
+    # Necessary for systems with AMD host CPUs.
+    - amd_iommu=on
 
     # Disables NUMA balancing to reduce overhead from OS memory migration attempts.
     - numa_balancing=disable
@@ -112,8 +112,8 @@ spec:
     # to memory for improved performance.
     - iommu=pt
 
-    # Necessary for systems with Intel host CPUs (not required for AMD CPUs).
-    - intel_iommu=on
+    # Necessary for systems with AMD host CPUs.
+    - amd_iommu=on
 
     # Disables NUMA balancing to reduce overhead from OS memory migration attempts.
     - numa_balancing=disable

@@ -9,10 +9,10 @@ data:
   LAUNCHER_REPLICAS: "1"                # Number of Launcher Pods for the MPIJob, which coordinates workers
   SLOTS_PER_WORKER: "8"                 # MPI ranks per Worker pod
   GPU_PER_WORKER: "8"                   # Number of GPUs to request per Worker pod
-  PF_NIC_PER_WORKER: "7"                # Number of PF-NICs to request per Worker pod (physical NICs)
-  VF_NIC_PER_WORKER: "0"                # Number of VF-NICs to request per Worker pod (virtual NICs)
+  PF_NIC_PER_WORKER: "0"                # Number of PF-NICs to request per Worker pod
+  VF_NIC_PER_WORKER: "8"                # Number of VF-NICs to request per Worker pod
   NODE_VALIDATION_INTERVAL_MINS: "10"   # minimum interval in minutes between cluster validation runs on a given worker node
-  PF_NIC_NAD_NAME: "amd-rdma-net"
+  PF_NIC_NAD_NAME: "amd-host-device-nad"
   VF_NIC_NAD_NAME: "vf-amd-host-device-nad"
 
   # === To redirect logs, set FLUENT_LOG_OUTPUT to  one of below : ===
@@ -28,11 +28,9 @@ data:
   # NOTE:
   # For virtual function (VF) based GPU in a VM, use amd-vgpu=true instead of amd-gpu=true
   # For virtual function (VF) based NIC in a VM, use amd-vnic=true instead of amd-nic=true
-  # NOTE: kubernetes.io/hostname pins to a specific node. The GST performance
-  # thresholds assume full SPX GPUs — CPX-partitioned nodes will fail.
   NODE_SELECTOR_LABELS: |
     - feature.node.kubernetes.io/amd-gpu=true
-    - feature.node.kubernetes.io/amd-nic=true
+    - feature.node.kubernetes.io/amd-vnic=true
   CANDIDATE_LABEL: "amd.com/cluster-validation-candidate=true"
   SUCCESS_LABEL: "amd.com/cluster-validation-status=passed"
   FAILURE_LABEL: "amd.com/cluster-validation-status=failed"
@@ -48,12 +46,12 @@ data:
       ]
     }
 
-  RCCL_WORKLOAD_IMAGE: "docker.io/rocm/roce-workload:ubuntu24_rocm-7.2_rccl-7.2.0_anp-v1.3.0_ainic-1.117.5-a-56"
-  MPIJOB_WAIT_TIME: "600"
+  RCCL_WORKLOAD_IMAGE: "docker.io/rocm/roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-56"
+  MPIJOB_WAIT_TIME: "240"
   DEBUG_DELAY: "20"
   WAIT_FOR_WORKERS: "true"
   ENABLE_SSH_CHECK: "true"
-  WORKER_READY_TIMEOUT: "600"
+  WORKER_READY_TIMEOUT: "300"
   SSH_CHECK_INTERVAL: "4"
   SSH_CHECK_TIMEOUT: "60"
   MPI_RUN_DIR: "/shared"
@@ -71,8 +69,6 @@ data:
     RCCL_ENV="$RCCL_ENV -x NCCL_TOPO_DUMP_FILE=/tmp/topo_all.txt"
     RCCL_ENV="$RCCL_ENV -x NCCL_DEBUG=INFO"
     RCCL_ENV="$RCCL_ENV -x NCCL_DMABUF_ENABLE=0"
-    RCCL_ENV="$RCCL_ENV -x NCCL_BUFFSIZE=2097152"
-    RCCL_ENV="$RCCL_ENV -x NCCL_MAX_NCHANNELS=16"
     echo "$RCCL_ENV" > ${MPI_RUN_DIR}/rccl_env.txt
 
   # MPIJob documentation: https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/mpi/
@@ -97,7 +93,7 @@ data:
   TEST_RUNNER_JOB_WAIT_TIME: "1200"
   TEST_RUNNER_SUCCESS_LABEL: "amd.com/gpu-validation-test=passed"
   TEST_RUNNER_FAILURE_LABEL: "amd.com/gpu-validation-test=failed"
-  TEST_RUNNER_IMAGE: "docker.io/rocm/test-runner:v1.5.0"
+  TEST_RUNNER_IMAGE: "docker.io/rocm/test-runner:v1.4.0"
   GPU_VALIDATION_TESTS_JSON: |
     {
       "TestConfig": {
@@ -472,3 +468,4 @@ data:
         Format template
         Template {log}
         Mkdir On
+---

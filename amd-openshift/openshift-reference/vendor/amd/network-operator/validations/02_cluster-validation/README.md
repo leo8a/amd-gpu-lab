@@ -77,6 +77,18 @@ oc logs job/cluster-validation-mpi-job-<timestamp>-launcher
 | node-b | `amd.com/cluster-validation-status=failed` | Node failed one or more tests |
 | node-c | (no label)                                 | Node not in candidate set     |
 
+> **Note**: When re-running validations, stale labels from previous runs can cause issues.
+> Clean them up before retriggering:
+>
+> ```bash
+> # Check current labels
+> oc get nodes -o json | jq '.items[] | {name: .metadata.name, labels: .metadata.labels | with_entries(select(.key | contains("cluster-validation")))}'
+>
+> # Remove stale labels
+> oc label nodes --all amd.com/cluster-validation-status-
+> oc label nodes --all amd.com/cluster-validation-candidate-
+> ```
+
 ## Validation Results (2026-05-11)
 
 Single-node run on `smc6217gpu` with `network-operator-utils:v1.2.0` and `roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-56`:
@@ -166,3 +178,4 @@ Before deployment, operators may need to customize:
 - [MPI Operator Introduction](https://medium.com/kubeflow/introduction-to-kubeflow-mpi-operator-and-industry-adoption-296d5f2e6edc)
 - [MPI Operator Documentation](https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/mpi/)
 - [MPI Operator GitHub](https://github.com/kubeflow/mpi-operator/blob/master/README.md)
+- [AMD GPU Cluster Networking troubleshooting guide](https://instinct.docs.amd.com/projects/gpu-cluster-networking/en/latest/how-to/troubleshooting.html)

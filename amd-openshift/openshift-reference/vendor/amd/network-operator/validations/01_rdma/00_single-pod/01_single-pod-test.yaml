@@ -1,0 +1,50 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rdma-single-pod-test
+  namespace: openshift-amd-network
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: amd-rdma-net
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        feature.node.kubernetes.io/amd-nic: "true"
+      containers:
+        - name: rdma-check
+          image: registry.access.redhat.com/ubi9/ubi:latest
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== RDMA Single-Pod Validation ==="
+              echo "--- interfaces ---"
+              ip -br link show
+              echo "--- RDMA devices ---"
+              if [ ! -d /sys/class/infiniband ] || [ -z "$(ls /sys/class/infiniband/ 2>/dev/null)" ]; then
+                echo "FAIL: No RDMA devices found"
+                exit 1
+              fi
+              for dev in /sys/class/infiniband/*; do
+                echo "$(basename $dev): type=$(cat $dev/node_type 2>/dev/null) guid=$(cat $dev/node_guid 2>/dev/null)"
+              done
+              echo "--- secondary NIC details ---"
+              ip addr show net1
+              echo "--- link speed ---"
+              SPEED=$(cat /sys/class/net/net1/speed 2>/dev/null || echo "unknown")
+              echo "net1: ${SPEED} Mbps"
+              echo "=== PASS ==="
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+              amd.com/nic: "1"
+            limits:
+              cpu: 100m
+              memory: 100Mi
+              amd.com/nic: "1"

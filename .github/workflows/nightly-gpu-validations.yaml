@@ -17,7 +17,6 @@ concurrency:
 env:
   GPU_NAMESPACE: openshift-amd-gpu
   VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations
-  LOG_DIR: /tmp/validation-logs
 
 jobs:
   preflight:
@@ -38,7 +37,6 @@ jobs:
             echo "::error::No AMD GPU nodes found"
             exit 1
           fi
-          mkdir -p "$LOG_DIR"
 
       - name: Determine stages to run
         id: plan
@@ -73,45 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Enable DRA on DeviceConfig
-        run: |
-          set -euo pipefail
-          echo "Enabling DRA driver and disabling Device Plugin..."
-          oc patch deviceconfig amdgpu-driver-install -n "$GPU_NAMESPACE" --type merge \
-            --patch-file "${VALIDATIONS_DIR}/02_dra/00_deviceconfig-dra-patch.yaml"
-
-          echo "Restarting kubelet on GPU nodes to clear stale device plugin resources..."
-          for node in $(oc get nodes -l feature.node.kubernetes.io/amd-gpu=true -o name); do
-            echo "  Restarting kubelet on ${node}..."
-            oc debug "${node}" -- chroot /host systemctl restart kubelet
-          done
-
-          DRA_DS="amdgpu-driver-install-dra-driver"
-          echo "Waiting for DRA driver DaemonSet ($DRA_DS) to be ready..."
-          SECONDS=0
-          while [[ $SECONDS -lt 300 ]]; do
-            READY=$(oc get daemonset "$DRA_DS" -n "$GPU_NAMESPACE" \
-              -o jsonpath='{.status.numberReady}' 2>/dev/null || echo "0")
-            DESIRED=$(oc get daemonset "$DRA_DS" -n "$GPU_NAMESPACE" \
-              -o jsonpath='{.status.desiredNumberScheduled}' 2>/dev/null || echo "0")
-            if [[ "$READY" -gt 0 && "$READY" == "$DESIRED" ]]; then
-              echo "DRA driver ready ($READY/$DESIRED)"
-              break
-            fi
-            echo "  DRA driver: $READY/$DESIRED ready..."
-            sleep 5
-          done
-          if [[ $SECONDS -ge 300 ]]; then
-            echo "::error::DRA driver DaemonSet not ready within 5 minutes"
-            exit 1
-          fi
-
-          echo "Verifying ResourceSlices are published..."
-          SLICES=$(oc get resourceslices --no-headers 2>/dev/null | wc -l)
-          if [[ "$SLICES" -lt 1 ]]; then
-            echo "::error::No ResourceSlices found after DRA driver startup"
-            exit 1
-          fi
-          echo "ResourceSlices: $SLICES"
+        run: make -C ${VALIDATIONS_DIR}/02_dra enable-dra NAMESPACE=${GPU_NAMESPACE}
 
   dra-full-gpu:
     needs: [preflight, dra-setup]
@@ -120,8 +80,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-gpu-validation.sh 0
+      - name: Run full-gpu validation
+        run: make -C ${VALIDATIONS_DIR}/02_dra full-gpu NAMESPACE=${GPU_NAMESPACE}
 
   dra-partitioned-gpu:
     needs: [preflight, dra-setup]
@@ -130,8 +90,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-gpu-validation.sh 1
+      - name: Run partitioned-gpu validation
+        run: make -C ${VALIDATIONS_DIR}/02_dra partitioned-gpu NAMESPACE=${GPU_NAMESPACE}
 
   cleanup:
     needs: [preflight, dra-setup, dra-full-gpu, dra-partitioned-gpu]
@@ -140,22 +100,5 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Upload validation logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: gpu-validation-logs-${{ github.run_id }}
-          path: /tmp/validation-logs/
-          retention-days: 30
-          if-no-files-found: ignore
-
       - name: Restore base DeviceConfig
-        run: |
-          set -uo pipefail
-          echo "Restoring base DeviceConfig (Device Plugin enabled, DRA disabled)..."
-          oc apply -f "${VALIDATIONS_DIR}/../07_amd-deviceconfig.yaml" || true
-
-          echo "Final safety cleanup of test resources..."
-          for dir in 00_full-gpu 01_partitioned-gpu; do
-            oc delete -k "${VALIDATIONS_DIR}/02_dra/$dir" --ignore-not-found=true 2>/dev/null || true
-          done
-          echo "Cleanup complete"
+        run: make -C ${VALIDATIONS_DIR}/02_dra cleanup NAMESPACE=${GPU_NAMESPACE}

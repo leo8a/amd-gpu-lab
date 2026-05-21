@@ -16,7 +16,7 @@ NODE_NAME := $(shell bash -c 'read -p "Enter node name: " node; echo $$node')
 endif
 
 NAMESPACE    ?= openshift-amd-gpu
-PROFILE_NAME ?= spx-profile-nps1  			# Options: spx-profile-nps1, cpx-profile-{nps1,nps4}, dpx-profile-{nps1,nps2}
+PROFILE_NAME ?= cpx-profile-nps4  			# Options: cpx-profile-nps4, dpx-profile-nps2, spx-profile-nps1
 
 # Optimal Pairings, derived from https://instinct.docs.amd.com/projects/amdgpu-docs/en/latest/gpu-partitioning/mi300x/overview.html#b-memory-partitioning-nps
 #     - SPX + NPS1: Maximum performance per GPU (single tenant)
@@ -43,11 +43,7 @@ default: help
 ##@ Workflow Steps
 
 .PHONY: all
-all: cleanup tolerations deploy-dcm taint label verify untaint ## Run complete workflow (steps 1-6)
-
-.PHONY: tolerations
-tolerations: ## Step 1: Add tolerations to prevent system pod eviction
-	@./01-add-tolerations.sh
+all: cleanup deploy-dcm taint label verify untaint ## Run complete workflow
 
 .PHONY: deploy-dcm
 deploy-dcm: ## Step 2: Deploy DCM pod by applying/updating DeviceConfig

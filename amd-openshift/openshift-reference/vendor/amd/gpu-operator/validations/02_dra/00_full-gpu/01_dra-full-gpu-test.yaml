@@ -26,9 +26,15 @@ spec:
             - |
               echo "=== DRA Full GPU Validation ==="
               echo "--- rocm-smi ---"
-              rocm-smi || exit 1
+              rocm-smi
+              GPU_COUNT=$(rocm-smi --showid --csv 2>/dev/null | grep -c 'card')
+              if [ "$GPU_COUNT" -eq 0 ]; then
+                echo "FAIL: No GPUs visible in container"
+                exit 1
+              fi
+              echo "Found $GPU_COUNT GPU(s)"
               echo "--- rocm-smi --showid ---"
-              rocm-smi --showid || exit 1
+              rocm-smi --showid
               echo "=== PASS ==="
           resources:
             claims:

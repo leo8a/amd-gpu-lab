@@ -28,16 +28,13 @@ Nightly default: DCM partitioning + all DRA stages. DRA stages are selectable vi
 
 Workflow: `nightly-network-validations.yaml` — runs at 04:00 UTC.
 
-| Stage | Name                  | What it validates                           | Duration |
-| ----- | --------------------- | ------------------------------------------- | -------- |
-| 0     | Cluster Validation    | GPU health + RCCL performance (MPI)         | ~20 min  |
-| 1     | Basic NIC             | NIC assignment via host-device CNI          | ~2 min   |
-| 2     | RDMA Single Pod       | RDMA device visibility in a pod             | ~1 min   |
-| 3     | RDMA Multi-Node       | Two-node RDMA connectivity (needs 2+ nodes) | ~2 min   |
-| 4     | SR-IOV (pf1_vf1)      | SR-IOV VF assignment (1 VF/NIC, RDMA)       | ~5 min   |
-| 5     | SR-IOV (hnic_pf1_vf8) | SR-IOV VF assignment (8 VFs/NIC, no RDMA)   | ~5 min   |
+| Stage | Name               | What it validates                               | Duration |
+| ----- | ------------------ | ----------------------------------------------- | -------- |
+| 0     | RDMA Single Pod    | RDMA device visibility and NIC attachment       | ~3 min   |
+| 1     | RDMA Multi-Node    | Two-node RDMA bandwidth via ib_write_bw         | ~3 min   |
+| 2     | Cluster Validation | GPU health + RCCL performance (MPI, multi-node) | ~20 min  |
 
-Nightly default: stages 0, 1, 2, 4. Stages 3 and 5 are available via manual dispatch.
+Nightly default: all stages (0, 1, 2). Individual stages are selectable via manual dispatch.
 
 ## Manual dispatch
 
@@ -52,6 +49,5 @@ gh workflow run nightly-gpu-validations.yaml \
 # Network operator
 gh workflow run nightly-network-validations.yaml \
   -R leo8a/amd-gpu-lab \
-  -f stages="0,2" \
-  -f sriov_profile="skip"
+  -f stages="0,1"
 ```

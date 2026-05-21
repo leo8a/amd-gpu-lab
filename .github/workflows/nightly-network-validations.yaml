@@ -6,19 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0=cluster, 1=basic, 2=rdma-single, 3=rdma-multi, 4=sriov-pf1, 5=sriov-hnic) or 'all'"
+        description: "Comma-separated stages (0=rdma-single, 1=rdma-multi, 2=cluster-validation) or 'all'"
         required: false
         default: "all"
-      sriov_profile:
-        description: "SR-IOV profile for stage 3"
-        required: false
-        default: "all"
-        type: choice
-        options:
-          - all
-          - pf1_vf1
-          - hnic_pf1_vf8
-          - skip
 
 concurrency:
   group: network-validations
@@ -26,16 +16,19 @@ concurrency:
 
 env:
   NAMESPACE: openshift-amd-network
+  CI_TOOLS_IMAGE: quay.io/lochoa/ci-tools:latest
   VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/network-operator/validations
-  LOG_DIR: /tmp/validation-logs
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Preflight
+  # ─────────────────────────────────────────────────────────────────────────────
+
   preflight:
     runs-on: self-hosted
     timeout-minutes: 2
     outputs:
       stages: ${{ steps.plan.outputs.stages }}
-      sriov_profile: ${{ steps.plan.outputs.sriov_profile }}
     steps:
       - name: Check cluster connectivity
         run: |
@@ -49,7 +42,6 @@ jobs:
             echo "::error::No AMD NIC nodes found"
             exit 1
           fi
-          mkdir -p "$LOG_DIR"
 
       - name: Verify device plugin resources
         run: |
@@ -74,125 +66,138 @@ jobs:
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             STAGES_TO_RUN="${{ inputs.stages }}"
-            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2,3,4"
-            SRIOV_PROFILE="${{ inputs.sriov_profile }}"
+            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2"
           else
-            STAGES_TO_RUN="0,1,2,3,4"
-            SRIOV_PROFILE="pf1_vf1"
+            STAGES_TO_RUN="0,1,2"
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
-          echo "sriov_profile=$SRIOV_PROFILE" >> "$GITHUB_OUTPUT"
-          echo "Stages: $STAGES_TO_RUN | SR-IOV profile: $SRIOV_PROFILE"
+          echo "Stages: $STAGES_TO_RUN"
 
-  cluster-validation:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # RDMA Validation
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  rdma-single-pod:
     needs: preflight
     if: contains(needs.preflight.outputs.stages, '0')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run single-pod RDMA test
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make single-pod NAMESPACE=${NAMESPACE}
+
+  rdma-multi-node:
+    needs: [preflight, rdma-single-pod]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '1')
+      && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run multi-node RDMA bandwidth test
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make multi-node NAMESPACE=${NAMESPACE}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Cluster Validation
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  cluster-validation:
+    needs: [preflight, rdma-single-pod, rdma-multi-node]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '2')
+      && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')
     runs-on: self-hosted
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-network-validation.sh 0
+      - name: Deploy and run cluster validation
+        run: |
+          set -euo pipefail
+          oc apply --server-side -k "${VALIDATIONS_DIR}/02_cluster-validation"
+          oc wait --for=condition=established crd/mpijobs.kubeflow.org --timeout=180s
 
-  basic-nic:
-    needs: [preflight, cluster-validation]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '1')
-      && (needs.cluster-validation.result == 'success' || needs.cluster-validation.result == 'skipped')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-network-validation.sh 1
+          JOB_NAME="cluster-validation-ci-$(date +%s)"
+          oc create job "$JOB_NAME" --from=cronjob/cluster-validation-cron-job -n default
+          oc label job "$JOB_NAME" -n default ci-triggered=true
 
-  rdma-single-pod:
-    needs: [preflight, basic-nic]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '2')
-      && (needs.basic-nic.result == 'success' || needs.basic-nic.result == 'skipped')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-network-validation.sh 2
+          for node in $(oc get nodes -l feature.node.kubernetes.io/amd-nic=true -o name); do
+            oc annotate "$node" amd.com/cluster-validation-last-run-timestamp- 2>/dev/null || true
+          done
 
-  rdma-multi-node:
-    needs: [preflight, basic-nic]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '3')
-      && (needs.basic-nic.result == 'success' || needs.basic-nic.result == 'skipped')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-network-validation.sh 3
+          JOB_POD=$(oc get pods -n default -l job-name="$JOB_NAME" -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+          echo "Waiting for submit-mpijob container to complete (pod: $JOB_POD)..."
+          SECONDS=0
+          while [[ $SECONDS -lt 1500 ]]; do
+            STATE=$(oc get pod "$JOB_POD" -n default \
+              -o jsonpath='{.status.containerStatuses[?(@.name=="submit-mpijob")].state}' 2>/dev/null)
+            if echo "$STATE" | grep -q "terminated"; then
+              EXIT_CODE=$(oc get pod "$JOB_POD" -n default \
+                -o jsonpath='{.status.containerStatuses[?(@.name=="submit-mpijob")].state.terminated.exitCode}' 2>/dev/null)
+              echo "submit-mpijob exited with code $EXIT_CODE"
+              if [[ "$EXIT_CODE" != "0" ]]; then
+                echo "FAIL: Cluster validation job failed"
+                oc logs -n default "$JOB_POD" -c submit-mpijob 2>/dev/null || true
+                exit 1
+              fi
+              break
+            fi
+            sleep 10
+          done
+          if [[ $SECONDS -ge 1500 ]]; then
+            echo "FAIL: Cluster validation job did not complete within 25 minutes"
+            oc logs -n default "$JOB_POD" -c submit-mpijob 2>/dev/null || true
+            exit 1
+          fi
 
-  sriov-pf1-vf1:
-    needs: [preflight, rdma-single-pod, rdma-multi-node]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '4')
-      && (needs.preflight.outputs.sriov_profile == 'all' || needs.preflight.outputs.sriov_profile == 'pf1_vf1')
-      && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
-      && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')
-    runs-on: self-hosted
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-network-validation.sh 4
+          PASSED_COUNT=$(oc get nodes -l amd.com/cluster-validation-status=passed --no-headers 2>/dev/null | wc -l)
+          if [[ "$PASSED_COUNT" -ge 1 ]]; then
+            echo "PASS: $PASSED_COUNT node(s) passed cluster validation"
+          else
+            echo "FAIL: No nodes have cluster-validation-status=passed"
+            exit 1
+          fi
 
-  sriov-hnic:
-    needs: [preflight, rdma-single-pod, rdma-multi-node]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '5')
-      && (needs.preflight.outputs.sriov_profile == 'all' || needs.preflight.outputs.sriov_profile == 'hnic_pf1_vf8')
-      && (needs.rdma-single-pod.result == 'success' || needs.rdma-single-pod.result == 'skipped')
-      && (needs.rdma-multi-node.result == 'success' || needs.rdma-multi-node.result == 'skipped')
-    runs-on: self-hosted
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run validation
-        run: .github/scripts/run-network-validation.sh 5
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Cleanup
+  # ─────────────────────────────────────────────────────────────────────────────
 
   cleanup:
-    needs: [preflight, cluster-validation, basic-nic, rdma-single-pod, rdma-multi-node, sriov-pf1-vf1, sriov-hnic]
+    needs: [preflight, rdma-single-pod, rdma-multi-node, cluster-validation]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Upload validation logs
-        uses: actions/upload-artifact@v4
-        with:
-          name: validation-logs-${{ github.run_id }}
-          path: /tmp/validation-logs/
-          retention-days: 30
-          if-no-files-found: ignore
-
-      - name: Final safety cleanup
+      - name: Cleanup all test resources
         run: |
           set -uo pipefail
-          echo "Running belt-and-suspenders cleanup..."
-          for dir in 00_cluster-validation 01_basic/00_nic-assignment 02_rdma/00_single-pod \
-                     02_rdma/01_multi-node 03_sriov/00_pf1_vf1-profile 03_sriov/01_hnic_pf1_vf8-profile; do
-            oc delete -k "${VALIDATIONS_DIR}/$dir" --ignore-not-found=true 2>/dev/null || true
-          done
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE} || true
+
+          oc delete -k "${VALIDATIONS_DIR}/02_cluster-validation" --ignore-not-found=true 2>/dev/null || true
+          oc delete job -l ci-triggered=true -n default --ignore-not-found=true 2>/dev/null || true
+          oc delete job -l amd.com/cluster-validation-created=true -n default --ignore-not-found=true 2>/dev/null || true
           oc label nodes --all \
             amd.com/cluster-validation-status- \
             amd.com/cluster-validation-candidate- \
             amd.com/gpu-validation-test- \
             2>/dev/null || true
-          echo "Restoring device-plugin ConfigMap..."
-          oc apply -f "${VALIDATIONS_DIR}/../07_amd-device-plugin-config.yaml" || true
-
           echo "Cleanup complete"

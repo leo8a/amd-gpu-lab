@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: rdma-multi-node-test
+  name: rdma-client
   namespace: openshift-amd-network
 spec:
   backoffLimit: 0

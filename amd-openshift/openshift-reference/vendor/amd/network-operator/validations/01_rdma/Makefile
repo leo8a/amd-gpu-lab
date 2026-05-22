@@ -18,9 +18,9 @@ define wait-for-job
 	oc wait job/$(1) -n $(NAMESPACE) --for=condition=failed --timeout=$(TIMEOUT) 2>/dev/null & \
 	wait -n; \
 	if [ "$$(oc get job/$(1) -n $(NAMESPACE) -o jsonpath='{.status.succeeded}')" = "1" ]; then \
-	  echo "✓ $(1) PASSED"; \
+	  oc logs job/$(1) -n $(NAMESPACE); echo ; echo "✓ $(1) PASSED" ; exit 0; \
 	else \
-	  echo "✗ $(1) FAILED"; oc logs job/$(1) -n $(NAMESPACE); exit 1; \
+	  oc logs job/$(1) -n $(NAMESPACE); echo ; echo "✗ $(1) FAILED" ; exit 1; \
 	fi
 endef
 
@@ -42,7 +42,7 @@ multi-node: ## Run 01_multi-node RDMA bandwidth test (ib_write_bw)
 	@echo "" ; echo "Running multi-node RDMA bandwidth test..."
 	@oc apply -k 01_multi-node/
 	@oc wait pod/rdma-server -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
-	$(call wait-for-job,rdma-multi-node-test)
+	$(call wait-for-job,rdma-client)
 
 
 # ───────────────────────────────────────────────────────────────────────────────

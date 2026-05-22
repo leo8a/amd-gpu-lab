@@ -12,7 +12,7 @@ Validates AMD NIC assignment, RDMA device visibility, and bandwidth with AMD Pen
 - AMD Network Operator deployed
 - Nodes labeled with `feature.node.kubernetes.io/amd-nic=true`
 - For `01_multi-node/`: at least 2 nodes with AMD NICs physically connected (carrier up)
-- Container image `quay.io/lochoa/amd-tools:latest` (see `../../tools/` for build instructions)
+- Container image `quay.io/lochoa/amd-tools:latest` (see `01_multi-node/tools/` for build instructions)
 
 ## Quick start
 

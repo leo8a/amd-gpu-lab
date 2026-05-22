@@ -12,8 +12,8 @@ spec:
     driverType: container
     # image: image-registry.openshift-image-registry.svc:5000/$MOD_NAMESPACE/amdgpu_kmod
     # Ensure driver selected is >6.3.1 (minimum supported version for MI325X), see amdgpu released versions
-    # at https://instinct.docs.amd.com/projects/amdgpu-docs/en/latest/release/versions.html.
-    version: "30.30"
+    # at https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/user-kernel-space-compat-matrix.html.
+    version: 30.20.1
 
   # Device Plugin and Node Labeller
   # This section enables:

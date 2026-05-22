@@ -4,8 +4,10 @@
 #
 # This script cleans up the GPU partitioning configuration by reversing
 # all steps from back to front:
-#   Un-taint node
-#   Disable DCM and remove ConfigMap
+#   6. Un-taint node
+#   4. Remove partition label
+#   2. Disable DCM and remove ConfigMap
+#   1. Remove tolerations from control plane (optional)
 #
 
 
@@ -16,13 +18,20 @@ echo "╚═══════════════════════�
 echo ""
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Un-taint Node
+# Step 6 (Reverse): Un-taint Node
 # ──────────────────────────────────────────────────────────────────────────────
 kubectl taint nodes "$NODE_NAME" amd-dcm=up:NoExecute-
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Disable DCM and Remove ConfigMap
+# Step 4 (Reverse): Remove Partition Label
+# ──────────────────────────────────────────────────────────────────────────────
+kubectl label node "$NODE_NAME" dcm.amd.com/gpu-config-profile-
+kubectl label node "$NODE_NAME" dcm.amd.com/gpu-config-profile-state-
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Step 2 (Reverse): Disable DCM and Remove ConfigMap
 # ──────────────────────────────────────────────────────────────────────────────
 kubectl patch deviceconfig amdgpu-driver-install -n "$NAMESPACE" --type='merge' -p '{
     "spec": {
@@ -37,6 +46,7 @@ kubectl delete configmap config-manager-config -n "$NAMESPACE"
 echo ""
 echo "Summary:"
 echo "  ✓ Node un-tainted"
+echo "  ✓ Partition label removed"
 echo "  ✓ DCM disabled"
 echo "  ✓ ConfigMap removed"
 echo ""

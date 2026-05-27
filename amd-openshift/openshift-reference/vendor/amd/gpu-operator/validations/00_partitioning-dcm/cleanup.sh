@@ -40,6 +40,10 @@ kubectl patch deviceconfig amdgpu-driver-install -n "$NAMESPACE" --type='merge' 
       }
     }
   }'
+kubectl wait --for=delete pod \
+  -l app.kubernetes.io/name=device-config-manager \
+  -n "$NAMESPACE" \
+  --timeout=120s
 kubectl delete configmap config-manager-config -n "$NAMESPACE"
 
 

@@ -25,46 +25,29 @@ DCM_POD=$(kubectl get pods -n $NAMESPACE \
 kubectl label node $NODE_NAME dcm.amd.com/gpu-config-profile=$PROFILE_NAME --overwrite
 echo ""
 
-# Wait for DCM to process the profile
+# Stream DCM logs and wait for completion marker or timeout (5 mins)
 echo "Waiting for DCM to process profile (timeout: 5 mins)..."
 echo " -> kubectl logs -n $NAMESPACE -c device-config-manager-container $DCM_POD -f"
 echo ""
 
-# Wait for DCM to report profile state via node label
-echo "Waiting for dcm.amd.com/gpu-config-profile-state label..."
-MAX_WAIT=600   # 10 mins
-elapsed=0
-while [ $elapsed -lt $MAX_WAIT ]; do
-  STATE=$(kubectl get node $NODE_NAME -o jsonpath='{.metadata.labels.dcm\.amd\.com/gpu-config-profile-state}' 2>/dev/null || echo "")
+LOG_FIFO=$(mktemp -u)
+mkfifo "$LOG_FIFO"
+trap 'rm -f "$LOG_FIFO"' EXIT
 
-  if [ "$STATE" = "success" ]; then
-    echo "✓ Profile applied successfully"
-    break
-  elif [ "$STATE" = "failure" ]; then
-    echo "✗ Profile application failed"
-    kubectl get node $NODE_NAME -ojson | jq '.metadata.labels | with_entries(select(.key | contains("amd.com")))'
-    echo ""
-    exit 1
-  fi
+kubectl logs -n $NAMESPACE -c device-config-manager-container $DCM_POD -f 2>/dev/null > "$LOG_FIFO" &
+LOG_PID=$!
+cleanup_log() { kill $LOG_PID 2>/dev/null; wait $LOG_PID 2>/dev/null || true; rm -f "$LOG_FIFO"; }
+trap cleanup_log EXIT
 
-  sleep 5
-  elapsed=$((elapsed + 5))
-done
-
-if [ $elapsed -ge $MAX_WAIT ]; then
-  echo "✗ Timeout waiting for profile state"
+if timeout 300 sed '/PreStateDB has been successfully emptied./q' "$LOG_FIFO"; then
+  cleanup_log; trap - EXIT
+  echo ""
+  echo "✓ Profile applied successfully"
+else
+  cleanup_log; trap - EXIT
+  echo ""
+  echo "✗ Timeout waiting for DCM to finish processing"
   exit 1
 fi
-
-# Previous approach: watch DCM logs for NodeModulesConfig deletion.
-# Replaced by label-based approach above which is cleaner.
-# for i in {1..150}; do
-#   if kubectl logs -n $NAMESPACE -c device-config-manager-container $DCM_POD --tail=50 2>/dev/null | \
-#      grep -q "NodeModulesConfig for node $NODE_NAME deleted successfully"; then
-#     echo "✓ NodeModulesConfig deleted"
-#     break
-#   fi
-#   sleep 2
-# done
 
 echo ""

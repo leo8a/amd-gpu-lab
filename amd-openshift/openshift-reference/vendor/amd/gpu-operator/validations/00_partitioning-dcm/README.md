@@ -2,18 +2,18 @@
 
 ## What is GPU Partitioning via DCM?
 
-DCM (Dynamic Compute Multiplexing) is AMD's technology that enables partitioning a single physical AMD Instinct GPU into multiple virtual GPU instances. This allows:
+The Device Config Manager (DCM) is a component of the AMD GPU Operator that orchestrates GPU partitioning on AMD Instinct GPUs. It splits a physical GPU into multiple compute and memory partitions (e.g., CPX + NPS4 yields 8 logical GPUs per physical device), enabling:
 
-- **Multi-tenancy**: Multiple workloads can share the same GPU with hardware-level isolation
-- **Resource optimization**: Dynamically allocate GPU compute resources based on workload needs
-- **Flexible partitioning**: Configure partition profiles (e.g., 1g.5gb, 2g.10gb, 3g.20gb) to split GPU memory and compute units
+- **Multi-tenancy**: Multiple workloads share the same GPU with XCD-level isolation
+- **Resource density**: Partition profiles (SPX, DPX, QPX, CPX) control how many logical GPUs are exposed to the cluster
+- **Kubernetes-native workflow**: Partition layouts are declared via a ConfigMap and applied through the DeviceConfig CR
 
 ## Key Features
 
-- Hardware-enforced isolation between partitions
+- XCD-level isolation between partitions
 - Support for AMD Instinct MI-series GPUs
-- Integration with Kubernetes via AMD GPU Operator
-- Dynamic partition profile application without host reboot
+- Integration with Kubernetes via the AMD GPU Operator
+- Partition profile changes without full host reboot (requires driver reload, node taint, and pod eviction)
 
 ## Reference Documentation
 
@@ -26,11 +26,11 @@ DCM (Dynamic Compute Multiplexing) is AMD's technology that enables partitioning
 ### Compatibility matrix
 
 | Compute mode | # compute partitions | Compatible memory modes | Officially highlighted by AMD |
-|---|---:|---|---|
-| **SPX** | 1 | NPS1 | ✅ SPX + NPS1 |
-| **DPX** | 2 | NPS1, NPS2 | ✅ DPX + NPS2 |
-| **QPX** | 4 | NPS1, NPS2, NPS4 | ⚠️ Limited docs |
-| **CPX** | 8 | NPS1, NPS2, NPS4 | ✅ CPX + NPS4 |
+| ------------ | -------------------: | ----------------------- | ----------------------------- |
+| **SPX**      |                    1 | NPS1                    | ✅ SPX + NPS1                 |
+| **DPX**      |                    2 | NPS1, NPS2              | ✅ DPX + NPS2                 |
+| **QPX**      |                    4 | NPS1, NPS2, NPS4        | ⚠️ Limited docs               |
+| **CPX**      |                    8 | NPS1, NPS2, NPS4        | ✅ CPX + NPS4                 |
 
 ### Partition modes (quick reference)
 

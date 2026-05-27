@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated DRA stages (0=full-gpu, 1=partitioned-gpu) or 'all'"
+        description: "Comma-separated stages (0-3=DCM partitioning, 4=DRA full-gpu, 5=DRA partitioned-gpu) or 'all'"
         required: false
-        default: "0"
+        default: "0,1,2,3,4"
 
 concurrency:
   group: gpu-validations
@@ -51,9 +51,9 @@ jobs:
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             STAGES_TO_RUN="${{ inputs.stages }}"
-            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1"
+            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2,3,4,5"
           else
-            STAGES_TO_RUN="0"
+            STAGES_TO_RUN="0,1,2,3,4"
 
             PARTITIONED_NODES=$(oc get nodes \
               -l "feature.node.kubernetes.io/amd-gpu=true,dcm.amd.com/gpu-config-profile=cpx-profile-nps4,dcm.amd.com/gpu-config-profile-state=success" \
@@ -62,35 +62,21 @@ jobs:
             if [[ -n "$PARTITIONED_NODES" ]]; then
               echo "DCM partitioned GPU nodes detected:"
               echo "$PARTITIONED_NODES"
-              STAGES_TO_RUN="0,1"
+              STAGES_TO_RUN="0,1,2,3,4,5"
             else
               echo "No DCM partitioned GPU nodes found, skipping partitioned-gpu stage"
             fi
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
-          echo "DRA stages: $STAGES_TO_RUN"
+          echo "Stages: $STAGES_TO_RUN"
 
   # ─────────────────────────────────────────────────────────────────────────────
   # DCM Partitioning
   # ─────────────────────────────────────────────────────────────────────────────
 
-  dcm-deploy:
-    needs: preflight
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy DCM
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
-            ${CI_TOOLS_IMAGE} make deploy-dcm NAMESPACE=${GPU_NAMESPACE} NODE_NAME=${SMC6216GPU}
-
   partition-smc6216gpu:
-    needs: dcm-deploy
+    needs: preflight
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -101,11 +87,11 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
-            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+            ${CI_TOOLS_IMAGE} make all \
               NODE_NAME=${SMC6216GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
 
   partition-smc6217gpu:
-    needs: dcm-deploy
+    needs: preflight
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -116,7 +102,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
-            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+            ${CI_TOOLS_IMAGE} make all \
               NODE_NAME=${SMC6217GPU} PROFILE_NAME=dpx-profile-nps2 NAMESPACE=${GPU_NAMESPACE}
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -135,7 +121,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
-            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+            ${CI_TOOLS_IMAGE} make all \
               NODE_NAME=${SMC6216GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
 
   restore-smc6217gpu:
@@ -150,7 +136,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
-            ${CI_TOOLS_IMAGE} make taint label verify untaint \
+            ${CI_TOOLS_IMAGE} make all \
               NODE_NAME=${SMC6217GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -173,7 +159,7 @@ jobs:
 
   dra-full-gpu:
     needs: [preflight, dra-setup]
-    if: contains(needs.preflight.outputs.stages, '0')
+    if: contains(needs.preflight.outputs.stages, '4')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -188,7 +174,7 @@ jobs:
 
   dra-partitioned-gpu:
     needs: [preflight, dra-setup]
-    if: contains(needs.preflight.outputs.stages, '1')
+    if: contains(needs.preflight.outputs.stages, '5')
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -206,7 +192,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   cleanup:
-    needs: [dcm-deploy, partition-smc6216gpu, partition-smc6217gpu, restore-smc6216gpu, restore-smc6217gpu, dra-setup, dra-full-gpu, dra-partitioned-gpu]
+    needs: [partition-smc6216gpu, partition-smc6217gpu, restore-smc6216gpu, restore-smc6217gpu, dra-setup, dra-full-gpu, dra-partitioned-gpu]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5

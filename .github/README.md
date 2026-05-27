@@ -25,7 +25,7 @@ Workflow: `nightly-gpu-validations.yaml` — runs at 03:00 UTC.
 | 4     | DRA Full GPU    | DRA resource claim for full GPU        | ~5 min   |
 | 5     | DRA Partitioned | DRA resource claim for partitioned GPU | ~5 min   |
 
-Nightly default: stages 0–4. Stages are selectable via manual dispatch.
+Nightly default: stages 0–5. Stages are selectable via manual dispatch.
 
 ## Network operator stages
 

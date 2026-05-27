@@ -37,10 +37,12 @@ define wait-for-job
 	@oc wait job/$(1) -n $(NAMESPACE) --for=condition=complete --timeout=$(TIMEOUT) 2>/dev/null & \
 	oc wait job/$(1) -n $(NAMESPACE) --for=condition=failed --timeout=$(TIMEOUT) 2>/dev/null & \
 	wait -n; \
+	oc logs job/$(1) -n $(NAMESPACE) 2>/dev/null; \
+	echo ""; \
 	if [ "$$(oc get job/$(1) -n $(NAMESPACE) -o jsonpath='{.status.succeeded}')" = "1" ]; then \
 	  echo "✓ $(1) PASSED"; \
 	else \
-	  echo "✗ $(1) FAILED"; oc logs job/$(1) -n $(NAMESPACE); exit 1; \
+	  echo "✗ $(1) FAILED"; exit 1; \
 	fi
 endef
 

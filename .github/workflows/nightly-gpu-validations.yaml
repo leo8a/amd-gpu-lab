@@ -8,7 +8,7 @@ on:
       stages:
         description: "Comma-separated stages (0-3=DCM partitioning, 4=DRA full-gpu, 5=DRA partitioned-gpu) or 'all'"
         required: false
-        default: "0,1,2,3,4"
+        default: "0,1,2,3,4,5"
 
 concurrency:
   group: gpu-validations
@@ -53,19 +53,7 @@ jobs:
             STAGES_TO_RUN="${{ inputs.stages }}"
             [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2,3,4,5"
           else
-            STAGES_TO_RUN="0,1,2,3,4"
-
-            PARTITIONED_NODES=$(oc get nodes \
-              -l "feature.node.kubernetes.io/amd-gpu=true,dcm.amd.com/gpu-config-profile=cpx-profile-nps4,dcm.amd.com/gpu-config-profile-state=success" \
-              --no-headers 2>/dev/null || true)
-
-            if [[ -n "$PARTITIONED_NODES" ]]; then
-              echo "DCM partitioned GPU nodes detected:"
-              echo "$PARTITIONED_NODES"
-              STAGES_TO_RUN="0,1,2,3,4,5"
-            else
-              echo "No DCM partitioned GPU nodes found, skipping partitioned-gpu stage"
-            fi
+            STAGES_TO_RUN="0,1,2,3,4,5"
           fi
 
           echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"

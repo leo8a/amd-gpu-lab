@@ -1,5 +1,9 @@
-# Runs rocm-smi inside a workload pod to confirm the GPU partition allocated
+# Runs clinfo inside a workload pod to confirm the GPU partition allocated
 # via DRA is visible and correctly configured.
+#
+# Uses clinfo (OpenCL) instead of rocm-smi because partitioned GPUs use XCP
+# platform devices in sysfs, which rocm-smi cannot discover (it requires PCI
+# vendor attributes). clinfo and rocminfo use HSA/OpenCL and work reliably.
 #
 # NOTE: GPU virtualization (vGPU / Virt) is NOT supported with AMD DRA at this time.
 ---
@@ -27,17 +31,23 @@ spec:
           args:
             - |
               echo "=== DRA Partitioned GPU Validation ==="
-              echo "--- rocm-smi ---"
-              rocm-smi
-              GPU_COUNT=$(rocm-smi --showid --csv 2>/dev/null | grep -c 'card')
-              if [ "$GPU_COUNT" -eq 0 ]; then
-                echo "FAIL: No GPU partitions visible in container"
+              echo "--- /dev/dri ---"
+              ls -1 /dev/dri/renderD* 2>/dev/null
+              RENDER_COUNT=$(ls -1 /dev/dri/renderD* 2>/dev/null | wc -l)
+              if [ "$RENDER_COUNT" -eq 0 ]; then
+                echo "FAIL: No render devices in /dev/dri"
                 exit 1
               fi
-              echo "Found $GPU_COUNT GPU partition(s)"
-              echo "--- rocm-smi --showcomputepartition ---"
-              rocm-smi --showcomputepartition
-              echo "=== PASS ==="
+              echo "--- clinfo ---"
+              clinfo | grep -E '(Number of devices|Device Type|Board name|Max compute units|Global memory size)'
+              GPU_COUNT=$(clinfo 2>/dev/null | grep -c 'Device Type.*GPU')
+              if [ "$GPU_COUNT" -eq 0 ]; then
+                echo "FAIL: No GPU partitions visible via OpenCL"
+                exit 1
+              fi
+              echo "--- rocminfo ---"
+              rocminfo 2>&1 | awk '/Device Type:.*GPU/{gpu=1} gpu && /Marketing Name:|Device Type:|Compute Unit:/{print}'
+              echo "=== PASS ($GPU_COUNT GPU partition(s), $RENDER_COUNT render device(s)) ==="
           resources:
             claims:
               - name: gpu-partition-claim

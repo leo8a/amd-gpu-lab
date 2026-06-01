@@ -48,6 +48,11 @@ spec:
     # Enable node labeller to add labels like amd.com/nic.* to nodes
     enableNodeLabeller: true
 
+    # Testing PR #61: NIC profile label (amd.com/nic.profile)
+    # https://github.com/pensando/k8s-network-node-labeller/pull/61
+    nodeLabellerImage: quay.io/lochoa/k8s-network-node-labeller:pr-61
+    nodeLabellerImagePullPolicy: "Always"
+
     devicePluginImagePullPolicy: "IfNotPresent"
 
   # Issues:

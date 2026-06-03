@@ -128,7 +128,7 @@ jobs:
       - name: Deploy and run cluster validation
         run: |
           set -euo pipefail
-          oc apply --server-side -k "${VALIDATIONS_DIR}/02_cluster-validation"
+          oc apply --server-side -k "${VALIDATIONS_DIR}/02_cvf"
           oc wait --for=condition=established crd/mpijobs.kubeflow.org --timeout=180s
 
           JOB_NAME="cluster-validation-ci-$(date +%s)"
@@ -192,7 +192,7 @@ jobs:
             -w /workspace/${VALIDATIONS_DIR}/01_rdma \
             ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE} || true
 
-          oc delete -k "${VALIDATIONS_DIR}/02_cluster-validation" --ignore-not-found=true 2>/dev/null || true
+          oc delete -k "${VALIDATIONS_DIR}/02_cvf" --ignore-not-found=true 2>/dev/null || true
           oc delete job -l ci-triggered=true -n default --ignore-not-found=true 2>/dev/null || true
           oc delete job -l amd.com/cluster-validation-created=true -n default --ignore-not-found=true 2>/dev/null || true
           oc label nodes --all \

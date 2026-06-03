@@ -1,6 +1,6 @@
-# Two-Node RDMA Bandwidth Test
+# Two-Node RDMA Bandwidth Test (CPU Memory)
 
-Validates RDMA write bandwidth between two nodes using `ib_write_bw` over Pollara 400 AI NICs.
+Validates RDMA write bandwidth between two nodes using `ib_write_bw` over Pollara 400 AI NICs. Data transfers use **CPU memory** buffers. For GPU-to-GPU RDMA (GDR), see [02_multi-node-gdr](../02_multi-node-gdr/).
 
 ## Prerequisites
 

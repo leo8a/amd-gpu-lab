@@ -1,0 +1,109 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rdma-client
+  namespace: openshift-amd-network
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: amd-rdma-net
+      labels:
+        app: rdma-test
+        role: client
+    spec:
+      serviceAccountName: rdma-validator
+      restartPolicy: Never
+      nodeSelector:
+        feature.node.kubernetes.io/amd-nic: "true"
+      containers:
+        - name: client
+          image: quay.io/lochoa/amd-tools:gdr
+          imagePullPolicy: Always
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== RDMA GDR Multi-Node Bandwidth Validation ==="
+              echo "--- waiting for net1 ---"
+              timeout=60
+              while [ $timeout -gt 0 ]; do
+                if ip addr show net1 2>/dev/null | grep -q "inet "; then
+                  CLIENT_IP=$(ip addr show net1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+                  echo "Client IP: $CLIENT_IP"
+                  break
+                fi
+                sleep 1
+                timeout=$((timeout - 1))
+              done
+              if [ -z "$CLIENT_IP" ]; then
+                echo "FAIL: net1 not ready"
+                exit 1
+              fi
+
+              echo "--- RDMA device ---"
+              RDMA_DEV=$(ibv_devices 2>/dev/null | awk '/ionic/{print $1}' | head -1)
+              if [ -z "$RDMA_DEV" ]; then
+                echo "FAIL: No ionic RDMA device assigned to pod"
+                ibv_devices 2>&1
+                exit 1
+              fi
+              echo "Using: $RDMA_DEV"
+              ibv_devinfo -d $RDMA_DEV 2>&1
+
+              echo "--- GPU check ---"
+              rocm-smi --showid 2>&1 | head -5 || echo "WARN: rocm-smi not available"
+
+              echo "--- scanning for server ---"
+              sleep 10
+              for attempt in $(seq 1 5); do
+                for ip in $(seq 1 20); do
+                  TARGET="192.168.200.$ip"
+                  [ "$TARGET" = "$CLIENT_IP" ] && continue
+                  if ping -c 1 -W 2 $TARGET >/dev/null 2>&1; then
+                    SERVER_IP=$TARGET
+                    break 2
+                  fi
+                done
+                sleep 5
+              done
+              if [ -z "$SERVER_IP" ]; then
+                echo "FAIL: Server not found on RDMA network"
+                exit 1
+              fi
+              echo "Server IP: $SERVER_IP"
+
+              echo "--- ib_write_bw GDR test ---"
+              echo "Client: $CLIENT_IP -> Server: $SERVER_IP (device: $RDMA_DEV, GPU: 0)"
+              ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 4 -p 10000 \
+                --tclass 96 --report_gbits -s 1048576 -D 10 --use_rocm=0 $SERVER_IP
+              if [ $? -ne 0 ]; then
+                echo "FAIL: ib_write_bw GDR failed"
+                exit 1
+              fi
+              echo "=== PASS ==="
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+              amd.com/nic: "1"
+              amd.com/gpu: "1"
+            limits:
+              cpu: 100m
+              memory: 256Mi
+              amd.com/nic: "1"
+              amd.com/gpu: "1"
+          securityContext:
+            capabilities:
+              add: ["IPC_LOCK", "NET_RAW"]
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: role
+                    operator: In
+                    values: ["server"]
+              topologyKey: kubernetes.io/hostname

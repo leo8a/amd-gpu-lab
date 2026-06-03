@@ -17,7 +17,6 @@ Validates AMD NIC assignment, RDMA device visibility, and bandwidth with AMD Pen
 ## Quick start
 
 ```bash
-make all              # run all tests
 make single-pod       # single-pod RDMA device check
 make multi-node       # two-node RDMA bandwidth test (ib_write_bw)
 make cleanup          # delete all test resources

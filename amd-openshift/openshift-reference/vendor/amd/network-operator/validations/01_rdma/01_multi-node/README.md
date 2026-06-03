@@ -1,6 +1,6 @@
-# Two-Node RDMA Connectivity Tests
+# Two-Node RDMA Bandwidth Test
 
-Tests to validate RDMA network connectivity between two nodes.
+Validates RDMA write bandwidth between two nodes using `ib_write_bw` over Pollara 400 AI NICs.
 
 ## Prerequisites
 
@@ -8,6 +8,7 @@ Tests to validate RDMA network connectivity between two nodes.
 - AMD Network Operator deployed
 - **At least 2 nodes** labeled with `feature.node.kubernetes.io/amd-nic=true`
 - **At least 2 AI NICs physically connected** between the nodes (carrier up) — the server and client pods are scheduled on different nodes via anti-affinity, so the RDMA network must have L2 connectivity
+- NIC prerequisites applied (see [docs/nic-prereqs.md](docs/nic-prereqs.md))
 
 **Verify NIC link state:**
 
@@ -24,64 +25,55 @@ oc debug node/<node-name> -- chroot /host bash -c \
 
 > **Note**: If only 1 node has AMD NICs, pods will run on the same node and won't find each other during network scans (expected behavior).
 
-## Server-Client Pod Test
-
-Interactive test with server and client pods on different nodes.
+## Run
 
 ```bash
 oc apply -k .
 oc logs -n openshift-amd-network rdma-server
-oc logs -n openshift-amd-network rdma-client
+oc logs -n openshift-amd-network -l job-name=rdma-client
 ```
 
-### Expected Output
+## Expected Output
 
-Server gets an IP from the RDMA subnet and lists all infiniband devices on the node.
-Client discovers the server via ICMP scan and pings it over the RDMA network with 0% packet loss.
+Server listens on TCP port 10000 for QP exchange, then runs the RDMA write bandwidth test.
+Client discovers the server via ICMP scan, connects for QP exchange, and measures write bandwidth.
 
-`oc logs -n openshift-amd-network rdma-server` (smc6217gpu):
+`oc logs -n openshift-amd-network rdma-server`:
 
 ```logs
 === RDMA Server Starting ===
-Waiting for RDMA network interface...
-Server ready on RDMA network: 192.168.200.2
-Listening for ICMP pings on 192.168.200.2...
-RDMA device check:
-ionic_0
-ionic_1
-ionic_2
-ionic_3
-ionic_4
-ionic_5
-ionic_6
-mlx5_0
+--- waiting for net1 ---
+Server IP: 192.168.200.15
+--- RDMA device ---
+Using: ionic_3
+...
+--- starting ib_write_bw server on port 10000 ---
+                    RDMA_Write BW Test
+ Dual-port       : OFF          Device         : ionic_3
+ Number of qps   : 1            Transport type : IB
+ Connection type : RC
+ ...
+ #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]
+ 65536      533970           93.32              93.32               0.177989
 ```
 
-`oc logs -n openshift-amd-network rdma-client` (smc6216gpu):
+`oc logs -n openshift-amd-network -l job-name=rdma-client`:
 
 ```logs
-=== RDMA Client Starting ===
-Waiting for RDMA network interface...
-Client ready on RDMA network: 192.168.200.1
-Waiting for server to be ready...
-Scanning for server on RDMA network...
-Scan attempt 1/5...
-Found server at: 192.168.200.2
+=== RDMA Multi-Node Bandwidth Validation ===
+--- waiting for net1 ---
+Client IP: 192.168.200.16
+--- RDMA device ---
+Using: ionic_5
+...
+--- ib_write_bw test ---
+Client: 192.168.200.16 -> Server: 192.168.200.15 (device: ionic_5)
+                    RDMA_Write BW Test
+ ...
+ #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]
+ 65536      533970           93.32              93.32               0.177989
 
-=== Testing RDMA Connectivity ===
-PING 192.168.200.2 (192.168.200.2): 56 data bytes
-64 bytes from 192.168.200.2: seq=0 ttl=64 time=0.088 ms
-64 bytes from 192.168.200.2: seq=1 ttl=64 time=0.092 ms
-64 bytes from 192.168.200.2: seq=2 ttl=64 time=0.108 ms
-64 bytes from 192.168.200.2: seq=3 ttl=64 time=0.092 ms
-64 bytes from 192.168.200.2: seq=4 ttl=64 time=0.090 ms
-
---- 192.168.200.2 ping statistics ---
-5 packets transmitted, 5 packets received, 0% packet loss
-round-trip min/avg/max = 0.088/0.094/0.108 ms
-
-=== RDMA Connectivity Test: PASSED ===
-Client: 192.168.200.1 -> Server: 192.168.200.2
+=== PASS ===
 ```
 
 ## Cleanup
@@ -95,4 +87,5 @@ oc delete -k .
 - `00_nad-amd-rdma.yaml` - NetworkAttachmentDefinition for RDMA network
 - `01_serviceaccount.yaml` - ServiceAccount with privileged SCC
 - `02_rdma-server.yaml` - RDMA server pod
-- `03_rdma-client.yaml` - RDMA client pod
+- `03_rdma-client.yaml` - RDMA client job
+- `docs/nic-prereqs.md` - NIC configuration prerequisites for ib_write_bw

@@ -27,8 +27,8 @@ spec:
     # - 1.110.0: Has both .el9 and .uek.el9 variants, but uses old naming (tawk_ipc with underscore)
     # - RDMA minimum required version: 1.117.5-a-28
     #
-    # Target NIC firmware version: 1.117.5-a-56 (matches current firmware on NICs)
-    version: "1.117.5-a-56"
+    # Target NIC firmware version: 1.117.5-a-77 (matches current firmware on NICs)
+    version: "1.117.5-a-77"
 
     # Blacklist inbox drivers to use out-of-tree drivers
     blacklist: true

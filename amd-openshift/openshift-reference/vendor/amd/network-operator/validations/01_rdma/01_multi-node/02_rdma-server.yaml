@@ -49,8 +49,8 @@ spec:
           ibv_devinfo -d $RDMA_DEV 2>&1
 
           echo "--- starting ib_write_bw server on port 10000 ---"
-          ib_write_bw -d $RDMA_DEV -p 10000 --source_ip $SERVER_IP \
-            -R -T 24 --report_gbits -s 65536 -D 10
+          ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 4 -p 10000 \
+            --tclass 96 --report_gbits -s 1048576 -D 10
       resources:
         requests:
           cpu: 100m

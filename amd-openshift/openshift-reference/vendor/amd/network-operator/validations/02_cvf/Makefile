@@ -57,7 +57,7 @@ run: ## Trigger a manual validation run (cleans stale labels first)
 .PHONY: status
 status: ## Check validation results (node labels, job status)
 	@echo "" ; echo "=== Node Validation Labels ==="
-	@oc get nodes -o json | jq -r '.items[] | "\(.metadata.name): \(.metadata.labels | with_entries(select(.key | contains("cluster-validation"))) | if length == 0 then "(none)" else to_entries | map("\(.key)=\(.value)") | join(", ") end)"'
+	@oc get nodes -o custom-columns='NODE:.metadata.name,STATUS:.metadata.labels.amd\.com/cluster-validation-status,CANDIDATE:.metadata.labels.amd\.com/cluster-validation-candidate'
 	@echo "" ; echo "=== CronJob ==="
 	@oc get cronjob cluster-validation-cron-job 2>/dev/null || echo "(not deployed)"
 	@echo "" ; echo "=== Jobs ==="

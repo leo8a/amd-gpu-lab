@@ -7,7 +7,7 @@ Nightly workflows that run AMD GPU and network operator validations on a self-ho
 
 ## GPU operator stages
 
-Workflow: `nightly-gpu-validations.yaml` — runs at 03:00 UTC.
+Workflow: `nightly-gpu-validations.yaml` — runs at 00:00 UTC.
 
 ### DCM partitioning (always runs)
 
@@ -29,15 +29,25 @@ Nightly default: stages 0–5. Stages are selectable via manual dispatch.
 
 ## Network operator stages
 
-Workflow: `nightly-network-validations.yaml` — runs at 04:00 UTC.
+Workflow: `nightly-network-validations.yaml` — runs at 01:00 UTC.
 
-| Stage | Name               | What it validates                               | Duration |
-| ----- | ------------------ | ----------------------------------------------- | -------- |
-| 0     | RDMA Single Pod    | RDMA device visibility and NIC attachment       | ~3 min   |
-| 1     | RDMA Multi-Node    | Two-node RDMA bandwidth via ib_write_bw         | ~3 min   |
-| 2     | Cluster Validation | GPU health + RCCL performance (MPI, multi-node) | ~20 min  |
+### RDMA validation (stages run in parallel)
 
-Nightly default: all stages (0, 1, 2). Individual stages are selectable via manual dispatch.
+| Stage | Name                | What it validates                         | Duration |
+| ----- | ------------------- | ----------------------------------------- | -------- |
+| 0     | RDMA Single Pod     | RDMA device visibility and NIC attachment | ~3 min   |
+| 1     | RDMA Multi-Node CPU | CPU-to-CPU RDMA bandwidth via ib_write_bw | ~3 min   |
+| 2     | RDMA Multi-Node GDR | GPU-to-GPU RDMA bandwidth (GDR)           | ~3 min   |
+
+### Cluster Validation Framework (after RDMA)
+
+| Stage | Name                         | What it validates                               | Duration |
+| ----- | ---------------------------- | ----------------------------------------------- | -------- |
+| 3     | Cluster Validation Framework | GPU health + RCCL performance (MPI, multi-node) | ~20 min  |
+
+See the [AMD Cluster Validation Framework documentation](https://dcgpu-docs.amd.com/projects/gpu-operator/en/latest/cluster-validation-framework/index.html) for details.
+
+Nightly default: all stages (0–3). Stages are selectable via manual dispatch.
 
 ## Manual dispatch
 

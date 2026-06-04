@@ -13,9 +13,9 @@ Workflow: `nightly-gpu-validations.yaml` — runs at 03:00 UTC.
 
 | Stage | Name                 | What it validates         | Duration |
 | ----- | -------------------- | ------------------------- | -------- |
-| 0     | Partition smc6216gpu | Partition to SPX + NPS1   | ~10 min  |
-| 1     | Partition smc6217gpu | Partition to CPX + NPS4   | ~10 min  |
-| 2     | Restore smc6216gpu   | Restore to CPX + NPS4     | ~10 min  |
+| 0     | Partition smc6216gpu | Partition to CPX + NPS4   | ~10 min  |
+| 1     | Partition smc6217gpu | Partition to DPX + NPS2   | ~10 min  |
+| 2     | Restore smc6216gpu   | Restore to SPX + NPS1     | ~10 min  |
 | 3     | Restore smc6217gpu   | Restore to SPX + NPS1     | ~10 min  |
 
 ### DRA validation (after restore)

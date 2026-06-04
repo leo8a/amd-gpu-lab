@@ -69,21 +69,6 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Partition to SPX + NPS1
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
-            ${CI_TOOLS_IMAGE} make all \
-              NODE_NAME=${SMC6216GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
-
-  partition-smc6217gpu:
-    needs: preflight
-    runs-on: self-hosted
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
       - name: Partition to CPX + NPS4
         run: |
           podman run --rm --network=host \
@@ -91,7 +76,22 @@ jobs:
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
             ${CI_TOOLS_IMAGE} make all \
-              NODE_NAME=${SMC6217GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
+              NODE_NAME=${SMC6216GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
+
+  partition-smc6217gpu:
+    needs: preflight
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Partition to DPX + NPS2
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
+            ${CI_TOOLS_IMAGE} make all \
+              NODE_NAME=${SMC6217GPU} PROFILE_NAME=dpx-profile-nps2 NAMESPACE=${GPU_NAMESPACE}
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Restore Defaults
@@ -103,14 +103,14 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Restore to CPX + NPS4 (default)
+      - name: Restore to SPX + NPS1 (default)
         run: |
           podman run --rm --network=host \
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/00_partitioning-dcm \
             ${CI_TOOLS_IMAGE} make all \
-              NODE_NAME=${SMC6216GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
+              NODE_NAME=${SMC6216GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
 
   restore-smc6217gpu:
     needs: [partition-smc6216gpu, partition-smc6217gpu]

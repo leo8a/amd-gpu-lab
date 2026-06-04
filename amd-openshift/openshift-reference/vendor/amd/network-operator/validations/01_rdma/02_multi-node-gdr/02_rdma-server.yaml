@@ -52,17 +52,18 @@ spec:
           rocm-smi --showid 2>&1 | head -5 || echo "WARN: rocm-smi not available"
 
           echo "--- starting ib_write_bw GDR server on port 10000 ---"
-          ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 4 -p 10000 \
-            --tclass 96 --report_gbits -s 1048576 -D 10 --use_rocm=0
+          ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 8 -p 10000 \
+            --tclass 96 --report_gbits -s 1048576 -D 10 \
+            -l 64 -t 4096 -Q 1 --use_rocm=0
       resources:
         requests:
-          cpu: 100m
-          memory: 256Mi
+          cpu: "4"
+          memory: 1Gi
           amd.com/nic: "1"
           amd.com/gpu: "1"
         limits:
-          cpu: 100m
-          memory: 256Mi
+          cpu: "4"
+          memory: 1Gi
           amd.com/nic: "1"
           amd.com/gpu: "1"
       securityContext:

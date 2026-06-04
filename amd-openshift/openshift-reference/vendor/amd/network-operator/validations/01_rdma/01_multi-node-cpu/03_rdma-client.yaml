@@ -74,8 +74,9 @@ spec:
 
               echo "--- ib_write_bw test ---"
               echo "Client: $CLIENT_IP -> Server: $SERVER_IP (device: $RDMA_DEV)"
-              ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 4 -p 10000 \
-                --tclass 96 --report_gbits -s 1048576 -D 10 $SERVER_IP
+              ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 8 -p 10000 \
+                --tclass 96 --report_gbits -s 1048576 -D 10 \
+                -l 64 -t 4096 -Q 1 $SERVER_IP
               if [ $? -ne 0 ]; then
                 echo "FAIL: ib_write_bw failed"
                 exit 1

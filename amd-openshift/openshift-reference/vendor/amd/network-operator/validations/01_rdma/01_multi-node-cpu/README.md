@@ -47,25 +47,27 @@ The server listens on TCP port 10000 for QP exchange, then runs the RDMA write b
 ```logs
 === RDMA Server Starting ===
 --- waiting for net1 ---
-Server IP: 192.168.200.16
+Server IP: 192.168.200.17
 --- RDMA device ---
-Using: ionic_6
+Using: ionic_4
 ...
 --- starting ib_write_bw server on port 10000 ---
-                    RDMA_Write BW Test
- Dual-port       : OFF          Device         : ionic_6
- Number of qps   : 4            Transport type : IB
+                    RDMA_Write Post List BW Test
+ Dual-port       : OFF          Device         : ionic_4
+ Number of qps   : 8            Transport type : IB
  Connection type : RC
+ Post List       : 64
+ CQ Moderation   : 1
  ...
  #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]
- 1048576    59141            0.00               82.68               0.009857
+ 1048576    284278           0.00               397.44               0.047379
 ```
 
 **Client** (`oc logs -n openshift-amd-network -l job-name=rdma-client-cpu`):
 
 ```logs
  #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]
- 1048576    59141            0.00               82.68               0.009857
+ 1048576    284278           0.00               397.44               0.047379
 === PASS ===
 ```
 

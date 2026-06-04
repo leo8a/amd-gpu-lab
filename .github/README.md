@@ -45,7 +45,7 @@ Workflow: `nightly-network-validations.yaml` — runs at 01:00 UTC.
 | ----- | ---------------------------- | ----------------------------------------------- | -------- |
 | 3     | Cluster Validation Framework | GPU health + RCCL performance (MPI, multi-node) | ~20 min  |
 
-See the [AMD Cluster Validation Framework documentation](https://dcgpu-docs.amd.com/projects/gpu-operator/en/latest/cluster-validation-framework/index.html) for details.
+See the [AMD Cluster Validation Framework documentation](https://instinct.docs.amd.com/projects/network-operator/en/latest/cluster_validation_framework/README.html) for details.
 
 Nightly default: all stages (0–3). Stages are selectable via manual dispatch.
 

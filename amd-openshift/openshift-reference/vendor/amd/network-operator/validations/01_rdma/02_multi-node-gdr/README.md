@@ -42,14 +42,16 @@ cd .. && make multi-node-gdr
 
 Same flow as the CPU test, but with `--use_rocm=0` to pin buffers in GPU memory. Bandwidth is slightly lower due to `ib_peer_mem` GPU memory registration overhead, but data never touches CPU memory — it flows directly from MI325X VRAM through the Pollara 400 NIC to the remote GPU.
 
-**Results** (2026-06-03, smc6217gpu <-> smc6216gpu, MI325X, Pollara 400, 4 QP, 1M messages, MTU 9000):
+**Results** (smc6217gpu <-> smc6216gpu, MI325X, Pollara 400, 8 QP, 1M messages, MTU 9000, post_list 64, tx-depth 4096, GDR pods at 4 CPU / 1Gi Guaranteed QoS):
 
-| Test             | Data path                        | Bandwidth  |
-| ---------------- | -------------------------------- | ---------- |
-| `multi-node-cpu` | CPU mem -> NIC -> NIC -> CPU mem | 82.63 Gb/s |
-| `multi-node-gdr` | GPU mem -> NIC -> NIC -> GPU mem | 77.25 Gb/s |
+| Test             | Data path                        | Bandwidth   |
+| ---------------- | -------------------------------- | ----------- |
+| `multi-node-cpu` | CPU mem -> NIC -> NIC -> CPU mem | 397.42 Gb/s |
+| `multi-node-gdr` | GPU mem -> NIC -> NIC -> GPU mem | 391.55 Gb/s |
 
 > GDR bandwidth is slightly lower than CPU due to `ib_peer_mem` memory registration overhead — each RDMA operation must pin and translate GPU virtual addresses through the PCIe BAR before the NIC can DMA directly to/from VRAM. CPU buffers skip this step since system memory is natively accessible to the NIC.
+>
+> GDR bandwidth also varies between runs (observed range: 325-391 Gb/s) due to NUMA topology randomness — no Topology Manager is configured, so the GPU and NIC assigned to the pod may land on different NUMA nodes. When GPU and NIC are on the same NUMA node, GDR reaches ~391 Gb/s (98% line rate); when they cross NUMA, it drops to ~325-360 Gb/s. Enabling `topologyManagerPolicy: single-numa-node` via a PerformanceProfile would eliminate this variance.
 
 ## Cleanup
 

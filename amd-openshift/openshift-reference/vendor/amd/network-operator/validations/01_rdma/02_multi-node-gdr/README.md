@@ -28,8 +28,8 @@ oc get nodes -o json | jq '.items[] | {name: .metadata.name, gpu: .status.alloca
 
 ```bash
 oc apply -k .
-oc logs -n openshift-amd-network rdma-server
-oc logs -n openshift-amd-network -l job-name=rdma-client
+oc logs -n openshift-amd-network rdma-server-gdr
+oc logs -n openshift-amd-network -l job-name=rdma-client-gdr
 ```
 
 Or via the parent Makefile:
@@ -48,6 +48,8 @@ Same flow as the CPU test, but with `--use_rocm=0` to pin buffers in GPU memory.
 | ---------------- | -------------------------------- | ---------- |
 | `multi-node-cpu` | CPU mem -> NIC -> NIC -> CPU mem | 82.63 Gb/s |
 | `multi-node-gdr` | GPU mem -> NIC -> NIC -> GPU mem | 77.25 Gb/s |
+
+> GDR bandwidth is slightly lower than CPU due to `ib_peer_mem` memory registration overhead — each RDMA operation must pin and translate GPU virtual addresses through the PCIe BAR before the NIC can DMA directly to/from VRAM. CPU buffers skip this step since system memory is natively accessible to the NIC.
 
 ## Cleanup
 

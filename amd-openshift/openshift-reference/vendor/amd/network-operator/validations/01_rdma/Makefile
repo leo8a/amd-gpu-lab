@@ -41,15 +41,15 @@ single-pod: ## Run 00_single-pod RDMA device check
 multi-node-cpu: ## Run 01_multi-node CPU-to-CPU RDMA bandwidth test (ib_write_bw)
 	@echo "" ; echo "Running multi-node CPU RDMA bandwidth test..."
 	@oc apply -k 01_multi-node-cpu/
-	@oc wait pod/rdma-server -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
-	$(call wait-for-job,rdma-client)
+	@oc wait pod/rdma-server-cpu -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
+	$(call wait-for-job,rdma-client-cpu)
 
 .PHONY: multi-node-gdr
 multi-node-gdr: ## Run 02_multi-node-gdr GPU-to-GPU RDMA bandwidth test (GDR, requires amd-tools:gdr image)
 	@echo "" ; echo "Running multi-node GDR bandwidth test..."
 	@oc apply -k 02_multi-node-gdr/
-	@oc wait pod/rdma-server -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
-	$(call wait-for-job,rdma-client)
+	@oc wait pod/rdma-server-gdr -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
+	$(call wait-for-job,rdma-client-gdr)
 
 
 # ───────────────────────────────────────────────────────────────────────────────

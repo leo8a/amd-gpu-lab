@@ -34,15 +34,15 @@ oc debug node/<node> -- chroot /host bash -c \
 
 ```bash
 oc apply -k .
-oc logs -n openshift-amd-network rdma-server
-oc logs -n openshift-amd-network -l job-name=rdma-client
+oc logs -n openshift-amd-network rdma-server-cpu
+oc logs -n openshift-amd-network -l job-name=rdma-client-cpu
 ```
 
 ## Expected Output
 
 The server listens on TCP port 10000 for QP exchange, then runs the RDMA write bandwidth test. The client discovers the server via ICMP scan, connects, and measures write bandwidth.
 
-**Server** (`oc logs -n openshift-amd-network rdma-server`):
+**Server** (`oc logs -n openshift-amd-network rdma-server-cpu`):
 
 ```logs
 === RDMA Server Starting ===
@@ -61,7 +61,7 @@ Using: ionic_6
  1048576    59141            0.00               82.68               0.009857
 ```
 
-**Client** (`oc logs -n openshift-amd-network -l job-name=rdma-client`):
+**Client** (`oc logs -n openshift-amd-network -l job-name=rdma-client-cpu`):
 
 ```logs
  #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]

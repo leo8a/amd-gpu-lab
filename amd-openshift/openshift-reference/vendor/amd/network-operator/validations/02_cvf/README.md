@@ -172,6 +172,7 @@ Before deployment, operators may need to customize:
 - **Resource limits**: Ensure `slotsPerWorker` and resource limits match GPU/NIC configuration
 - **CronJob schedule**: Modify `spec.schedule` to adjust validation frequency (default: hourly)
 - **Debug mode**: Set `DEBUG_DELAY` environment variable to pause after job completion for troubleshooting
+- **`NCCL_DMABUF_ENABLE`**: Must be `0` on kernels < 6.x. DMABuf support requires kernel 6.x + amdgpu-dkms >= 6.14 ([UG1813, p.22](https://docs.amd.com/r/en-US/ug1813-pollara-400-benchmarking-guide)). RHEL 9.x ships kernel 5.14, so DMABuf is not available — enabling it causes `local access violation` errors during RCCL tests
 
 ## References
 

@@ -9,21 +9,20 @@ Nightly workflows that run AMD GPU and network operator validations on a self-ho
 
 Workflow: `nightly-gpu-validations.yaml` — runs at 00:00 UTC.
 
-### DCM partitioning (always runs)
+The pipeline is ordered so each DRA test runs when GPUs are in the correct state:
 
-| Stage | Name                 | What it validates         | Duration |
-| ----- | -------------------- | ------------------------- | -------- |
-| 0     | Partition smc6216gpu | Partition to CPX + NPS4   | ~10 min  |
-| 1     | Partition smc6217gpu | Partition to DPX + NPS2   | ~10 min  |
-| 2     | Restore smc6216gpu   | Restore to SPX + NPS1     | ~10 min  |
-| 3     | Restore smc6217gpu   | Restore to SPX + NPS1     | ~10 min  |
+```logs
+preflight → dra-full-gpu → partition → dra-partitioned-gpu → restore → cleanup
+```
 
-### DRA validation (after restore)
-
-| Stage | Name            | What it validates                      | Duration |
-| ----- | --------------- | -------------------------------------- | -------- |
-| 4     | DRA Full GPU    | DRA resource claim for full GPU        | ~5 min   |
-| 5     | DRA Partitioned | DRA resource claim for partitioned GPU | ~5 min   |
+| Stage | Name                 | What it validates                      | GPU state      | Duration |
+| ----- | -------------------- | -------------------------------------- | -------------- | -------- |
+| 0     | DRA Full GPU         | DRA resource claim for full GPU        | SPX (default)  | ~5 min   |
+| 1     | Partition smc6216gpu | Partition to CPX + NPS4                | —              | ~10 min  |
+| 2     | Partition smc6217gpu | Partition to DPX + NPS2                | —              | ~10 min  |
+| 3     | DRA Partitioned      | DRA resource claim for partitioned GPU | CPX/DPX        | ~5 min   |
+| 4     | Restore smc6216gpu   | Restore to SPX + NPS1                  | —              | ~10 min  |
+| 5     | Restore smc6217gpu   | Restore to SPX + NPS1                  | —              | ~10 min  |
 
 Nightly default: stages 0–5. Stages are selectable via manual dispatch.
 

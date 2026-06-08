@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0-3=DCM partitioning, 4=DRA full-gpu, 5=DRA partitioned-gpu) or 'all'"
+        description: "Comma-separated stages (0=DRA full-gpu, 1-2=partition, 3=DRA partitioned-gpu, 4-5=restore) or 'all'"
         required: false
         default: "0,1,2,3,4,5"
 
@@ -60,11 +60,31 @@ jobs:
           echo "Stages: $STAGES_TO_RUN"
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # DRA Full GPU (runs first — GPUs are in default SPX state)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  dra-full-gpu:
+    needs: preflight
+    if: contains(needs.preflight.outputs.stages, '0')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run full-gpu validation
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_dra \
+            ${CI_TOOLS_IMAGE} make full-gpu NAMESPACE=${GPU_NAMESPACE}
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # DCM Partitioning
   # ─────────────────────────────────────────────────────────────────────────────
 
   partition-smc6216gpu:
-    needs: preflight
+    needs: [preflight, dra-full-gpu]
+    if: always()
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -79,7 +99,8 @@ jobs:
               NODE_NAME=${SMC6216GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
 
   partition-smc6217gpu:
-    needs: preflight
+    needs: [preflight, dra-full-gpu]
+    if: always()
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -94,11 +115,31 @@ jobs:
               NODE_NAME=${SMC6217GPU} PROFILE_NAME=dpx-profile-nps2 NAMESPACE=${GPU_NAMESPACE}
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # DRA Partitioned GPU (runs while GPUs are partitioned)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  dra-partitioned-gpu:
+    needs: [preflight, partition-smc6216gpu, partition-smc6217gpu]
+    if: contains(needs.preflight.outputs.stages, '3')
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run partitioned-gpu validation
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_dra \
+            ${CI_TOOLS_IMAGE} make partitioned-gpu NAMESPACE=${GPU_NAMESPACE}
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # Restore Defaults
   # ─────────────────────────────────────────────────────────────────────────────
 
   restore-smc6216gpu:
-    needs: [partition-smc6216gpu, partition-smc6217gpu]
+    needs: [dra-partitioned-gpu]
+    if: always()
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -113,7 +154,8 @@ jobs:
               NODE_NAME=${SMC6216GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
 
   restore-smc6217gpu:
-    needs: [partition-smc6216gpu, partition-smc6217gpu]
+    needs: [dra-partitioned-gpu]
+    if: always()
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -128,59 +170,11 @@ jobs:
               NODE_NAME=${SMC6217GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # DRA Validation
-  # ─────────────────────────────────────────────────────────────────────────────
-
-  dra-setup:
-    needs: [restore-smc6216gpu, restore-smc6217gpu]
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Enable DRA on DeviceConfig
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_dra \
-            ${CI_TOOLS_IMAGE} make enable-dra NAMESPACE=${GPU_NAMESPACE}
-
-  dra-full-gpu:
-    needs: [preflight, dra-setup]
-    if: contains(needs.preflight.outputs.stages, '4')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run full-gpu validation
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_dra \
-            ${CI_TOOLS_IMAGE} make full-gpu NAMESPACE=${GPU_NAMESPACE}
-
-  dra-partitioned-gpu:
-    needs: [preflight, dra-setup]
-    if: contains(needs.preflight.outputs.stages, '5')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run partitioned-gpu validation
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_dra \
-            ${CI_TOOLS_IMAGE} make partitioned-gpu NAMESPACE=${GPU_NAMESPACE}
-
-  # ─────────────────────────────────────────────────────────────────────────────
   # Cleanup
   # ─────────────────────────────────────────────────────────────────────────────
 
   cleanup:
-    needs: [partition-smc6216gpu, partition-smc6217gpu, restore-smc6216gpu, restore-smc6217gpu, dra-setup, dra-full-gpu, dra-partitioned-gpu]
+    needs: [partition-smc6216gpu, partition-smc6217gpu, dra-partitioned-gpu, restore-smc6216gpu, restore-smc6217gpu, dra-full-gpu]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5

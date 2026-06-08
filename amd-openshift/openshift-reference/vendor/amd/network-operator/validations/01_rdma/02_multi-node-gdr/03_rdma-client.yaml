@@ -54,7 +54,15 @@ spec:
               ibv_devinfo -d $RDMA_DEV 2>&1
 
               echo "--- GPU check ---"
+              GPU_RENDER=$(ls -1 /dev/dri/renderD* 2>/dev/null | head -1)
+              GPU_ID=$(echo "$GPU_RENDER" | grep -o '[0-9]*$')
               rocm-smi --showid 2>&1 | head -5 || echo "WARN: rocm-smi not available"
+
+              echo "--- NUMA topology ---"
+              NIC_NUMA=$(cat /sys/class/infiniband/$RDMA_DEV/device/numa_node 2>/dev/null || echo "unknown")
+              GPU_NUMA=$(cat ${GPU_RENDER:+/sys/class/drm/$(basename $GPU_RENDER)/device/numa_node} 2>/dev/null || echo "unknown")
+              echo "NIC $RDMA_DEV NUMA: $NIC_NUMA | GPU $GPU_ID NUMA: $GPU_NUMA"
+              [ "$NIC_NUMA" != "$GPU_NUMA" ] && echo "WARN: NIC and GPU on different NUMA nodes — expect lower bandwidth"
 
               echo "--- scanning for server ---"
               sleep 10

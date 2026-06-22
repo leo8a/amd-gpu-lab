@@ -23,9 +23,11 @@ kubectl taint nodes "$NODE_NAME" amd-dcm=up:NoExecute
 echo "Waiting 30s for non-essential pods to terminate..."
 sleep 30
 
-# Workaround
-kubectl patch prometheus amd-gpu-prometheus -n devmetrics --type='merge' -p '{"spec":{"replicas":0}}'
-oc delete pod -n devmetrics prometheus-amd-gpu-prometheus-0 --force --grace-period=0 || true
+# Workaround: scale down devmetrics prometheus if it exists, so it doesn't block GPU partitioning
+if kubectl get namespace devmetrics &>/dev/null; then
+  kubectl patch prometheus amd-gpu-prometheus -n devmetrics --type='merge' -p '{"spec":{"replicas":0}}' || true
+  oc delete pod -n devmetrics prometheus-amd-gpu-prometheus-0 --force --grace-period=0 || true
+fi
 
 
 echo ""

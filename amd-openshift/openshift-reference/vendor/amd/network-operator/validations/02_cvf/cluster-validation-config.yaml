@@ -46,7 +46,20 @@ data:
       ]
     }
 
-  RCCL_WORKLOAD_IMAGE: "docker.io/rocm/roce-workload:ubuntu24_rocm-7.2_rccl-7.2.0_anp-v1.3.0_ainic-1.117.5-a-56"
+  # ┌────────────────────────────────────┬─────┬─────┬─────┬─────┐
+  # │           Tag disponible           │ ROC │ RCC │ ANP │ AIN │
+  # │                                    │  m  │  L  │     │ IC  │
+  # ├────────────────────────────────────┼─────┼─────┼─────┼─────┤
+  # │ ubuntu24_rocm-7.0.2_rccl-7.0.2_anp │ 7.0 │ 7.0 │ v1. │ a-7 │
+  # │ -v1.2.0_ainic-1.117.5-a-77         │ .2  │ .2  │ 2.0 │ 7   │
+  # ├────────────────────────────────────┼─────┼─────┼─────┼─────┤
+  # │ ubuntu24_rocm-7.2_rccl-7.2.0_anp-v │ 7.2 │ 7.2 │ v1. │ a-5 │
+  # │ 1.3.0_ainic-1.117.5-a-56           │     │ .0  │ 3.0 │ 6   │
+  # └────────────────────────────────────┴─────┴─────┴─────┴─────┘
+
+  # NOTE: Using rocm-7.0.2/anp-v1.2.0 stack to match driver version a-77.
+  # No rocm-7.2 image with a-77 exists yet upstream (docker.io/rocm/roce-workload).
+  RCCL_WORKLOAD_IMAGE: "docker.io/rocm/roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-77"
   MPIJOB_WAIT_TIME: "240"
   DEBUG_DELAY: "20"
   WAIT_FOR_WORKERS: "true"

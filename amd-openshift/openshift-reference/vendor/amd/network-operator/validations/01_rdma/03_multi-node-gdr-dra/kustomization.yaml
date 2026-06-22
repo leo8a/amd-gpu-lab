@@ -1,0 +1,10 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - 00_deviceclass-dranet.yaml
+  - 01_resourceclaimtemplate.yaml
+  - 02_serviceaccount.yaml
+  - 03_rdma-server.yaml
+  - 04_rdma-client.yaml

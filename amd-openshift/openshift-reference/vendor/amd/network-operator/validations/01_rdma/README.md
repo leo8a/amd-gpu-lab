@@ -6,9 +6,10 @@ Validates AMD NIC assignment, RDMA device visibility, and bandwidth with AMD Pen
 
 | Test                 | What it validates                                                  | Details                                          |
 | -------------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
-| `00_single-pod/`     | NIC attachment, RDMA device visibility, link speed                 | Single pod, no connectivity needed               |
-| `01_multi-node-cpu/` | CPU-to-CPU RDMA write bandwidth via `ib_write_bw`                  | [README](01_multi-node-cpu/README.md)            |
-| `02_multi-node-gdr/` | GPU-to-GPU RDMA write bandwidth via `ib_write_bw --use_rocm=0`     | [README](02_multi-node-gdr/README.md)            |
+| `00_single-pod/`         | NIC attachment, RDMA device visibility, link speed                        | Single pod, no connectivity needed               |
+| `01_multi-node-cpu/`     | CPU-to-CPU RDMA write bandwidth via `ib_write_bw`                        | [README](01_multi-node-cpu/README.md)            |
+| `02_multi-node-gdr/`     | GPU-to-GPU RDMA write bandwidth via `ib_write_bw --use_rocm=0`           | [README](02_multi-node-gdr/README.md)            |
+| `03_multi-node-gdr-dra/` | GDR with DRA PCIe root alignment (GPU+NIC same PCIe switch, experimental) | [README](03_multi-node-gdr-dra/README.md)        |
 
 ## Prerequisites
 
@@ -26,8 +27,9 @@ Validates AMD NIC assignment, RDMA device visibility, and bandwidth with AMD Pen
 ```bash
 make single-pod       # single-pod RDMA device check
 make multi-node-cpu   # two-node CPU RDMA bandwidth test
-make multi-node-gdr   # two-node GPU RDMA bandwidth test (GDR)
-make cleanup          # delete all test resources
+make multi-node-gdr       # two-node GPU RDMA bandwidth test (GDR)
+make multi-node-gdr-dra   # two-node GDR with DRA PCIe root alignment (experimental)
+make cleanup              # delete all test resources
 ```
 
 ## Reference

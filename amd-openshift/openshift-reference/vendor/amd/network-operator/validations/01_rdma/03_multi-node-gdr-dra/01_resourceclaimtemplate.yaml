@@ -1,0 +1,32 @@
+# ResourceClaimTemplate requesting one AMD GPU and one RDMA-capable NIC,
+# constrained to the same PCIe root complex via DRA matchAttribute.
+#
+# Requires: AMD GPU DRA driver (gpu.amd.com) + DRANET (dra.net) both
+# publishing resource.kubernetes.io/pcieRoot in their ResourceSlices.
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: dra-gpu-nic-aligned
+  namespace: openshift-amd-network
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          exactly:
+            deviceClassName: gpu.amd.com
+            count: 1
+            selectors:
+              - cel:
+                  expression: "device.attributes['gpu.amd.com'].type == 'amdgpu'"
+        - name: nic
+          exactly:
+            deviceClassName: dranet
+            count: 1
+            selectors:
+              - cel:
+                  expression: "device.attributes['dra.net'].rdma == true && device.attributes['dra.net'].pciVendor == 'AMD Pensando Systems'"
+      constraints:
+        - requests: [gpu, nic]
+          matchAttribute: "resource.kubernetes.io/pcieRoot"

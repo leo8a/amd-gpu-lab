@@ -51,6 +51,26 @@ multi-node-gdr: ## Run 02_multi-node-gdr GPU-to-GPU RDMA bandwidth test (GDR, re
 	@oc wait pod/rdma-server-gdr -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
 	$(call wait-for-job,rdma-client-gdr)
 
+DRA_PATCH := ../../../gpu-operator/validations/02_dra/00_deviceconfig-dra-patch.yaml
+DRANET_MANIFEST := https://raw.githubusercontent.com/kubernetes-sigs/dranet/refs/heads/main/install.yaml
+
+.PHONY: multi-node-gdr-dra
+multi-node-gdr-dra: ## Run 03_multi-node-gdr-dra GDR test with DRA PCIe root alignment (experimental)
+	@echo "" ; echo "Running multi-node GDR-DRA bandwidth test..."
+	@echo "--- prerequisites: enabling GPU DRA driver ---"
+	@oc patch deviceconfig amdgpu-driver-install -n openshift-amd-gpu --type merge -p "$$(cat $(DRA_PATCH))"
+	@echo "--- prerequisites: installing DRANET ---"
+	@kubectl apply -f $(DRANET_MANIFEST) 2>/dev/null || true
+	@oc adm policy add-scc-to-user privileged -z dranet -n kube-system 2>/dev/null || true
+	@echo "--- waiting for DRA drivers ---"
+	@sleep 15
+	@oc wait pods -n openshift-amd-gpu -l daemonset-name=amdgpu-driver-install-dra-driver --for=condition=ready --timeout=$(TIMEOUT)
+	@oc wait pods -n kube-system -l app=dranet --for=condition=ready --timeout=$(TIMEOUT)
+	@echo "--- deploying test ---"
+	@oc apply -k 03_multi-node-gdr-dra/
+	@oc wait pod/rdma-server-gdr-dra -n $(NAMESPACE) --for=condition=ready --timeout=$(TIMEOUT)
+	$(call wait-for-job,rdma-client-gdr-dra)
+
 
 # ───────────────────────────────────────────────────────────────────────────────
 # Cleanup
@@ -63,6 +83,12 @@ cleanup: ## Delete all test resources
 	@oc delete -k 00_single-pod/ --ignore-not-found
 	@oc delete -k 01_multi-node-cpu/ --ignore-not-found
 	@oc delete -k 02_multi-node-gdr/ --ignore-not-found
+	@oc delete -k 03_multi-node-gdr-dra/ --ignore-not-found
+	@echo "Restoring GPU device plugin (disabling DRA)..."
+	@oc apply -f ../../../gpu-operator/07_amd-deviceconfig.yaml 2>/dev/null || true
+	@echo "Removing DRANET..."
+	@kubectl delete -f https://raw.githubusercontent.com/kubernetes-sigs/dranet/refs/heads/main/install.yaml --ignore-not-found 2>/dev/null || true
+	@oc adm policy remove-scc-from-user privileged -z dranet -n kube-system 2>/dev/null || true
 
 
 ##@ Help

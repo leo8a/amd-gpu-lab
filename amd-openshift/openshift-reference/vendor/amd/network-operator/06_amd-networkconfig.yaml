@@ -30,7 +30,9 @@ spec:
     # Target NIC firmware version: 1.117.5-a-77 (matches current firmware on NICs)
     version: "1.117.5-a-77"
 
-    # Blacklist inbox drivers to use out-of-tree drivers
+    # NOTE: spec.driver.blacklist is NOT supported on OpenShift — use MachineConfig instead (see 04_amd-ionic-blacklist.yaml).
+    # https://github.com/pensando/network-operator/blob/main/docs/drivers/drivers.md#out-of-tree-driver-installation-by-amd-network-operator
+    # https://github.com/pensando/network-operator/blob/main/docs/openshift/installation-guide.md#2-blacklist-in-tree-ionic-driver-recommended
     blacklist: true
 
     # Registry TLS configuration for OpenShift internal registry
@@ -73,8 +75,8 @@ spec:
   secondaryNetwork:
     cniPlugins:
       enable: true
-
-      imagePullPolicy: "IfNotPresent"
+      image: quay.io/lochoa/rocm/k8s-cni-plugins:main
+      imagePullPolicy: "Always"
 
 
 

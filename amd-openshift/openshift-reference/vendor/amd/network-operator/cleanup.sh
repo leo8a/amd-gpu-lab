@@ -5,13 +5,11 @@ set -euo pipefail
 NS="openshift-amd-network"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# 1. Remove /validations resources
-oc delete -k "$SCRIPT_DIR"/validations/00_cluster-validation --ignore-not-found
-oc delete -k "$SCRIPT_DIR"/validations/01_basic/00_nic-assignment --ignore-not-found
-oc delete -k "$SCRIPT_DIR"/validations/02_rdma/01_multi-node --ignore-not-found
-oc delete -k "$SCRIPT_DIR"/validations/02_rdma/00_single-pod --ignore-not-found
-oc delete -k "$SCRIPT_DIR"/validations/03_sriov/01_hnic_pf1_vf8-profile --ignore-not-found
-oc delete -k "$SCRIPT_DIR"/validations/03_sriov/00_pf1_vf1-profile --ignore-not-found
+# 1. Remove /validations resources (reverse order of apply)
+oc delete -k "$SCRIPT_DIR"/validations/02_cvf --ignore-not-found
+oc delete -k "$SCRIPT_DIR"/validations/01_rdma/02_multi-node-gdr --ignore-not-found
+oc delete -k "$SCRIPT_DIR"/validations/01_rdma/01_multi-node-cpu --ignore-not-found
+oc delete -k "$SCRIPT_DIR"/validations/01_rdma/00_single-pod --ignore-not-found
 
 # 2. Remove NetworkConfig CR (if any)
 oc delete networkconfig --all -n "$NS" --ignore-not-found

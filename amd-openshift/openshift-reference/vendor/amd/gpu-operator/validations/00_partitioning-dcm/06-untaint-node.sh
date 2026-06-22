@@ -31,8 +31,10 @@ echo "✓ Taint removed - node ready for workload scheduling"
 echo "✓ GPU partitioning workflow complete"
 
 
-# Workaround
-kubectl patch prometheus amd-gpu-prometheus -n devmetrics --type='merge' -p '{"spec":{"replicas":1}}'
+# Workaround: restore devmetrics prometheus if it exists
+if kubectl get namespace devmetrics &>/dev/null; then
+  kubectl patch prometheus amd-gpu-prometheus -n devmetrics --type='merge' -p '{"spec":{"replicas":1}}' || true
+fi
 
 
 echo ""

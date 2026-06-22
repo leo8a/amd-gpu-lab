@@ -1,0 +1,121 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rdma-client-gdr-dra
+  namespace: openshift-amd-network
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app: rdma-test-dra
+        role: client
+    spec:
+      serviceAccountName: rdma-validator
+      restartPolicy: Never
+      nodeSelector:
+        feature.node.kubernetes.io/amd-nic: "true"
+      resourceClaims:
+        - name: gpu-nic
+          resourceClaimTemplateName: dra-gpu-nic-aligned
+      containers:
+        - name: client
+          image: quay.io/lochoa/amd-tools:gdr
+          imagePullPolicy: Always
+          command: ["sh", "-c"]
+          args:
+            - |
+              echo "=== RDMA GDR-DRA Multi-Node Bandwidth Validation ==="
+
+              echo "--- DRA topology verification ---"
+              GPU_RENDER=$(ls -1 /dev/dri/renderD* 2>/dev/null | head -1)
+              GPU_PCI=$(readlink -f /sys/class/drm/$(basename $GPU_RENDER)/device 2>/dev/null | xargs basename)
+              GPU_ROOT=$(readlink -f /sys/class/drm/$(basename $GPU_RENDER)/device 2>/dev/null | sed 's|/sys/devices/||' | cut -d/ -f1-2)
+              GPU_NUMA=$(cat /sys/class/drm/$(basename $GPU_RENDER)/device/numa_node 2>/dev/null || echo "unknown")
+
+              RDMA_DEV=$(ibv_devices 2>/dev/null | awk '/ionic/{print $1}' | head -1)
+              if [ -z "$RDMA_DEV" ]; then
+                echo "FAIL: No ionic RDMA device found"
+                ibv_devices 2>&1
+                exit 1
+              fi
+              NIC_PCI=$(readlink -f /sys/class/infiniband/$RDMA_DEV/device 2>/dev/null | xargs basename)
+              NIC_ROOT=$(readlink -f /sys/class/infiniband/$RDMA_DEV/device 2>/dev/null | sed 's|/sys/devices/||' | cut -d/ -f1-2)
+              NIC_NUMA=$(cat /sys/class/infiniband/$RDMA_DEV/device/numa_node 2>/dev/null || echo "unknown")
+
+              echo "GPU: $GPU_PCI  root=$GPU_ROOT  numa=$GPU_NUMA"
+              echo "NIC: $NIC_PCI  root=$NIC_ROOT  numa=$NIC_NUMA  rdma=$RDMA_DEV"
+              if [ "$GPU_ROOT" = "$NIC_ROOT" ]; then
+                echo "OK: GPU and NIC on same PCIe root ($GPU_ROOT)"
+              else
+                echo "WARN: GPU ($GPU_ROOT) and NIC ($NIC_ROOT) on different PCIe roots"
+              fi
+
+              echo "--- RDMA device info ---"
+              ibv_devinfo -d $RDMA_DEV 2>&1
+
+              echo "--- GPU info ---"
+              rocm-smi --showid 2>&1 | head -5 || echo "WARN: rocm-smi not available"
+
+              echo "--- configuring RDMA NIC IP ---"
+              RDMA_NETDEV=$(ls /sys/class/infiniband/$RDMA_DEV/device/net/ 2>/dev/null | head -1)
+              if [ -z "$RDMA_NETDEV" ]; then
+                echo "FAIL: No network device for $RDMA_DEV"
+                exit 1
+              fi
+              CLIENT_IP="192.168.200.11"
+              ip addr add $CLIENT_IP/24 dev $RDMA_NETDEV
+              ip link set $RDMA_NETDEV mtu 9000 up
+              echo "Client IP: $CLIENT_IP on $RDMA_NETDEV"
+
+              SERVER_IP="192.168.200.10"
+              echo "--- waiting for server at $SERVER_IP ---"
+              sleep 10
+              timeout=60
+              while [ $timeout -gt 0 ]; do
+                if ping -c 1 -W 2 $SERVER_IP >/dev/null 2>&1; then
+                  echo "Server reachable"
+                  break
+                fi
+                sleep 2
+                timeout=$((timeout - 2))
+              done
+              if [ $timeout -le 0 ]; then
+                echo "FAIL: Server not reachable at $SERVER_IP"
+                exit 1
+              fi
+
+              echo "--- ib_write_bw GDR test ---"
+              echo "Client: $CLIENT_IP -> Server: $SERVER_IP (device: $RDMA_DEV, GPU: 0)"
+              echo "PCIe alignment: GPU=$GPU_ROOT NIC=$NIC_ROOT"
+              ib_write_bw -d $RDMA_DEV -i 1 -F -x 1 -q 8 -p 10000 \
+                --tclass 96 --report_gbits -s 1048576 -D 10 \
+                -l 64 -t 4096 -Q 1 --use_rocm=0 $SERVER_IP
+              if [ $? -ne 0 ]; then
+                echo "FAIL: ib_write_bw GDR failed"
+                exit 1
+              fi
+              echo "=== PASS ==="
+          resources:
+            claims:
+              - name: gpu-nic
+            requests:
+              cpu: "4"
+              memory: 1Gi
+            limits:
+              cpu: "4"
+              memory: 1Gi
+          securityContext:
+            capabilities:
+              add: ["IPC_LOCK", "NET_RAW", "NET_ADMIN"]
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: role
+                    operator: In
+                    values: ["server"]
+              topologyKey: kubernetes.io/hostname

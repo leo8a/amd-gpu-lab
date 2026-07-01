@@ -1,0 +1,28 @@
+Fluent Bit v4.2.2
+* Copyright (C) 2015-2025 The Fluent Bit Authors
+* Fluent Bit is a CNCF graduated project under the Fluent organization
+* https://fluentbit.io
+
+______ _                  _    ______ _ _             ___   _____ 
+|  ___| |                | |   | ___ (_) |           /   | / __  \
+| |_  | |_   _  ___ _ __ | |_  | |_/ /_| |_  __   __/ /| | `' / /'
+|  _| | | | | |/ _ \ '_ \| __| | ___ \ | __| \ \ / / /_| |   / /  
+| |   | | |_| |  __/ | | | |_  | |_/ / | |_   \ V /\___  |_./ /___
+\_|   |_|\__,_|\___|_| |_|\__| \____/|_|\__|   \_/     |_(_)_____/
+                                                                  
+             Fluent Bit v4.2 – Direct Routes Ahead
+         Celebrating 10 Years of Open, Fluent Innovation!
+
+[2026/07/01 13:22:37.736446036] [ info] [fluent bit] version=4.2.2, commit=ddfef360d7, pid=1
+[2026/07/01 13:22:37.736520945] [ info] [storage] ver=1.5.4, type=memory, sync=normal, checksum=off, max_chunks_up=128
+[2026/07/01 13:22:37.736525145] [ info] [simd    ] SSE2
+[2026/07/01 13:22:37.736527255] [ info] [cmetrics] version=1.0.6
+[2026/07/01 13:22:37.736529495] [ info] [ctraces ] version=0.6.6
+[2026/07/01 13:22:37.736592484] [ info] [input:tail:tail.0] initializing
+[2026/07/01 13:22:37.736595604] [ info] [input:tail:tail.0] storage_strategy='memory' (memory only)
+[2026/07/01 13:22:37.758611333] [ info] [output:null:null.0] worker #0 started
+[2026/07/01 13:22:37.758634042] [ info] [sp] stream processor started
+[2026/07/01 13:22:37.758640192] [ info] [output:stdout:stdout.1] worker #0 started
+[2026/07/01 13:22:37.758644002] [ info] [output:file:file.2] worker #0 started
+[2026/07/01 13:22:37.758685961] [ info] [engine] Shutdown Grace Period=5, Shutdown Input Grace Period=2
+[2026/07/01 13:22:42.80075866] [ info] [input:tail:tail.0] inotify_fs_add(): inode=6509572970 watch_fd=1 name=/cron-logs/cluster-validation-manual-q4r5c.log

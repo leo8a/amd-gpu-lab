@@ -59,7 +59,7 @@ data:
 
   # NOTE: Using rocm-7.0.2/anp-v1.2.0 stack to match driver version a-77.
   # No rocm-7.2 image with a-77 exists yet upstream (docker.io/rocm/roce-workload).
-  RCCL_WORKLOAD_IMAGE: "docker.io/rocm/roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-77"
+  RCCL_WORKLOAD_IMAGE: "docker.io/rocm/roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-56"
   MPIJOB_WAIT_TIME: "240"
   DEBUG_DELAY: "20"
   WAIT_FOR_WORKERS: "true"

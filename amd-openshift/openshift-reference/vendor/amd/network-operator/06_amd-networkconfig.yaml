@@ -27,8 +27,8 @@ spec:
     # - 1.110.0: Has both .el9 and .uek.el9 variants, but uses old naming (tawk_ipc with underscore)
     # - RDMA minimum required version: 1.117.5-a-28
     #
-    # Target NIC firmware version: 1.117.5-a-77 (matches current firmware on NICs)
-    version: "1.117.5-a-77"
+    # Target NIC firmware version: 1.117.5-a-56 (matches current firmware on NICs)
+    version: "1.117.5-a-56"
 
     # NOTE: spec.driver.blacklist is NOT supported on OpenShift — use MachineConfig instead (see 04_amd-ionic-blacklist.yaml).
     # https://github.com/pensando/network-operator/blob/main/docs/drivers/drivers.md#out-of-tree-driver-installation-by-amd-network-operator

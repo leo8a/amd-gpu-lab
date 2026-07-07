@@ -25,3 +25,6 @@ resources:
   # Note: Update image tags (roce-workload, network-operator-utils) and CronJob schedule as needed
   #- https://instinct.docs.amd.com/projects/network-operator/en/latest/_downloads/4194a713ba2e2dae336c93fe485e3dda/cluster-validation-job.yaml
   - cluster-validation-job.yaml
+
+patches:
+  - path: patches/mpi-operator-pull-secret.yaml

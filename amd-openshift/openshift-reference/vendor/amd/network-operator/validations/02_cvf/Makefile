@@ -23,6 +23,11 @@ default: help
 deploy: ## Deploy the cluster validation framework (MPI Operator, CronJob, ConfigMaps)
 	@echo "" ; echo "Deploying cluster validation framework..."
 	@oc apply --server-side -k .
+	@echo "Syncing Docker Hub pull secret to mpi-operator namespace..."
+	@oc get secret dockerhub-pull-secret -n mpi-operator >/dev/null 2>&1 || \
+		oc get secret pull-secret -n openshift-config -o jsonpath='{.data.\.dockerconfigjson}' \
+		| base64 -d \
+		| oc create secret docker-registry dockerhub-pull-secret -n mpi-operator --from-file=.dockerconfigjson=/dev/stdin
 	@oc wait deployment/mpi-operator -n mpi-operator --for=condition=available --timeout=$(TIMEOUT)
 	@echo "✓ Cluster validation framework deployed"
 

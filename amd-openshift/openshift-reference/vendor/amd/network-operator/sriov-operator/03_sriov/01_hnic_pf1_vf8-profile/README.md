@@ -33,7 +33,7 @@ cat /sys/class/net/enp9s0np0/device/sriov_numvfs    # Returns 8 (if configured)
 - **NIC profile updated to `hnic_pf1_vf8`** (see [Update AI NIC Profile](../../docs/update-ai-nic-profile.md))
 - **Firmware partitions A and B synchronized** to same version (see [Update AI NIC Firmware](../../docs/update-ai-nic-firmware.md))
 - **Node rebooted** after profile update to activate VF capability
-- **AMD Device Plugin ConfigMap updated** with `isRdma: false` (see `../../07_amd-device-plugin-config.yaml`)
+- **AMD Device Plugin ConfigMap updated** with `isRdma: false` (see `../../08_amd-device-plugin-config.yaml`)
 - Nodes labeled with `feature.node.kubernetes.io/amd-nic=true`
 
 **Check current NIC profile** (`totalvfs=8` → hnic_pf1_vf8, `totalvfs=1` → pf1_vf1, `totalvfs=0` → default):
@@ -140,7 +140,7 @@ oc get nodes -ojson | jq '.items[].status.allocatable | with_entries(select(.key
 **Solution:** Apply the ConfigMap with `isRdma: false`:
 
 ```bash
-oc apply -f ../../07_amd-device-plugin-config.yaml
+oc apply -f ../../08_amd-device-plugin-config.yaml
 
 # Restart device plugin pods to pick up new config
 oc delete pods -n openshift-amd-network -l app.kubernetes.io/name=device-plugin

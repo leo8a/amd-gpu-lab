@@ -8,17 +8,17 @@ resources:
   - 02_amd-network-og.yaml
   - 03_amd-network-sub.yaml
   - 04_amd-ionic-blacklist.yaml
+  - 05_amd-disable-acs.yaml
 
   # TODO: Enable RDMA exclusive namespace mode (ib_core.netns_mode=0).
   # Without this, pods see ALL RDMA devices on the node instead of only the assigned one.
   # Requires the `rdma` CNI plugin in the NAD plugin chain ({"type": "rdma"}) to move RDMA
   # devices into the pod network namespace — but the rdma binary is not shipped in the
   # k8s-cni-plugins image, and NADs need to be updated to include it.
-  # - 05_rdma-namespace-mode.yaml
+  # - 06_rdma-namespace-mode.yaml
 
-  - 06_amd-networkconfig.yaml
-  - 07_amd-device-plugin-config.yaml
-  - 08_amd-disable-acs.yaml
+  - 07_amd-networkconfig.yaml
+  - 08_amd-device-plugin-config.yaml
 
 
 # -----------------------------------------------------------------------------

@@ -18,7 +18,7 @@ All [01_multi-node-cpu prerequisites](../01_multi-node-cpu/README.md#prerequisit
 
 ```bash
 # Check GPU BAR0 covers full VRAM (should show 256G for MI325X)
-oc debug node/<node> -- chroot /host lspci -d 1002: -v | grep -E "Region 0.*prefetchable"
+oc debug node/<node> -- chroot /host lspci -d 1002: -v | grep "prefetchable.*size=256G"
 
 # Check GPU allocatable
 oc get nodes -o json | jq '.items[] | {name: .metadata.name, gpu: .status.allocatable["amd.com/gpu"]}'

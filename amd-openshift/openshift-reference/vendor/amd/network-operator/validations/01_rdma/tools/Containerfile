@@ -1,0 +1,35 @@
+FROM quay.io/centos/centos:stream9 AS builder
+
+RUN dnf install -y \
+      gcc gcc-c++ make automake autoconf libtool git \
+      libibverbs-devel librdmacm-devel libibumad-devel pciutils-devel \
+    && dnf clean all
+
+RUN echo -e '[ROCm-6.4.1]\nname=ROCm 6.4.1\nbaseurl=https://repo.radeon.com/rocm/el9/6.4.1/main\nenabled=1\ngpgcheck=0' \
+      > /etc/yum.repos.d/rocm.repo && \
+    dnf install -y rocm-hip-runtime-devel && \
+    dnf clean all
+
+RUN git clone https://github.com/linux-rdma/perftest.git /perftest && \
+    cd /perftest && ./autogen.sh && \
+    ./configure --prefix=/usr/local --enable-rocm --with-rocm=/opt/rocm && \
+    make -j$(nproc) && make install
+
+FROM quay.io/centos/centos:stream9
+
+RUN echo -e '[ROCm-6.4.1]\nname=ROCm 6.4.1\nbaseurl=https://repo.radeon.com/rocm/el9/6.4.1/main\nenabled=1\ngpgcheck=0' \
+      > /etc/yum.repos.d/rocm.repo && \
+    dnf install -y \
+      rocm-hip-runtime rocm-smi-lib libdrm-devel \
+      perftest libibverbs-utils rdma-core \
+      iproute iputils \
+    && dnf clean all
+
+COPY --from=builder /usr/local/bin/ib_* /usr/local/bin/
+
+ENV PATH="/opt/rocm/bin:${PATH}"
+
+LABEL name="amd-tools" \
+      summary="RDMA/GDR validation tools for AMD Pensando NICs + AMD GPUs" \
+      description="CentOS Stream 9 with perftest built with --enable-rocm \
+(ib_write_bw --use_rocm for GPUDirect RDMA), ionic RDMA provider, and network utilities."

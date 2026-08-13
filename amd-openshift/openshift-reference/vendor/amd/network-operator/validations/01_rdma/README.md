@@ -22,6 +22,15 @@ Validates AMD NIC assignment, RDMA device visibility, and bandwidth with AMD Pen
 | Physical connectivity    | At least 2 nodes with AI NICs connected (carrier up) — required for multi-node tests                            |
 | Container images         | `quay.io/lochoa/amd-tools:latest` (CPU), `quay.io/lochoa/amd-tools:gdr` (GDR)                                   |
 
+## Expected Results (Dell XE9785L / MI355X, OCP 4.21)
+
+| Test                 | BW (Gb/s) | Device  | Notes                               |
+| -------------------- | --------- | ------- | ----------------------------------- |
+| `single-pod`         | —         | —       | 8 ionic + 4 mlx5 visible, 400G link |
+| `multi-node-cpu`     | ~397      | ionic_6 | 8 QPs, 1 MB messages                |
+| `multi-node-gdr`     | ~313      | ionic_1 | GPU VRAM (gfx950), NUMA-aligned     |
+| `multi-node-gdr-dra` | ~391      | ionic_0 | DRA PCIe root-aligned GPU+NIC       |
+
 ## Quick Start
 
 ```bash

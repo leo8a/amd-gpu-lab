@@ -10,21 +10,27 @@ resources:
   # Code: https://github.com/kubeflow/mpi-operator/blob/master/README.md
   - https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.8.0/deploy/v2beta1/mpi-operator.yaml
 
-  # NetworkAttachmentDefinition for RDMA network (default namespace)
-  - 00_nad-amd-rdma.yaml
+  # --- MI325X Lab at AMD (Supermicro SMC6217/6216) ---
+  #- labs/mi325x/00_nad-amd-rdma.yaml
+  #- labs/mi325x/cluster-validation-config.yaml
+  #- labs/mi325x/cluster-validation-job.yaml
+
+  # --- MI355X Lab at RH (Dell XE9785L) ---
+  - labs/mi355x/00_nad-amd-rdma.yaml
+  - labs/mi355x/cluster-validation-config.yaml
+  - labs/mi355x/cluster-validation-job.yaml
+
+patches:
+  - path: patches/mpi-operator-pull-secret.yaml
+
 
   # AMD Cluster Validation Framework ConfigMap -> centralized configuration hub for the validation workflow
   # Contains: node selection criteria for candidates, MPIJob templates for distributed RCCL tests,
   #           performance thresholds/benchmarks for validation, and candidate selection logic
   # Enables customization of validation tests without modifying the core CronJob logic
   #- https://instinct.docs.amd.com/projects/network-operator/en/latest/_downloads/1f09b6f0983f090ba870c62f134447ba/cluster-validation-config.yaml
-  - cluster-validation-config.yaml
 
   # AMD Cluster Validation CronJob -> orchestrates periodic cluster validation checks on a schedule
   # Contains: CronJob definition, MPIJob template for distributed RCCL tests, and RBAC resources
   # Note: Update image tags (roce-workload, network-operator-utils) and CronJob schedule as needed
   #- https://instinct.docs.amd.com/projects/network-operator/en/latest/_downloads/4194a713ba2e2dae336c93fe485e3dda/cluster-validation-job.yaml
-  - cluster-validation-job.yaml
-
-patches:
-  - path: patches/mpi-operator-pull-secret.yaml

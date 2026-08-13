@@ -11,9 +11,10 @@ spec:
     useSourceImage: true
     driverType: container
     # image: image-registry.openshift-image-registry.svc:5000/$MOD_NAMESPACE/amdgpu_kmod
-    # Ensure driver selected is >6.3.1 (minimum supported version for MI325X), see amdgpu released versions
-    # at https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/user-kernel-space-compat-matrix.html.
-    version: 30.20.1
+    # See amdgpu released versions and RHCOS compatibility at:
+    # https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/user-kernel-space-compat-matrix.html
+    # Search on https://repo.radeon.com/amdgpu/
+    version: "31.30"
 
   # Device Plugin and Node Labeller
   # This section enables:

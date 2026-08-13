@@ -1,0 +1,18 @@
+Node=dell-mi355x-4.rdu4.partner-accelerators.redhat.lab octet=12
+DEL: 192.168.101.2/24 from net1
+ADD: 192.168.104.12/24 on net1 (pci=d9:00.0)
+DEL: 192.168.102.2/24 from net2
+ADD: 192.168.101.12/24 on net2 (pci=06:00.0)
+DEL: 192.168.103.2/24 from net3
+ADD: 192.168.102.12/24 on net3 (pci=3a:00.0)
+DEL: 192.168.104.2/24 from net4
+ADD: 192.168.105.12/24 on net4 (pci=0001:06:00.0)
+DEL: 192.168.105.2/24 from net5
+ADD: 192.168.106.12/24 on net5 (pci=0001:38:00.0)
+DEL: 192.168.106.2/24 from net6
+ADD: 192.168.107.12/24 on net6 (pci=0001:a9:00.0)
+DEL: 192.168.107.2/24 from net7
+ADD: 192.168.108.12/24 on net7 (pci=0001:d6:00.0)
+DEL: 192.168.108.2/24 from net8
+ADD: 192.168.103.12/24 on net8 (pci=ac:00.0)
+All NICs configured.

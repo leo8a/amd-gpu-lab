@@ -1,0 +1,217 @@
+# Per-VLAN NADs for L3-routed multi-NIC RoCE (one NAD per NIC pair).
+#
+# A single shared NAD causes ARP flux when 3+ NICs share one subnet — Linux
+# answers ARP from whichever interface it chooses, breaking RDMA connections.
+#
+# Switch prerequisites (tested on SONiC):
+#   - 7 VLANs (101-107), one per NIC pair across nodes
+#   - Each VLAN: exactly 2 untagged ports (one per server), SVI at .254/24
+#   - Proxy ARP enabled on each VLAN interface
+#
+# The MPIJob worker also needs the nic-routing-setup initContainer for
+# source-based policy routing (see cluster-validation-job.yaml).
+#
+# Ref: https://instinct.docs.amd.com/projects/cluster-documentation/latest/how-to/roce-network-config.html
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-101
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-101",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.101.0/24",
+            "exclude": ["192.168.101.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-102
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-102",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.102.0/24",
+            "exclude": ["192.168.102.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-103
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-103",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.103.0/24",
+            "exclude": ["192.168.103.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-104
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-104",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.104.0/24",
+            "exclude": ["192.168.104.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-105
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-105",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.105.0/24",
+            "exclude": ["192.168.105.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-106
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-106",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.106.0/24",
+            "exclude": ["192.168.106.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: amd-host-device-nad-107
+  namespace: default
+  annotations:
+    k8s.v1.cni.cncf.io/resourceName: amd.com/nic
+spec:
+  config: |
+    {
+      "cniVersion": "1.0.0",
+      "name": "amd-host-device-nad-107",
+      "plugins": [
+        {
+          "type": "amd-host-device",
+          "mtu": 9000,
+          "ipam": {
+            "type": "whereabouts",
+            "range": "192.168.107.0/24",
+            "exclude": ["192.168.107.254/32"]
+          }
+        },
+        {
+          "type": "tuning",
+          "mtu": 9000
+        }
+      ]
+    }

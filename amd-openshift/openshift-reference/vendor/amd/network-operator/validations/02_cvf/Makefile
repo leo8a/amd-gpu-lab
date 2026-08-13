@@ -47,12 +47,15 @@ teardown: ## Remove all cluster validation resources and clean node labels
 ##@ Run
 
 .PHONY: run
-run: ## Trigger a manual validation run (cleans stale labels first)
+run: ## Trigger a manual validation run (cleans stale labels and leftover resources first)
 	@echo "" ; echo "Triggering manual cluster validation..."
 	@oc label nodes --all amd.com/cluster-validation-status- 2>/dev/null || true
 	@oc label nodes --all amd.com/cluster-validation-candidate- 2>/dev/null || true
 	@oc annotate nodes --all amd.com/cluster-validation-last-run-timestamp- 2>/dev/null || true
 	@oc delete job cluster-validation-manual --ignore-not-found
+	@oc delete mpijobs --all -n $(NAMESPACE) --ignore-not-found 2>/dev/null || true
+	@oc delete jobs -n $(NAMESPACE) -l amd.com/cluster-validation-created=true --ignore-not-found 2>/dev/null || true
+	@for pod in $$(oc get pods -n $(NAMESPACE) --no-headers -o name 2>/dev/null | grep cvf-test-runner); do oc delete $$pod -n $(NAMESPACE) --ignore-not-found; done
 	@oc create job --from=cronjob/cluster-validation-cron-job cluster-validation-manual
 	@echo "Waiting for job pod to start..."
 	@oc wait --for=condition=Ready pod -l job-name=cluster-validation-manual --timeout=$(TIMEOUT)

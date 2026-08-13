@@ -1,0 +1,59 @@
+
+Wed Aug  5 15:06:36 UTC 2026: ===Step 1: Determining candidate nodes===
+[Node Selection] Using node selector: feature.node.kubernetes.io/amd-gpu=true,feature.node.kubernetes.io/amd-nic=true
+[Node Selection] Node dell-mi355x-3.rdu4.partner-accelerators.redhat.lab is idle (allocated: GPU=0, NIC=0, VNIC=0)
+[Node Selection] Node dell-mi355x-4.rdu4.partner-accelerators.redhat.lab is idle (allocated: GPU=0, NIC=0, VNIC=0)
+[Node Selection] Reached desired candidate count (2 / 2)
+--------------------[ Node Selection Summary ]--------------------
+Timestamp:                          Wed Aug  5 15:06:37 UTC 2026
+Required worker replicas:           2
+Total nodes checked:                2
+Skipped (recently labeled):         0
+Busy (non-idle) nodes:              0
+Candidate nodes (idle):             2
+------------------------------------------------------------------
+Adding candidate label to node: dell-mi355x-3.rdu4.partner-accelerators.redhat.lab
+node/dell-mi355x-3.rdu4.partner-accelerators.redhat.lab labeled
+node/dell-mi355x-3.rdu4.partner-accelerators.redhat.lab annotated
+Adding candidate label to node: dell-mi355x-4.rdu4.partner-accelerators.redhat.lab
+node/dell-mi355x-4.rdu4.partner-accelerators.redhat.lab labeled
+node/dell-mi355x-4.rdu4.partner-accelerators.redhat.lab annotated
+------------------------------------------------------------------
+[Node Selection: Success] Labeled 2 candidate node(s) for cluster validation
+[Node Selection] Candidate nodes labeled this run: dell-mi355x-3.rdu4.partner-accelerators.redhat.lab dell-mi355x-4.rdu4.partner-accelerators.redhat.lab 
+==================================================================
+
+Wed Aug  5 15:06:37 UTC 2026: ===Step 2: Submitting test runner jobs for each candidate node===
+Truncating long job name.. cvf-test-runner-dell-mi355x-3.rdu4.partner-accelerators.redhat.lab-20260805-150637
+Submitting test runner job for node: dell-mi355x-3.rdu4.partner-accelerators.redhat.lab (job: cvf-test-runner-dbe656-20260805-150637)
+job.batch/cvf-test-runner-dbe656-20260805-150637 created
+Truncating long job name.. cvf-test-runner-dell-mi355x-4.rdu4.partner-accelerators.redhat.lab-20260805-150638
+Submitting test runner job for node: dell-mi355x-4.rdu4.partner-accelerators.redhat.lab (job: cvf-test-runner-2f3eaa-20260805-150638)
+job.batch/cvf-test-runner-2f3eaa-20260805-150638 created
+[Test Runner Jobs: Submitted for all candidate nodes]
+
+Wed Aug  5 15:06:40 UTC 2026: Waiting for test runner jobs to complete...
+Waiting for job cvf-test-runner-dbe656-20260805-150637 (node: dell-mi355x-3.rdu4.partner-accelerators.redhat.lab)...
+Job cvf-test-runner-dbe656-20260805-150637 completed successfully ✅ (node: dell-mi355x-3.rdu4.partner-accelerators.redhat.lab)
+Waiting for job cvf-test-runner-2f3eaa-20260805-150638 (node: dell-mi355x-4.rdu4.partner-accelerators.redhat.lab)...
+Job cvf-test-runner-2f3eaa-20260805-150638 completed successfully ✅ (node: dell-mi355x-4.rdu4.partner-accelerators.redhat.lab)
+==================================================================
+Test Runner Jobs Summary:
+  Passed: 2 node(s)
+    Nodes:  dell-mi355x-3.rdu4.partner-accelerators.redhat.lab dell-mi355x-4.rdu4.partner-accelerators.redhat.lab
+  Failed: 0 node(s)
+==================================================================
+Labeling passed test runner nodes...
+  - Node dell-mi355x-3.rdu4.partner-accelerators.redhat.lab: Adding test runner success label
+node/dell-mi355x-3.rdu4.partner-accelerators.redhat.lab labeled
+  - Node dell-mi355x-4.rdu4.partner-accelerators.redhat.lab: Adding test runner success label
+node/dell-mi355x-4.rdu4.partner-accelerators.redhat.lab labeled
+[Test Runner Jobs: 2 node(s) passed, proceeding with RCCL tests]
+==================================================================
+
+Wed Aug  5 15:14:33 UTC 2026: ===Step 3: Submitting MPIJob===
+mpijob.kubeflow.org/cluster-validation-mpi-job-20260805-1514 created
+[MPIJob: Submitted for 2 worker node(s)]
+==================================================================
+
+Wed Aug  5 15:14:33 UTC 2026: ===Step 4: Waiting for MPIJob completion===

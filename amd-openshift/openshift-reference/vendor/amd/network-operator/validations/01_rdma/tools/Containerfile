@@ -1,11 +1,15 @@
+ARG ROCM_VERSION=7.2.4
+
 FROM quay.io/centos/centos:stream9 AS builder
+
+ARG ROCM_VERSION
 
 RUN dnf install -y \
       gcc gcc-c++ make automake autoconf libtool git \
       libibverbs-devel librdmacm-devel libibumad-devel pciutils-devel \
     && dnf clean all
 
-RUN echo -e '[ROCm-6.4.1]\nname=ROCm 6.4.1\nbaseurl=https://repo.radeon.com/rocm/el9/6.4.1/main\nenabled=1\ngpgcheck=0' \
+RUN echo -e "[ROCm-${ROCM_VERSION}]\nname=ROCm ${ROCM_VERSION}\nbaseurl=https://repo.radeon.com/rocm/el9/${ROCM_VERSION}/main\nenabled=1\ngpgcheck=0" \
       > /etc/yum.repos.d/rocm.repo && \
     dnf install -y rocm-hip-runtime-devel && \
     dnf clean all
@@ -17,7 +21,9 @@ RUN git clone https://github.com/linux-rdma/perftest.git /perftest && \
 
 FROM quay.io/centos/centos:stream9
 
-RUN echo -e '[ROCm-6.4.1]\nname=ROCm 6.4.1\nbaseurl=https://repo.radeon.com/rocm/el9/6.4.1/main\nenabled=1\ngpgcheck=0' \
+ARG ROCM_VERSION
+
+RUN echo -e "[ROCm-${ROCM_VERSION}]\nname=ROCm ${ROCM_VERSION}\nbaseurl=https://repo.radeon.com/rocm/el9/${ROCM_VERSION}/main\nenabled=1\ngpgcheck=0" \
       > /etc/yum.repos.d/rocm.repo && \
     dnf install -y \
       rocm-hip-runtime rocm-smi-lib libdrm-devel \

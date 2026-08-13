@@ -1,6 +1,6 @@
 # AMD Cluster Validation Framework (CVF)
 
-Validates GPU health (RVS `gst_single`) and multi-node RDMA/RCCL performance (`all_reduce_perf`, `broadcast_perf`, `reduce_scatter_perf`) across AMD MI325X nodes on OpenShift.
+Validates GPU health (RVS `gst_single`) and multi-node RDMA/RCCL performance (`all_reduce_perf`, `broadcast_perf`, `reduce_scatter_perf`) on OpenShift.
 
 Based on the [AMD Network Operator Cluster Validation Framework](https://instinct.docs.amd.com/projects/network-operator/en/latest/cluster_validation_framework/README.html).
 
@@ -11,6 +11,50 @@ Based on the [AMD Network Operator Cluster Validation Framework](https://instinc
 3. Deploys a CronJob with `submit-mpijob` and `fluent-bit` containers
 4. Runs GPU health checks (RVS) on each candidate node, then multi-node RCCL benchmarks via MPIJobs
 5. Applies node labels based on validation results
+
+## Lab Structure
+
+Lab-specific manifests live under `labs/`. Toggle the active lab by commenting/uncommenting resource lines in `kustomization.yaml`.
+
+```tree
+02_cvf/
+  kustomization.yaml           # toggle between labs
+  labs/
+    mi325x/                    # Supermicro SMC6217/6216 (AMD MI325X lab)
+    mi355x/                    # Dell XE9785L (RH MI355X lab)
+  patches/                     # shared patches
+  Makefile                     # deploy / run / teardown / status / logs
+```
+
+### MI325X Lab (Supermicro SMC6217/6216)
+
+| Parameter          | Value                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| Nodes              | smc6217gpu, smc6216gpu                                                                        |
+| NICs per node      | 7 Pensando DSC3 (400G)                                                                        |
+| PF NICs per worker | 7                                                                                             |
+| VLANs              | 101–107 (one per NIC pair)                                                                    |
+| GPUs per worker    | 8                                                                                             |
+| Worker replicas    | 2                                                                                             |
+| Results            | `labs/mi325x/results/`                                                                        |
+
+### MI355X Lab (Dell XE9785L)
+
+| Parameter          | Value                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------- |
+| Nodes              | dell-mi355x-3, dell-mi355x-4                                                                  |
+| NICs per node      | 8 Pensando DSC3 (400G) — 4 on NUMA 0, 4 on NUMA 1                                             |
+| PF NICs per worker | 8                                                                                             |
+| VLANs              | 101–108 (one per NIC pair)                                                                    |
+| GPUs per worker    | 8                                                                                             |
+| Worker replicas    | 2                                                                                             |
+
+### Available Workload Image Tags
+
+| Tag                                                              | ROCm  | RCCL  | ANP    | Firmware |
+| ---------------------------------------------------------------- | ----- | ----- | ------ | -------- |
+| `ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-77`   | 7.0.2 | 7.0.2 | v1.2.0 | a-77     |
+| `ubuntu24_rocm-7.2_rccl-7.2.0_anp-v1.3.0_ainic-1.117.5-a-56`     | 7.2   | 7.2.0 | v1.3.0 | a-56     |
 
 ## Quick Start
 
@@ -23,36 +67,15 @@ make teardown   # Remove all resources and clean node labels
 make help       # Display available targets
 ```
 
-## Current Configuration
-
-| Parameter           | Value                                                                                            |
-| ------------------- | ------------------------------------------------------------------------------------------------ |
-| Workload image      | `docker.io/rocm/roce-workload:ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-56`    |
-| Test-runner image   | `docker.io/rocm/test-runner:v1.5.0`                                                             |
-| PF NICs per worker  | 7                                                                                                |
-| GPUs per worker     | 8                                                                                                |
-| Worker replicas     | 2                                                                                                |
-| GPU validation      | Enabled (`SKIP_GPU_VALIDATION: "false"`)                                                         |
-| GPU test            | RVS `gst_single` (parallel, 1200s timeout)                                                       |
-| CronJob schedule    | Hourly (default)                                                                                 |
-
-### Available Workload Image Tags
-
-| Tag                                                          | ROCm | RCCL  | ANP   | Firmware |
-| ------------------------------------------------------------ | ---- | ----- | ----- | -------- |
-| `ubuntu24_rocm-7.0.2_rccl-7.0.2_anp-v1.2.0_ainic-1.117.5-a-77` | 7.0.2 | 7.0.2 | v1.2.0 | a-77     |
-| `ubuntu24_rocm-7.2_rccl-7.2.0_anp-v1.3.0_ainic-1.117.5-a-56`   | 7.2   | 7.2.0 | v1.3.0 | a-56     |
-
 ## Files
 
-| File                              | Purpose                                                                  |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| `kustomization.yaml`              | Kustomize entrypoint; pulls MPI Operator v0.8.0 and local manifests      |
-| `00_nad-amd-rdma.yaml`            | NetworkAttachmentDefinition for the RDMA network                         |
-| `cluster-validation-config.yaml`  | ConfigMaps: node selection, RCCL tests, GPU validation, fluentbit config |
-| `cluster-validation-job.yaml`     | CronJob definition, MPIJob template, test-runner template, RBAC          |
-| `Makefile`                        | deploy / run / teardown / status / logs / help targets                   |
-| `results/`                        | Timestamped subdirectories with cronjob and fluentbit logs from manual runs |
+| File                                        | Purpose                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------ |
+| `kustomization.yaml`                        | Kustomize entrypoint; pulls MPI Operator v0.8.0 and lab-specific files   |
+| `labs/<lab>/00_nad-amd-rdma.yaml`           | Per-VLAN NADs for L3-routed multi-NIC RoCE                               |
+| `labs/<lab>/cluster-validation-config.yaml` | ConfigMaps: node selection, RCCL tests, GPU validation, fluentbit        |
+| `labs/<lab>/cluster-validation-job.yaml`    | CronJob, MPIJob template (with init container PCI→subnet mapping), RBAC  |
+| `Makefile`                                  | deploy / run / teardown / status / logs / help targets                   |
 
 ## Check Validation Results
 
@@ -80,12 +103,28 @@ oc describe node | grep "amd.com/gpu-validation-test\|Name:"
 - **GPUs must be allocatable** (`amd.com/gpu >= 1`) on candidate nodes -- DRA partitioning sets `amd.com/gpu: 0`, which prevents test runner pods from scheduling
 - **Full SPX GPUs required** -- the GST performance thresholds assume full SPX GPUs; CPX-partitioned nodes will fail every benchmark
 
+### Switch prerequisites
+
+Each NIC pair across nodes needs its own VLAN to avoid ARP flux (see [issue #7](../../../docs/found-issues.md#7-arp-flux-on-flat-l2-breaks-multi-nic-rccl--cqe-error-12-on-3-nics)). Configure one VLAN per NIC pair on the backend switch:
+
+| Lab    | VLANs   | Subnets                     |
+| ------ | ------- | --------------------------- |
+| MI325X | 101–107 | `192.168.101.0/24` – `.107` |
+| MI355X | 101–108 | `192.168.101.0/24` – `.108` |
+
+Per VLAN:
+
+- 2 untagged ports (one per server, matching the NIC's physical cable)
+- SVI gateway at `192.168.<vlan>.254/24`
+- Proxy ARP enabled
+
 ## Configuration Notes
 
-Before deployment, operators may need to customize:
+Before deployment, customize the active lab's files under `labs/<lab>/`:
 
 - **Image tags**: Update `RCCL_WORKLOAD_IMAGE` and `TEST_RUNNER_IMAGE` in `cluster-validation-config.yaml`
 - **Resource limits**: Ensure `SLOTS_PER_WORKER`, `GPU_PER_WORKER`, and `PF_NIC_PER_WORKER` match the cluster hardware
+- **PCI→subnet mapping**: Update the `nic-routing-setup` init container in `cluster-validation-job.yaml` with the correct PCI BDFs and node hostnames for the target lab
 - **CronJob schedule**: Modify `spec.schedule` in `cluster-validation-job.yaml` to adjust validation frequency
 - **GPU validation**: Set `SKIP_GPU_VALIDATION` to `"true"` to skip GPU health checks and go directly to RCCL tests
 - **Debug mode**: `DEBUG_DELAY` pauses after job completion for troubleshooting (currently 20s)
@@ -130,6 +169,7 @@ arping -c 3 -I <pensando-iface> 10.99.99.1
 
 ## References
 
+- **[RoCE cluster network configuration guide](https://instinct.docs.amd.com/projects/cluster-documentation/latest/how-to/roce-network-config.html#roce-configuration-for-network-switches)** -- switch and NAD configuration for multi-NIC RoCE (L3 routed with /31 subnets to avoid ARP flux)
 - [MPI Operator Introduction](https://medium.com/kubeflow/introduction-to-kubeflow-mpi-operator-and-industry-adoption-296d5f2e6edc)
 - [MPI Operator Documentation](https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/mpi/)
 - [MPI Operator GitHub](https://github.com/kubeflow/mpi-operator/blob/master/README.md)

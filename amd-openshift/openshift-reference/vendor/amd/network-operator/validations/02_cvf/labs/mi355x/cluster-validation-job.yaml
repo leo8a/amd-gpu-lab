@@ -150,14 +150,71 @@ data:
           template:
             metadata:
               annotations:
-                k8s.v1.cni.cncf.io/networks: $$NAD_ANNOTATION
-              labels: 
+                k8s.v1.cni.cncf.io/networks: amd-host-device-nad-101,amd-host-device-nad-102,amd-host-device-nad-103,amd-host-device-nad-104,amd-host-device-nad-105,amd-host-device-nad-106,amd-host-device-nad-107,amd-host-device-nad-108
+              labels:
                 app: rccl-test-worker
             spec:
               # Only schedule on nodes labeled as candidate
               nodeSelector:
                 amd.com/cluster-validation-candidate: "true"        # Must match CANDIDATE_LABEL
               restartPolicy: Never
+              initContainers:
+              - name: nic-routing-setup
+                image: $$RCCL_WORKLOAD_IMAGE
+                imagePullPolicy: IfNotPresent
+                securityContext:
+                  capabilities:
+                    add: [NET_ADMIN]
+                env:
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+                command: ["/bin/bash", "-c"]
+                args:
+                - |
+                  set -e
+                  get_subnet() {
+                    case "$1" in
+                      06:00.0) echo "192.168.101" ;;
+                      3a:00.0) echo "192.168.102" ;;
+                      ac:00.0) echo "192.168.103" ;;
+                      d9:00.0) echo "192.168.104" ;;
+                      0001:06:00.0) echo "192.168.105" ;;
+                      0001:38:00.0) echo "192.168.106" ;;
+                      0001:a9:00.0) echo "192.168.107" ;;
+                      0001:d6:00.0) echo "192.168.108" ;;
+                      *) echo "" ;;
+                    esac
+                  }
+                  case "${NODE_NAME}" in
+                    *mi355x-3*) OCTET=11 ;;
+                    *mi355x-4*) OCTET=12 ;;
+                    *) echo "ERROR: Unknown NODE_NAME=${NODE_NAME}"; exit 1 ;;
+                  esac
+                  echo "Node=${NODE_NAME} octet=${OCTET}"
+                  TABLE=200
+                  for iface in $(ls /sys/class/net/ | grep -E '^net[0-9]+$' | sort -V); do
+                    link=$(readlink /sys/class/net/$iface/device 2>/dev/null || echo "")
+                    [ -z "$link" ] && continue
+                    pci=$(basename "$link" | sed 's/^0000://')
+                    subnet=$(get_subnet "$pci")
+                    [ -z "$subnet" ] && { echo "SKIP: $iface pci=$pci"; continue; }
+                    TARGET_IP="${subnet}.${OCTET}"
+                    GW="${subnet}.254"
+                    for addr in $(ip -4 addr show dev "$iface" | awk '/inet /{print $2}'); do
+                      echo "DEL: $addr from $iface"
+                      ip addr del "$addr" dev "$iface" 2>/dev/null || true
+                    done
+                    echo "ADD: ${TARGET_IP}/24 on $iface (pci=$pci)"
+                    ip addr add "${TARGET_IP}/24" dev "$iface"
+                    ip link set "$iface" up
+                    ip route add "${subnet}.0/24" dev "$iface" table $TABLE 2>/dev/null || true
+                    ip route add default via "$GW" dev "$iface" table $TABLE
+                    ip rule add from "$TARGET_IP" lookup $TABLE priority $TABLE
+                    TABLE=$((TABLE + 1))
+                  done
+                  echo "All NICs configured."
               containers:
               - name: rccl-test-worker
                 image: $$RCCL_WORKLOAD_IMAGE

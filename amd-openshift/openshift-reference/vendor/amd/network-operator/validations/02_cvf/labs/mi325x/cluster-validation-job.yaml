@@ -32,7 +32,7 @@ data:
                   emptyDir: {}
               initContainers:
                 - name: wait-for-worker-pods
-                  image: docker.io/rocm/network-operator-utils:v1.1.0
+                  image: docker.io/rocm/network-operator-utils:v1.2.0
                   imagePullPolicy: IfNotPresent
                   envFrom:
                     - configMapRef:
@@ -51,7 +51,7 @@ data:
               containers:
               - name: rccl-launcher
                 image: $$RCCL_WORKLOAD_IMAGE
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 envFrom:
                   - configMapRef:
                       name: cluster-validation-config
@@ -150,21 +150,77 @@ data:
           template:
             metadata:
               annotations:
-                k8s.v1.cni.cncf.io/networks: $$NAD_ANNOTATION
-              labels: 
+                k8s.v1.cni.cncf.io/networks: amd-host-device-nad-101,amd-host-device-nad-102,amd-host-device-nad-103,amd-host-device-nad-104,amd-host-device-nad-105,amd-host-device-nad-106,amd-host-device-nad-107
+              labels:
                 app: rccl-test-worker
             spec:
               # Only schedule on nodes labeled as candidate
               nodeSelector:
                 amd.com/cluster-validation-candidate: "true"        # Must match CANDIDATE_LABEL
               restartPolicy: Never
+              initContainers:
+              - name: nic-routing-setup
+                image: $$RCCL_WORKLOAD_IMAGE
+                imagePullPolicy: IfNotPresent
+                securityContext:
+                  capabilities:
+                    add: [NET_ADMIN]
+                env:
+                - name: NODE_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: spec.nodeName
+                command: ["/bin/bash", "-c"]
+                args:
+                - |
+                  set -e
+                  get_subnet() {
+                    case "$1" in
+                      09:00.0) echo "192.168.101" ;;
+                      19:00.0) echo "192.168.102" ;;
+                      79:00.0) echo "192.168.103" ;;
+                      69:00.0) echo "192.168.104" ;;
+                      89:00.0) echo "192.168.105" ;;
+                      99:00.0) echo "192.168.106" ;;
+                      f9:00.0) echo "192.168.107" ;;
+                      *) echo "" ;;
+                    esac
+                  }
+                  case "${NODE_NAME}" in
+                    *6216*) OCTET=11 ;;
+                    *6217*) OCTET=12 ;;
+                    *) echo "ERROR: Unknown NODE_NAME=${NODE_NAME}"; exit 1 ;;
+                  esac
+                  echo "Node=${NODE_NAME} octet=${OCTET}"
+                  TABLE=200
+                  for iface in $(ls /sys/class/net/ | grep -E '^net[0-9]+$' | sort -V); do
+                    link=$(readlink /sys/class/net/$iface/device 2>/dev/null || echo "")
+                    [ -z "$link" ] && continue
+                    pci=$(basename "$link" | sed 's/^0000://')
+                    subnet=$(get_subnet "$pci")
+                    [ -z "$subnet" ] && { echo "SKIP: $iface pci=$pci"; continue; }
+                    TARGET_IP="${subnet}.${OCTET}"
+                    GW="${subnet}.254"
+                    for addr in $(ip -4 addr show dev "$iface" | awk '/inet /{print $2}'); do
+                      echo "DEL: $addr from $iface"
+                      ip addr del "$addr" dev "$iface" 2>/dev/null || true
+                    done
+                    echo "ADD: ${TARGET_IP}/24 on $iface (pci=$pci)"
+                    ip addr add "${TARGET_IP}/24" dev "$iface"
+                    ip link set "$iface" up
+                    ip route add "${subnet}.0/24" dev "$iface" table $TABLE 2>/dev/null || true
+                    ip route add default via "$GW" dev "$iface" table $TABLE
+                    ip rule add from "$TARGET_IP" lookup $TABLE priority $TABLE
+                    TABLE=$((TABLE + 1))
+                  done
+                  echo "All NICs configured."
               containers:
               - name: rccl-test-worker
                 image: $$RCCL_WORKLOAD_IMAGE
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 securityContext:
                   capabilities:
-                    add: ["IPC_LOCK"]
+                    add: ["IPC_LOCK", "SYS_CHROOT"]
                 envFrom:
                   - configMapRef:
                       name: cluster-validation-config
@@ -173,10 +229,14 @@ data:
                     amd.com/gpu: $$GPU_PER_WORKER
                     amd.com/nic: $$PF_NIC_PER_WORKER
                     amd.com/vnic: $$VF_NIC_PER_WORKER
+                    memory: "64Gi"
+                    cpu: "32"
                   limits:
                     amd.com/gpu: $$GPU_PER_WORKER
                     amd.com/nic: $$PF_NIC_PER_WORKER
                     amd.com/vnic: $$VF_NIC_PER_WORKER
+                    memory: "192Gi"
+                    cpu: "64"
                 volumeMounts:
                   - name: boot
                     mountPath: /boot
@@ -191,7 +251,7 @@ data:
                 - name: shm
                   emptyDir:
                     medium: Memory
-                    sizeLimit: 16Gi
+                    sizeLimit: 48Gi
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -290,10 +350,13 @@ rules:
     resources: ["events"]
     verbs: ["get", "list", "watch", "create", "update"]
 
-  # Allow listing pods by MPIJob controller wait steps
+  # Allow listing pods and exec for SSH connectivity checks
   - apiGroups: [""]
-    resources: ["pods", "pods/exec", "pods/log"]
+    resources: ["pods", "pods/log"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -328,10 +391,9 @@ spec:
           #nodeName: "nodeA"  # Optional: Schedule the Cronjob on a specified node, and if fluent logging to FILE is enabled, 
                               # Cluster validation logs are present in host-mounted volume on this node.
           restartPolicy: Never
-          initContainers:
+          containers:
             - name: fluent-bit
               image: fluent/fluent-bit:4.2.2
-              restartPolicy: Always
               envFrom:
                 - configMapRef:
                     name: fluentbit-config
@@ -345,9 +407,8 @@ spec:
                 - name: fluentbit-config
                   mountPath: /fluent-bit/etc/
               args: ['-c', '/fluent-bit/etc/fluent-bit.conf']
-          containers:
             - name: submit-mpijob
-              image: docker.io/rocm/network-operator-utils:v1.1.0
+              image: docker.io/rocm/network-operator-utils:v1.2.0
               imagePullPolicy: IfNotPresent
               command: ["/bin/bash", "-c"]
               envFrom:

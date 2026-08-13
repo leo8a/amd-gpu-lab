@@ -22,7 +22,7 @@ oc delete -f "$SCRIPT_DIR"/03_amd-network-sub.yaml --ignore-not-found
 oc -n "$NS" delete csv -l operators.coreos.com/amd-network-operator."$NS"= --ignore-not-found
 oc delete -f "$SCRIPT_DIR"/02_amd-network-og.yaml --ignore-not-found
 oc delete -f "$SCRIPT_DIR"/01_amd-network-ns.yaml --ignore-not-found
-oc delete -f "$SCRIPT_DIR"/00_amd-network-cs.yaml --ignore-not-found
+# oc delete -f "$SCRIPT_DIR"/00_amd-network-cs.yaml --ignore-not-found
 
 # 5. Remove CRDs
 oc delete crd networkconfigs.amd.com --ignore-not-found

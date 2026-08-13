@@ -1,0 +1,663 @@
+
+Thu Aug 13 10:54:44 UTC 2026: ===Step 1: Determining candidate nodes===
+[Node Selection] Using node selector: feature.node.kubernetes.io/amd-gpu=true,feature.node.kubernetes.io/amd-nic=true
+[Node Selection] Node smc6216gpu.partner-accelerators.redhat.lab is idle (allocated: GPU=0, NIC=0, VNIC=0)
+[Node Selection] Node smc6217gpu.partner-accelerators.redhat.lab is idle (allocated: GPU=0, NIC=0, VNIC=0)
+[Node Selection] Reached desired candidate count (2 / 2)
+--------------------[ Node Selection Summary ]--------------------
+Timestamp:                          Thu Aug 13 10:54:46 UTC 2026
+Required worker replicas:           2
+Total nodes checked:                2
+Skipped (recently labeled):         0
+Busy (non-idle) nodes:              0
+Candidate nodes (idle):             2
+------------------------------------------------------------------
+Adding candidate label to node: smc6216gpu.partner-accelerators.redhat.lab
+node/smc6216gpu.partner-accelerators.redhat.lab labeled
+node/smc6216gpu.partner-accelerators.redhat.lab annotated
+Adding candidate label to node: smc6217gpu.partner-accelerators.redhat.lab
+node/smc6217gpu.partner-accelerators.redhat.lab labeled
+node/smc6217gpu.partner-accelerators.redhat.lab annotated
+------------------------------------------------------------------
+[Node Selection: Success] Labeled 2 candidate node(s) for cluster validation
+[Node Selection] Candidate nodes labeled this run: smc6216gpu.partner-accelerators.redhat.lab smc6217gpu.partner-accelerators.redhat.lab 
+==================================================================
+
+Thu Aug 13 10:54:46 UTC 2026: ===Step 2: Submitting test runner jobs for each candidate node===
+SKIP_GPU_VALIDATION is set to true. Skipping test runner jobs.
+==================================================================
+Test Runner Jobs Summary:
+  Passed: 2 node(s)
+    Nodes: smc6216gpu.partner-accelerators.redhat.lab
+smc6217gpu.partner-accelerators.redhat.lab
+  Failed: 0 node(s)
+==================================================================
+SKIP_GPU_VALIDATION is set to true. Skip labelling nodes.
+[Test Runner Jobs: 2 node(s) passed, proceeding with RCCL tests]
+==================================================================
+
+Thu Aug 13 10:54:46 UTC 2026: ===Step 3: Submitting MPIJob===
+mpijob.kubeflow.org/cluster-validation-mpi-job-20260813-1054 created
+[MPIJob: Submitted for 2 worker node(s)]
+==================================================================
+
+Thu Aug 13 10:54:46 UTC 2026: ===Step 4: Waiting for MPIJob completion===
+error: timed out waiting for the condition on mpijobs/cluster-validation-mpi-job-20260813-1054
+Thu Aug 13 11:04:46 UTC 2026: MPIJob cluster-validation-mpi-job-20260813-1054 failed ❌
+[MPIJob Result: Failed]
+==================================================================
+
+Thu Aug 13 11:04:46 UTC 2026: === Step 5: Collecting MPIJob logs ===
+===== LAUNCHER LOGS =====
+Namespace: default
+Waiting for 2 worker pods...
+pod/cluster-validation-mpi-job-20260813-1054-worker-0 condition met
+pod/cluster-validation-mpi-job-20260813-1054-worker-1 condition met
+Checking SSH connectivity across workers...
+Defaulted container "rccl-test-worker" out of: rccl-test-worker, nic-routing-setup (init)
+__ Testing SSH to 10.129.0.156 ...
+__ SSH OK for 10.129.0.156
+__ Testing SSH to 10.128.1.67 ...
+__ SSH OK for 10.128.1.67
+__ SSH connectivity verified across all worker pods.
+/shared/rccl_env.sh: line 13: :#: command not found
+Found 3 tests
+MPI NP = 16
+-------------------------------------------
+Running all_reduce_perf (threshold: 5)...
+Warning: Permanently added 'cluster-validation-mpi-job-20260813-1054-worker-0.cluster-validation-mpi-job-20260813-1054.default.svc' (ED25519) to the list of known hosts.
+Warning: Permanently added 'cluster-validation-mpi-job-20260813-1054-worker-1.cluster-validation-mpi-job-20260813-1054.default.svc' (ED25519) to the list of known hosts.
+# Collective test starting: all_reduce_perf
+# nThread 1 nGpus 1 minBytes 1024 maxBytes 2147483648 step: 2(factor) warmup iters: 20 iters: 6 agg iters: 1 validation: 0 graph: 0
+#
+rccl-tests: Version develop:5272cd1
+# Using devices
+#  Rank  0 Group  0 Pid     31 on cluster-validation-mpi-job-20260813-1054-worker-0 device  0 [0000:05:00] AMD Radeon Graphics
+#  Rank  1 Group  0 Pid     32 on cluster-validation-mpi-job-20260813-1054-worker-0 device  1 [0000:15:00] AMD Radeon Graphics
+#  Rank  2 Group  0 Pid     33 on cluster-validation-mpi-job-20260813-1054-worker-0 device  2 [0000:65:00] AMD Radeon Graphics
+#  Rank  3 Group  0 Pid     34 on cluster-validation-mpi-job-20260813-1054-worker-0 device  3 [0000:75:00] AMD Radeon Graphics
+#  Rank  4 Group  0 Pid     35 on cluster-validation-mpi-job-20260813-1054-worker-0 device  4 [0000:85:00] AMD Radeon Graphics
+#  Rank  5 Group  0 Pid     36 on cluster-validation-mpi-job-20260813-1054-worker-0 device  5 [0000:95:00] AMD Radeon Graphics
+#  Rank  6 Group  0 Pid     37 on cluster-validation-mpi-job-20260813-1054-worker-0 device  6 [0000:e5:00] AMD Radeon Graphics
+#  Rank  7 Group  0 Pid     38 on cluster-validation-mpi-job-20260813-1054-worker-0 device  7 [0000:f5:00] AMD Radeon Graphics
+#  Rank  8 Group  0 Pid     28 on cluster-validation-mpi-job-20260813-1054-worker-1 device  0 [0000:05:00] AMD Radeon Graphics
+#  Rank  9 Group  0 Pid     29 on cluster-validation-mpi-job-20260813-1054-worker-1 device  1 [0000:15:00] AMD Radeon Graphics
+#  Rank 10 Group  0 Pid     30 on cluster-validation-mpi-job-20260813-1054-worker-1 device  2 [0000:65:00] AMD Radeon Graphics
+#  Rank 11 Group  0 Pid     31 on cluster-validation-mpi-job-20260813-1054-worker-1 device  3 [0000:75:00] AMD Radeon Graphics
+#  Rank 12 Group  0 Pid     32 on cluster-validation-mpi-job-20260813-1054-worker-1 device  4 [0000:85:00] AMD Radeon Graphics
+#  Rank 13 Group  0 Pid     33 on cluster-validation-mpi-job-20260813-1054-worker-1 device  5 [0000:95:00] AMD Radeon Graphics
+#  Rank 14 Group  0 Pid     34 on cluster-validation-mpi-job-20260813-1054-worker-1 device  6 [0000:e5:00] AMD Radeon Graphics
+#  Rank 15 Group  0 Pid     35 on cluster-validation-mpi-job-20260813-1054-worker-1 device  7 [0000:f5:00] AMD Radeon Graphics
+cluster-validation-mpi-job-20260813-1054-worker-0:31:31 [0] NCCL INFO Kernel version: 5.14.0-570.122.1.el9_6.x86_64
+cluster-validation-mpi-job-20260813-1054-worker-0:31:31 [0] NCCL INFO Bootstrap: Using eth0:10.129.0.156<0>
+cluster-validation-mpi-job-20260813-1054-worker-0:33:33 [2] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:33:33 [2] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:33:33 [2] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-0:35:35 [4] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:35:35 [4] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:35:35 [4] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-0:31:31 [0] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:31:31 [0] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:31:31 [0] NCCL INFO Could not open kernel conf file
+[cluster-validation-mpi-job-20260813-1054-worker-0:38   :0:38] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[cluster-validation-mpi-job-20260813-1054-worker-0:31   :0:31] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+cluster-validation-mpi-job-20260813-1054-worker-1:28:28 [0] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:28:28 [0] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:28:28 [0] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-1:29:29 [1] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:29:29 [1] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:29:29 [1] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-0:32:32 [1] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:32:32 [1] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:32:32 [1] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-1:30:30 [2] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:30:30 [2] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:30:30 [2] NCCL INFO Could not open kernel conf file
+[cluster-validation-mpi-job-20260813-1054-worker-0:32   :0:32] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+cluster-validation-mpi-job-20260813-1054-worker-1:31:31 [3] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:31:31 [3] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:31:31 [3] NCCL INFO Could not open kernel conf file
+[cluster-validation-mpi-job-20260813-1054-worker-0:33   :0:33] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[cluster-validation-mpi-job-20260813-1054-worker-0:34   :0:34] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[cluster-validation-mpi-job-20260813-1054-worker-0:35   :0:35] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+cluster-validation-mpi-job-20260813-1054-worker-0:34:34 [3] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:34:34 [3] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:34:34 [3] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-0:36:36 [5] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:36:36 [5] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:36:36 [5] NCCL INFO Could not open kernel conf file
+[cluster-validation-mpi-job-20260813-1054-worker-0:36   :0:36] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+cluster-validation-mpi-job-20260813-1054-worker-0:37:37 [6] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:37:37 [6] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:37:37 [6] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-1:32:32 [4] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:32:32 [4] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:32:32 [4] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-1:33:33 [5] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:33:33 [5] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:33:33 [5] NCCL INFO Could not open kernel conf file
+[cluster-validation-mpi-job-20260813-1054-worker-0:37   :0:37] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+cluster-validation-mpi-job-20260813-1054-worker-0:38:38 [7] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-0:38:38 [7] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-0:38:38 [7] NCCL INFO Could not open kernel conf file
+cluster-validation-mpi-job-20260813-1054-worker-1:34:34 [6] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:34:34 [6] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:34:34 [6] NCCL INFO Could not open kernel conf file
+==== backtrace (tid:     33) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f76b3dc8eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f76b3dc90ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f76b3dc92e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f86ba600b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f86bd25c855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f86ba61ced3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f86bd25c4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f86bd1f4099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f86ba5a51ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f86ba5a528b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] *** Process received signal ***
+cluster-validation-mpi-job-20260813-1054-worker-1:35:35 [7] NCCL INFO ROCr version 1.18
+cluster-validation-mpi-job-20260813-1054-worker-1:35:35 [7] NCCL INFO NCCL_DMABUF_ENABLE set by environment to 1.
+cluster-validation-mpi-job-20260813-1054-worker-1:35:35 [7] NCCL INFO Could not open kernel conf file
+==== backtrace (tid:     35) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f58edeebeb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f58edeec0ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f58edeec2e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f58f5f12b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f58f8b6e855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f58f5f2eed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f58f8b6e4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f58f8b06099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f58f5eb71ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f58f5eb728b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-1:35   :0:35] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] Failing at address: 0x21
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 0] [cluster-validation-mpi-job-20260813-1054-worker-1:28   :0:28] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] Failing at address: 0x23
+[cluster-validation-mpi-job-20260813-1054-worker-1:29   :0:29] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+==== backtrace (tid:     31) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f3f96eabeb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f3f96eac0ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f3f96eac2e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f3f9eea8b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f3fa1b04855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f3f9eec4ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f3fa1b044b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f3fa1a9c099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f3f9ee4d1ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f3f9ee4d28b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-1:30   :0:30] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f86ba5c0330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f86ba600b55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [cluster-validation-mpi-job-20260813-1054-worker-1:31   :0:31] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f58f5ed2330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 1] [cluster-validation-mpi-job-20260813-1054-worker-1:32   :0:32] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+==== backtrace (tid:     38) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f7ee8514eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f7ee85150ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f7ee85152e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f7eec50cb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f7eef168855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f7eec528ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f7eef1684b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f7eef100099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f7eec4b11ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f7eec4b128b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-1:33   :0:33] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+[ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f86bd25c855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f86ba61ced3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f86bd25c4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f86bd1f4099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 8] [cluster-validation-mpi-job-20260813-1054-worker-1:34   :0:34] Caught signal 11 (Segmentation fault: address not mapped to object at address (nil))
+==== backtrace (tid:     34) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f5458067eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f54580680ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f54580682e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f545b05eb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f545dcba855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f545b07aed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f545dcba4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f545dc52099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f545b0031ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f545b00328b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] *** Process received signal ***
+==== backtrace (tid:     29) ====
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] Failing at address: 0x1f
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 0] ==== backtrace (tid:     33) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7fa3c0c17eb4]
+==== backtrace (tid:     36) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f6f310e0eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f6f310e10ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f6f310e12e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f6f350dcb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f6f37d38855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f6f350f8ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f6f37d384b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f6f37cd0099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f6f350811ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f6f3508128b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] Failing at address: 0x24
+==== backtrace (tid:     31) ====
+==== backtrace (tid:     37) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f8dad6a7eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f8dad6a80ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f8dad6a82e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f8db169fb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f8db42fb855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f8db16bbed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f8db42fb4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f8db4293099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f8db16441ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f8db164428b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] Failing at address: 0x25
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7fe5c01f7eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7fe5c01f80ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7fe5c01f82e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7fe5c41f0b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7fe5c6e4c855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7fe5c420ced3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7fe5c6e4c4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7fe5c6de4099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7fe5c41951ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7fe5c419528b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+/lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f58f5f12b55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f58f8b6e855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f58f5f2eed3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f58f8b6e4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f58f8b06099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f58f5eb71ca]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7fa3c0c180ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7fa3c0c182e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7fa3c4c0bb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7fa3c7867855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7fa3c4c27ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7fa3c78674b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7fa3c77ff099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7fa3c4bb01ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7fa3c4bb028b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f8db165f330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f8db169fb55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f8db42fb855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] ==== backtrace (tid:     35) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f409409aeb4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] Failing at address: 0x26
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f7eec4cc330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f7eec50cb55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 2] ==== backtrace (tid:     34) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f83a3ee0eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f83a3ee10ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f83a3ee12e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f83abaddb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f83ae739855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f83abaf9ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f83ae7394b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f83ae6d1099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f83aba821ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f83aba8228b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+==== backtrace (tid:     32) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f34b1904eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f34b19050ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f34b19052e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f3cb5901b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f3cb855d855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f3cb591ded3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f3cb855d4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f3cb84f5099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f3cb58a61ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f3cb58a628b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] Failing at address: 0x20
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f3cb58c1330]
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f5f25deaeb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f5f25deb0ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f5f25deb2e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f5f2ddedb55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f5f30a49855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f5f2de09ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f5f30a494b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f5f309e1099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f5f2dd921ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f5f2dd9228b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f86ba5a51ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f86ba5a528b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00033] *** End of error message ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] Failing at address: 0x21
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 0] [cluster-validation-mpi-job-20260813-1054-worker-0:00034] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] Failing at address: 0x22
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f545b01e330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f545b05eb55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f545dcba855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 3] ==== backtrace (tid:     28) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7f1c9cd8beb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f1c9cd8c0ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f1c9cd8c2e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f1ca0d80b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f1ca39dc855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f1ca0d9ced3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f1ca39dc4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f1ca3974099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f1ca0d251ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f1ca0d2528b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f3f9ee68330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f3f9eea8b55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f3fa1b04855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f3f9eec4ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f3fa1b044b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f3fa1a9c099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f3f9ee4d1ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f3f9ee4d28b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00031] *** End of error message ***
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7f409409b0ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7f409409b2e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7f4096891b55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7f40994ed855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7f40968aded3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7f40994ed4b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7f4099485099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7f40968361ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7f409683628b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] Failing at address: 0x23
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f6f3509c330]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f6f350dcb55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f6f37d38855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f6f350f8ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f6f37d384b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 5] ==== backtrace (tid:     30) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7ff2a8b84eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7ff2a8b850ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7ff2a8b852e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7ff2acb7ab55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7ff2af7d6855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7ff2acb96ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7ff2af7d64b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7ff2af76e099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7ff2acb1f1ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7ff2acb1f28b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] Failing at address: 0x1e
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f58f5eb728b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00035] *** End of error message ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] Failing at address: 0x1d
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7fe5c41b0330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 1] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f6f37cd0099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f6f350811ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f6f3508128b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00036] *** End of error message ***
+==== backtrace (tid:     32) ====
+ 0  /root/ucx_build/lib/libucs.so.0(ucs_handle_error+0x2e4) [0x7ffbdc637eb4]
+ 1  /root/ucx_build/lib/libucs.so.0(+0x310ac) [0x7ffbdc6380ac]
+ 2  /root/ucx_build/lib/libucs.so.0(+0x312e8) [0x7ffbdc6382e8]
+ 3  /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25) [0x7ffbe062db55]
+ 4  /root/rccl/build/release/librccl.so.1.0(+0x913855) [0x7ffbe3289855]
+ 5  /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3) [0x7ffbe0649ed3]
+ 6  /root/rccl/build/release/librccl.so.1.0(+0x9134b4) [0x7ffbe32894b4]
+ 7  /root/rccl/build/release/librccl.so.1.0(+0x8ab099) [0x7ffbe3221099]
+ 8  /root/rccl-tests/build/all_reduce_perf() [0x6c7ebb]
+ 9  /root/rccl-tests/build/all_reduce_perf() [0x6c56a8]
+10  /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x7ffbe05d21ca]
+11  /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x7ffbe05d228b]
+12  /root/rccl-tests/build/all_reduce_perf() [0x6bbcf5]
+=================================
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] Failing at address: 0x20
+[ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f8db16bbed3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f8db42fb4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f8db4293099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f8db16441ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f8db164428b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00037] *** End of error message ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] Failing at address: 0x1f
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f5f2ddad330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 1] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f7eef168855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f7eec528ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f7eef1684b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f7eef100099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f7eec4b11ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f7eec4b128b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00038] *** End of error message ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7ffbe05ed330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 1] [cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f3cb5901b55]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f3cb855d855]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f3cb591ded3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f3cb855d4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f3cb84f5099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f3cb58a61ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f3cb58a628b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00032] *** End of error message ***
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7fa3c4bcb330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7fa3c4c0bb55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7fa3c7867855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7fa3c4c27ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7fa3c78674b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 5] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f545b07aed3]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f545dcba4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f545dc52099]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f545b0031ca]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f545b00328b]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-0:00034] *** End of error message ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] Failing at address: 0x1c
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 0] [cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f4096851330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 1] [cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7ff2acb3a330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7fe5c41f0b55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7fe5c6e4c855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7fe5c420ced3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7fe5c6e4c4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7fe5c6de4099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7fe5c41951ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [ 9] [cluster-validation-mpi-job-20260813-1054-worker-1:00034] *** Process received signal ***
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] Signal: Segmentation fault (11)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] Signal code:  (-6)
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] Failing at address: 0x22
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f83aba9d330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f83abaddb55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f83ae739855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 3] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f5f2ddedb55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f5f30a49855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f5f2de09ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f5f30a494b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f5f309e1099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f83abaf9ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f83ae7394b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f83ae6d1099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 8] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7ffbe062db55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7ffbe3289855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7ffbe0649ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7ffbe32894b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7ffbe3221099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7ffbe05d21ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7fa3c77ff099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7fa3c4bb01ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7fa3c4bb028b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00033] *** End of error message ***
+/lib/x86_64-linux-gnu/libc.so.6(+0x45330)[0x7f1ca0d40330]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 1] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f1ca0d80b55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f1ca39dc855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f1ca0d9ced3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 4] /lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7f4096891b55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7f40994ed855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7f40968aded3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f40994ed4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f4099485099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f40968361ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f409683628b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00035] *** End of error message ***
+/lib/x86_64-linux-gnu/libc.so.6(fgets+0x25)[0x7ff2acb7ab55]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 2] /root/rccl/build/release/librccl.so.1.0(+0x913855)[0x7ff2af7d6855]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0xa1ed3)[0x7ff2acb96ed3]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 4] /root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7ff2af7d64b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7ff2af76e099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7ff2acb1f1ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7ff2acb1f28b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7fe5c419528b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00029] *** End of error message ***
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f5f2dd921ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f5f2dd9228b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00031] *** End of error message ***
+/lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f83aba821ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f83aba8228b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00034] *** End of error message ***
+[ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7ffbe05d228b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00032] *** End of error message ***
+/root/rccl/build/release/librccl.so.1.0(+0x9134b4)[0x7f1ca39dc4b4]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 5] /root/rccl/build/release/librccl.so.1.0(+0x8ab099)[0x7f1ca3974099]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 6] /root/rccl-tests/build/all_reduce_perf[0x6c7ebb]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 7] /root/rccl-tests/build/all_reduce_perf[0x6c56a8]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 8] /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca)[0x7f1ca0d251ca]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [ 9] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b)[0x7f1ca0d2528b]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] [10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00028] *** End of error message ***
+[10] /root/rccl-tests/build/all_reduce_perf[0x6bbcf5]
+[cluster-validation-mpi-job-20260813-1054-worker-1:00030] *** End of error message ***
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun noticed that process rank 7 with PID 38 on node cluster-validation-mpi-job-20260813-1054-worker-0.cluster-validation-mpi-job-20260813-1054.default.svc exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------
+MPI rccl-launcher failed. Holding for 660s...
+==================================================================
+Thu Aug 13 11:04:46 UTC 2026: === Step 6: Cleaning up MPIJob ===
+Sleeping 3600 secs before exiting for debugging failure

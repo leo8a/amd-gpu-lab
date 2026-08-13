@@ -46,7 +46,7 @@ nicctl update qos scheduling --priority 3,0,6 --dwrr 99,1,0 --rate-limit 0,0,10
 
 ## 3. DCQCN
 
-Per RDMA device (`ionic_0`–`ionic_6`).
+Per RDMA device (`ionic_0`–`ionic_7`).
 
 ```bash
 nicctl update dcqcn -r <rdma-dev> -i 1 \
@@ -66,6 +66,8 @@ nicctl update dcqcn -r <rdma-dev> -i 1 \
 ## 4. Switch Configuration
 
 The switch must also have PFC enabled on priority 3 for the connected ports. Without end-to-end PFC, `ib_write_bw` will fail with `IBV_WC_RETRY_EXC_ERR` due to packet drops.
+
+For switch-side configuration examples, see the [AMD RoCE Network Configuration Guide](https://instinct.docs.amd.com/projects/cluster-documentation/latest/how-to/roce-network-config.html).
 
 ## Verification
 

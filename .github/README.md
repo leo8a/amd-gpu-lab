@@ -30,23 +30,30 @@ Nightly default: stages 0–5. Stages are selectable via manual dispatch.
 
 Workflow: `nightly-network-validations.yaml` — runs at 01:00 UTC.
 
-### RDMA validation (stages run in parallel)
+### Install
 
-| Stage | Name                | What it validates                         | Duration |
-| ----- | ------------------- | ----------------------------------------- | -------- |
-| 0     | RDMA Single Pod     | RDMA device visibility and NIC attachment | ~3 min   |
-| 1     | RDMA Multi-Node CPU | CPU-to-CPU RDMA bandwidth via ib_write_bw | ~3 min   |
-| 2     | RDMA Multi-Node GDR | GPU-to-GPU RDMA bandwidth (GDR)           | ~3 min   |
+| Stage | Name                   | What it does                                           | Duration |
+| ----- | ---------------------- | ------------------------------------------------------ | -------- |
+| 0     | Install Network Operator | Deploy operator, wait for CSV, verify device plugin  | ~5 min   |
+
+### RDMA validation (sequential, each with cleanup)
+
+| Stage | Name                     | What it validates                                     | Duration |
+| ----- | ------------------------ | ----------------------------------------------------- | -------- |
+| 1     | RDMA Single Pod          | RDMA device visibility and NIC attachment             | ~3 min   |
+| 2     | RDMA Multi-Node CPU      | CPU-to-CPU RDMA bandwidth via ib_write_bw             | ~3 min   |
+| 3     | RDMA Multi-Node GDR      | GPU-to-GPU RDMA bandwidth (GPU-Direct RDMA)           | ~3 min   |
+| 4     | RDMA Multi-Node GDR+DRA  | GDR with DRA-based GPU/NIC PCIe root alignment        | ~5 min   |
 
 ### Cluster Validation Framework (after RDMA)
 
-| Stage | Name                         | What it validates                               | Duration |
-| ----- | ---------------------------- | ----------------------------------------------- | -------- |
-| 3     | Cluster Validation Framework | GPU health + RCCL performance (MPI, multi-node) | ~20 min  |
+| Stage | Name                           | What it validates                               | Duration |
+| ----- | ------------------------------ | ----------------------------------------------- | -------- |
+| 5     | CVF: RCCL Collective Comms     | GPU health + RCCL performance (MPI, multi-node) | ~20 min  |
 
-See the [AMD Cluster Validation Framework documentation](https://instinct.docs.amd.com/projects/network-operator/en/latest/cluster_validation_framework/README.html) for details.
+Uses the [AMD Cluster Validation Framework](https://instinct.docs.amd.com/projects/network-operator/en/latest/cluster_validation_framework/README.html) with Kubeflow MPI Operator for distributed RCCL allreduce/allgather benchmarks across nodes.
 
-Nightly default: all stages (0–3). Stages are selectable via manual dispatch.
+Nightly default: all stages (0–5). Stages are selectable via manual dispatch.
 
 ## Manual dispatch
 

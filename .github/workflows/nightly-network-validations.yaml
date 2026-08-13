@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0=rdma-single, 1=rdma-multi-cpu, 2=rdma-multi-gdr, 3=cluster-validation) or 'all'"
+        description: "Comma-separated stages (0=install, 1=rdma-single, 2=rdma-multi-cpu, 3=rdma-multi-gdr, 4=rdma-multi-gdr-dra, 5=cvf) or 'all'"
         required: false
         default: "all"
 
@@ -16,7 +16,7 @@ concurrency:
 
 env:
   NAMESPACE: openshift-amd-network
-  CI_TOOLS_IMAGE: quay.io/lochoa/ci-tools:latest
+  OPERATOR_DIR: amd-openshift/openshift-reference/vendor/amd/network-operator
   VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/network-operator/validations
 
 jobs:
@@ -25,163 +25,156 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   preflight:
+    name: "Preflight: cleanup & connectivity"
     runs-on: self-hosted
-    timeout-minutes: 2
+    timeout-minutes: 5
     outputs:
       stages: ${{ steps.plan.outputs.stages }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Check cluster connectivity
         run: |
           set -euo pipefail
           oc whoami
           oc version
           oc get nodes
-          NODE_COUNT=$(oc get nodes -l feature.node.kubernetes.io/amd-nic=true --no-headers | wc -l)
-          echo "AMD NIC nodes: $NODE_COUNT"
-          if [[ $NODE_COUNT -lt 1 ]]; then
-            echo "::error::No AMD NIC nodes found"
-            exit 1
-          fi
 
-      - name: Verify device plugin resources
-        run: |
-          set -euo pipefail
-          if ! oc get cm -n "$NAMESPACE" amd-network-operator-device-plugin-config &>/dev/null; then
-            echo "::error::Device plugin ConfigMap missing — apply it with: oc apply -f vendor/amd/network-operator/08_amd-device-plugin-config.yaml"
-            exit 1
-          fi
-
-          NIC_TOTAL=$(oc get nodes -l feature.node.kubernetes.io/amd-nic=true \
-            -o jsonpath='{range .items[*]}{.status.allocatable.amd\.com/nic}{"\n"}{end}' \
-            | awk '{s+=$1} END {print s+0}')
-          echo "Total amd.com/nic allocatable: $NIC_TOTAL"
-          if [[ "$NIC_TOTAL" -lt 1 ]]; then
-            echo "::error::No amd.com/nic resources — device plugin may need a restart (oc delete pods -n $NAMESPACE -l app.kubernetes.io/name=device-plugin)"
-            exit 1
-          fi
+      - name: Cleanup previous operator install
+        run: bash ${OPERATOR_DIR}/cleanup.sh || true
 
       - name: Determine stages to run
         id: plan
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            STAGES_TO_RUN="${{ inputs.stages }}"
-            [[ "$STAGES_TO_RUN" == "all" ]] && STAGES_TO_RUN="0,1,2,3"
+            STAGES="${{ inputs.stages }}"
+            [[ "$STAGES" == "all" ]] && STAGES="0,1,2,3,4,5"
           else
-            STAGES_TO_RUN="0,1,2,3"
+            STAGES="0,1,2,3,4,5"
           fi
-
-          echo "stages=$STAGES_TO_RUN" >> "$GITHUB_OUTPUT"
-          echo "Stages: $STAGES_TO_RUN"
+          echo "stages=$STAGES" >> "$GITHUB_OUTPUT"
+          echo "Stages: $STAGES"
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # RDMA Validation
+  # Install Network Operator
   # ─────────────────────────────────────────────────────────────────────────────
 
-  rdma-single-pod:
+  install-network-operator:
+    name: "Install: AMD Network Operator"
     needs: preflight
     if: contains(needs.preflight.outputs.stages, '0')
     runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy network operator
+        run: |
+          set -euo pipefail
+          # First pass: CRD-dependent resources (NetworkConfig) will fail before the CSV installs CRDs
+          oc apply -k ${OPERATOR_DIR}/ || true
+          # Second pass: CRDs now exist, NetworkConfig succeeds
+          oc apply -k ${OPERATOR_DIR}/
+      - name: Wait for device plugin
+        run: |
+          set -euo pipefail
+          sleep 30
+          oc wait pods -n ${NAMESPACE} -l app.kubernetes.io/name=device-plugin \
+            --for=condition=ready --timeout=180s
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # RDMA Validations
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  rdma-single-pod:
+    name: "RDMA: Single Pod"
+    needs: [preflight, install-network-operator]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '1')
+      && needs.install-network-operator.result == 'success'
+    runs-on: self-hosted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Run single-pod RDMA test
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make single-pod NAMESPACE=${NAMESPACE}
+      - name: Test
+        run: make -C ${VALIDATIONS_DIR}/01_rdma single-pod
+      - name: Cleanup
+        if: always()
+        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
 
   rdma-multi-node-cpu:
-    needs: preflight
-    if: contains(needs.preflight.outputs.stages, '1')
+    name: "RDMA: Multi-Node CPU"
+    needs: [preflight, install-network-operator, rdma-single-pod]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '2')
+      && needs.install-network-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Run multi-node CPU RDMA bandwidth test
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make multi-node-cpu NAMESPACE=${NAMESPACE}
+      - name: Test
+        run: make -C ${VALIDATIONS_DIR}/01_rdma multi-node-cpu
+      - name: Cleanup
+        if: always()
+        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
 
   rdma-multi-node-gdr:
-    needs: preflight
-    if: contains(needs.preflight.outputs.stages, '2')
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run multi-node GDR RDMA bandwidth test
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make multi-node-gdr NAMESPACE=${NAMESPACE}
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Cluster Validation
-  # ─────────────────────────────────────────────────────────────────────────────
-
-  cluster-validation:
-    needs: [preflight, rdma-single-pod, rdma-multi-node-cpu, rdma-multi-node-gdr]
+    name: "RDMA: Multi-Node GDR"
+    needs: [preflight, install-network-operator, rdma-multi-node-cpu]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '3')
-      && !contains(needs.*.result, 'failure')
+      && needs.install-network-operator.result == 'success'
+    runs-on: self-hosted
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: make -C ${VALIDATIONS_DIR}/01_rdma multi-node-gdr
+      - name: Cleanup
+        if: always()
+        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
+
+  rdma-multi-node-gdr-dra:
+    name: "RDMA: Multi-Node GDR + DRA"
+    needs: [preflight, install-network-operator, rdma-multi-node-gdr]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '4')
+      && needs.install-network-operator.result == 'success'
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: make -C ${VALIDATIONS_DIR}/01_rdma multi-node-gdr-dra
+      - name: Cleanup
+        if: always()
+        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Cluster Validation Framework (CVF)
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  cluster-validation:
+    name: "CVF: RCCL Multi-Node Collective Comms"
+    needs: [preflight, install-network-operator, rdma-multi-node-gdr-dra]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '5')
+      && needs.install-network-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy cluster validation framework
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
-            ${CI_TOOLS_IMAGE} make deploy
-      - name: Run cluster validation
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
-            ${CI_TOOLS_IMAGE} make run
-      - name: Check validation results
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
-            ${CI_TOOLS_IMAGE} make status
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Cleanup
-  # ─────────────────────────────────────────────────────────────────────────────
-
-  cleanup:
-    needs: [preflight, rdma-single-pod, rdma-multi-node-cpu, rdma-multi-node-gdr, cluster-validation]
-    if: always()
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Cleanup all test resources
-        run: |
-          set -uo pipefail
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE} || true
-
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
-            ${CI_TOOLS_IMAGE} make teardown || true
-          echo "Cleanup complete"
+      - name: Deploy
+        run: make -C ${VALIDATIONS_DIR}/02_cvf deploy
+      - name: Run
+        run: make -C ${VALIDATIONS_DIR}/02_cvf run
+      - name: Results
+        run: make -C ${VALIDATIONS_DIR}/02_cvf status
+      - name: Teardown
+        if: always()
+        run: make -C ${VALIDATIONS_DIR}/02_cvf teardown

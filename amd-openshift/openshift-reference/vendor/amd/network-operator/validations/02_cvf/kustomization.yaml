@@ -11,14 +11,14 @@ resources:
   - https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.8.0/deploy/v2beta1/mpi-operator.yaml
 
   # --- MI325X Lab at AMD (Supermicro SMC6217/6216) ---
-  #- labs/mi325x/00_nad-amd-rdma.yaml
-  #- labs/mi325x/cluster-validation-config.yaml
-  #- labs/mi325x/cluster-validation-job.yaml
+  - labs/mi325x/00_nad-amd-rdma.yaml
+  - labs/mi325x/cluster-validation-config.yaml
+  - labs/mi325x/cluster-validation-job.yaml
 
   # --- MI355X Lab at RH (Dell XE9785L) ---
-  - labs/mi355x/00_nad-amd-rdma.yaml
-  - labs/mi355x/cluster-validation-config.yaml
-  - labs/mi355x/cluster-validation-job.yaml
+  # - labs/mi355x/00_nad-amd-rdma.yaml
+  # - labs/mi355x/cluster-validation-config.yaml
+  # - labs/mi355x/cluster-validation-job.yaml
 
 patches:
   - path: patches/mpi-operator-pull-secret.yaml

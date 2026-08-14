@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0=DRA full-gpu, 1-2=partition, 3=DRA partitioned-gpu, 4-5=restore) or 'all'"
+        description: "Comma-separated stages (0=install+DRA full-gpu, 1-2=partition, 3=DRA partitioned-gpu, 4-5=restore) or 'all'"
         required: false
         default: "0,1,2,3,4,5"
 
@@ -17,6 +17,7 @@ concurrency:
 env:
   GPU_NAMESPACE: openshift-amd-gpu
   CI_TOOLS_IMAGE: quay.io/lochoa/ci-tools:latest
+  OPERATOR_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator
   VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/gpu-operator/validations
   SMC6216GPU: smc6216gpu.partner-accelerators.redhat.lab
   SMC6217GPU: smc6217gpu.partner-accelerators.redhat.lab
@@ -27,11 +28,14 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   preflight:
+    name: "Preflight: cleanup & connectivity"
     runs-on: self-hosted
-    timeout-minutes: 2
+    timeout-minutes: 5
     outputs:
       stages: ${{ steps.plan.outputs.stages }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Check cluster connectivity
         run: |
           set -euo pipefail
@@ -44,6 +48,9 @@ jobs:
             echo "::error::No AMD GPU nodes found"
             exit 1
           fi
+
+      - name: Cleanup previous operator install
+        run: bash ${OPERATOR_DIR}/cleanup.sh || true
 
       - name: Determine stages to run
         id: plan
@@ -60,12 +67,45 @@ jobs:
           echo "Stages: $STAGES_TO_RUN"
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # Install GPU Operator
+  # ─────────────────────────────────────────────────────────────────────────────
+
+  install-gpu-operator:
+    name: "Install: AMD GPU Operator"
+    needs: preflight
+    if: contains(needs.preflight.outputs.stages, '0')
+    runs-on: self-hosted
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy GPU operator
+        run: |
+          set -euo pipefail
+          # First pass: CRD-dependent resources (DeviceConfig) will fail before the CSV installs CRDs
+          oc apply -k ${OPERATOR_DIR}/ || true
+          # Wait for OLM to install CSV and register CRDs
+          echo "Waiting for DeviceConfig CRD..."
+          timeout 120 bash -c 'until oc get crd/deviceconfigs.amd.com >/dev/null 2>&1; do sleep 5; done'
+          # Second pass: CRDs now exist, DeviceConfig succeeds
+          oc apply -k ${OPERATOR_DIR}/
+      - name: Wait for device plugin
+        run: |
+          set -euo pipefail
+          sleep 30
+          oc rollout status daemonset/amdgpu-driver-install-device-plugin \
+            -n ${GPU_NAMESPACE} --timeout=180s
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # DRA Full GPU (runs first — GPUs are in default SPX state)
   # ─────────────────────────────────────────────────────────────────────────────
 
   dra-full-gpu:
-    needs: preflight
-    if: contains(needs.preflight.outputs.stages, '0')
+    name: "DRA: Full GPU"
+    needs: [preflight, install-gpu-operator]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '0')
+      && needs.install-gpu-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -83,8 +123,12 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   partition-smc6216gpu:
-    needs: [preflight, dra-full-gpu]
-    if: always()
+    name: "DCM: Partition smc6216gpu (CPX+NPS4)"
+    needs: [preflight, install-gpu-operator, dra-full-gpu]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '1')
+      && needs.install-gpu-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -99,8 +143,12 @@ jobs:
               NODE_NAME=${SMC6216GPU} PROFILE_NAME=cpx-profile-nps4 NAMESPACE=${GPU_NAMESPACE}
 
   partition-smc6217gpu:
-    needs: [preflight, dra-full-gpu]
-    if: always()
+    name: "DCM: Partition smc6217gpu (DPX+NPS2)"
+    needs: [preflight, install-gpu-operator, dra-full-gpu]
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '2')
+      && needs.install-gpu-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -119,8 +167,13 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   dra-partitioned-gpu:
+    name: "DRA: Partitioned GPU"
     needs: [preflight, partition-smc6216gpu, partition-smc6217gpu]
-    if: contains(needs.preflight.outputs.stages, '3')
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '3')
+      && needs.partition-smc6216gpu.result == 'success'
+      && needs.partition-smc6217gpu.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 5
     steps:
@@ -138,8 +191,13 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   restore-smc6216gpu:
-    needs: [dra-partitioned-gpu]
-    if: always()
+    name: "DCM: Restore smc6216gpu (SPX+NPS1)"
+    needs: [preflight, install-gpu-operator, dra-partitioned-gpu]
+    continue-on-error: true
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '4')
+      && needs.install-gpu-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -154,8 +212,13 @@ jobs:
               NODE_NAME=${SMC6216GPU} PROFILE_NAME=spx-profile-nps1 NAMESPACE=${GPU_NAMESPACE}
 
   restore-smc6217gpu:
-    needs: [dra-partitioned-gpu]
-    if: always()
+    name: "DCM: Restore smc6217gpu (SPX+NPS1)"
+    needs: [preflight, install-gpu-operator, dra-partitioned-gpu]
+    continue-on-error: true
+    if: >-
+      always()
+      && contains(needs.preflight.outputs.stages, '5')
+      && needs.install-gpu-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
@@ -174,7 +237,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
 
   cleanup:
-    needs: [partition-smc6216gpu, partition-smc6217gpu, dra-partitioned-gpu, restore-smc6216gpu, restore-smc6217gpu, dra-full-gpu]
+    needs: [install-gpu-operator, dra-full-gpu, partition-smc6216gpu, partition-smc6217gpu, dra-partitioned-gpu, restore-smc6216gpu, restore-smc6217gpu]
     if: always()
     runs-on: self-hosted
     timeout-minutes: 5

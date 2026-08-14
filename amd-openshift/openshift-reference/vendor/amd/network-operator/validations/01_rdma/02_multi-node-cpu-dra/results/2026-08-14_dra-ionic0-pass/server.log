@@ -1,0 +1,82 @@
+=== RDMA CPU-DRA Server Starting ===
+--- DRA device verification ---
+Using: ionic_0 (PCI: 0000:09:00.0)
+hca_id:	ionic_0
+	transport:			InfiniBand (0)
+	fw_ver:				1.117.5-a-56
+	node_guid:			0690:81ff:fe36:72a8
+	sys_image_guid:			0690:81ff:fe36:72a8
+	vendor_id:			0x1dd8
+	vendor_part_id:			4098
+	hw_ver:				0x0
+	phys_port_cnt:			1
+		port:	1
+			state:			PORT_ACTIVE (4)
+			max_mtu:		4096 (5)
+			active_mtu:		4096 (5)
+			sm_lid:			0
+			port_lid:		0
+			port_lmc:		0x00
+			link_layer:		Ethernet
+
+--- configuring RDMA NIC IP ---
+Server IP: 192.168.101.10 on enp9s0np0
+--- starting ib_write_bw server on port 10000 ---
+ WARNING: BW peak won't be measured in this run.
+
+************************************
+* Waiting for client to connect... *
+************************************
+---------------------------------------------------------------------------------------
+                    RDMA_Write Post List BW Test
+ Dual-port       : OFF		Device         : ionic_0
+ Number of qps   : 8		Transport type : IB
+ Connection type : RC		Using SRQ      : OFF
+ PCIe relax order: ON		Lock-free      : OFF
+ ibv_wr* API     : OFF		Using Enhanced Reorder      : OFF
+ Post List       : 64
+ CQ Moderation   : 1
+ CQE Poll Batch  : Dynamic
+ Mtu             : 4096[B]
+ Link type       : Ethernet
+ GID index       : 1
+ Max inline data : 0[B]
+ rdma_cm QPs	 : OFF
+ Data ex. method : Ethernet
+---------------------------------------------------------------------------------------
+ local address: LID 0000 QPN 0x0002 PSN 0x71933d RKey 0x000102 VAddr 0x007fb3e39d6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0800 PSN 0xa7e8e3 RKey 0x000102 VAddr 0x007fb3e3ad6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0003 PSN 0x6f9bf1 RKey 0x000102 VAddr 0x007fb3e3bd6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0801 PSN 0xf28aec RKey 0x000102 VAddr 0x007fb3e3cd6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0004 PSN 0x16e48f RKey 0x000102 VAddr 0x007fb3e3dd6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0802 PSN 0x842045 RKey 0x000102 VAddr 0x007fb3e3ed6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0005 PSN 0xc57cc0 RKey 0x000102 VAddr 0x007fb3e3fd6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ local address: LID 0000 QPN 0x0803 PSN 0xefd9b9 RKey 0x000102 VAddr 0x007fb3e40d6000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:10
+ remote address: LID 0000 QPN 0x0002 PSN 0x4391fc RKey 0x000104 VAddr 0x007f60d3f4b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0800 PSN 0x4fa36 RKey 0x000104 VAddr 0x007f60d404b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0003 PSN 0x248e48 RKey 0x000104 VAddr 0x007f60d414b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0801 PSN 0xebe3f7 RKey 0x000104 VAddr 0x007f60d424b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0004 PSN 0x65b03e RKey 0x000104 VAddr 0x007f60d434b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0802 PSN 0x6413c8 RKey 0x000104 VAddr 0x007f60d444b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0005 PSN 0xabdd87 RKey 0x000104 VAddr 0x007f60d454b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+ remote address: LID 0000 QPN 0x0803 PSN 0x6dd874 RKey 0x000104 VAddr 0x007f60d464b000
+ GID: 00:00:00:00:00:00:00:00:00:00:255:255:192:168:101:11
+---------------------------------------------------------------------------------------
+ #bytes     #iterations    BW peak[Gb/sec]    BW average[Gb/sec]   MsgRate[Mpps]
+ 1048576    284273           0.00               397.44 		     0.047378
+---------------------------------------------------------------------------------------

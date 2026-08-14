@@ -14,11 +14,7 @@ spec:
       "plugins": [
         {
           "type": "amd-host-device",
-          "mtu": 9000,
-          "ipam": {
-            "type": "whereabouts",
-            "range": "192.168.200.0/24"
-          }
+          "mtu": 9000
         },
         {
           "type": "tuning",
@@ -26,8 +22,3 @@ spec:
         }
       ]
     }
-
-# Use case: RDMA workloads (vLLM, RCCL), multi-GPU training
-# Pod annotation: k8s.v1.cni.cncf.io/networks: amd-rdma-net
-# Resource request: amd.com/nic: "1" (Physical Function - AMD Pensando NICs don't support SR-IOV)
-# Security: Add IPC_LOCK capability

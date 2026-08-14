@@ -22,7 +22,7 @@ oc delete -f "$SCRIPT_DIR"/03_amd-gpu-sub.yaml --ignore-not-found
 oc -n "$NS" delete csv -l operators.coreos.com/amd-gpu-operator."$NS"= --ignore-not-found
 oc delete -f "$SCRIPT_DIR"/02_amd-gpu-og.yaml --ignore-not-found
 oc delete -f "$SCRIPT_DIR"/01_amd-gpu-ns.yaml --ignore-not-found
-oc delete -f "$SCRIPT_DIR"/00_amd-gpu-cs.yaml --ignore-not-found
+# oc delete -f "$SCRIPT_DIR"/00_amd-gpu-cs.yaml --ignore-not-found
 
 # 5. Remove CRDs
 oc delete crd deviceconfigs.amd.com remediationworkflowstatuses.amd.com --ignore-not-found

@@ -6,7 +6,7 @@ metadata:
   namespace: openshift-marketplace
 spec:
   sourceType: grpc
-  image: <registry.io>/amd-network-operator-catalog:<version>
+  image: quay.io/lochoa/rocm/amd-network-operator-catalog:main
   displayName: AMD Network Operators
   publisher: AMD
   updateStrategy:

@@ -6,7 +6,7 @@ metadata:
   namespace: openshift-marketplace
 spec:
   sourceType: grpc
-  image: <registry.io>/amd-gpu-operator-index:<version>
+  image: quay.io/lochoa/rocm/amd-gpu-operator-index:main
   displayName: AMD GPU Operators
   publisher: AMD
   updateStrategy:

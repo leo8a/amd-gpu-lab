@@ -1,0 +1,22 @@
+# ResourceClaimTemplate requesting ionic_0 (PCI 0000:09:00.0) specifically.
+# Requires: DRANET (dra.net) driver publishing device attributes including
+# pciAddress in its ResourceSlices.
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: dra-nic-ionic0
+  namespace: openshift-amd-network
+spec:
+  spec:
+    devices:
+      requests:
+        - name: nic
+          exactly:
+            deviceClassName: dranet
+            count: 1
+            selectors:
+              - cel:
+                  expression: >-
+                    device.attributes['dra.net'].rdma == true &&
+                    device.attributes['dra.net'].pciAddress == '0000:09:00.0'

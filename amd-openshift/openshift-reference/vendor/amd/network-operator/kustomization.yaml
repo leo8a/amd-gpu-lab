@@ -19,16 +19,3 @@ resources:
 
   - 07_amd-networkconfig.yaml
   - 08_amd-device-plugin-config.yaml
-
-
-# -----------------------------------------------------------------------------
-# Operator Releases
-# -----------------------------------------------------------------------------
-patches:
-  - target:
-      kind: CatalogSource
-      name: amd-network-operators
-    patch: |-
-      - op: replace
-        path: /spec/image
-        value: quay.io/lochoa/rocm/amd-network-operator-catalog:main

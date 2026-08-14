@@ -1,5 +1,6 @@
-# ResourceClaimTemplate requesting one AMD GPU and one RDMA-capable NIC,
+# ResourceClaimTemplate requesting one AMD GPU and ionic_1 (PCI 0000:19:00.0),
 # constrained to the same PCIe root complex via DRA matchAttribute.
+# ionic_1 shares PCIe root pci0000:10 with GPU 0000:15:00.0.
 #
 # Requires: AMD GPU DRA driver (gpu.amd.com) + DRANET (dra.net) both
 # publishing resource.kubernetes.io/pcieRoot in their ResourceSlices.
@@ -26,7 +27,9 @@ spec:
             count: 1
             selectors:
               - cel:
-                  expression: "device.attributes['dra.net'].rdma == true && device.attributes['dra.net'].pciVendor == 'AMD Pensando Systems'"
+                  expression: >-
+                    device.attributes['dra.net'].rdma == true &&
+                    device.attributes['dra.net'].pciAddress == '0000:19:00.0'
       constraints:
         - requests: [gpu, nic]
           matchAttribute: "resource.kubernetes.io/pcieRoot"

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       stages:
-        description: "Comma-separated stages (0=install, 1=rdma-single, 2=rdma-multi-cpu, 3=rdma-multi-gdr, 4=rdma-multi-gdr-dra, 5=cvf) or 'all'"
+        description: "Comma-separated stages (0=install, 1=rdma-single, 2=rdma-cpu-dra, 3=rdma-gdr-dra, 4=cvf) or 'all'"
         required: false
         default: "all"
 
@@ -50,9 +50,9 @@ jobs:
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             STAGES="${{ inputs.stages }}"
-            [[ "$STAGES" == "all" ]] && STAGES="0,1,2,3,4,5"
+            [[ "$STAGES" == "all" ]] && STAGES="0,1,2,3,4"
           else
-            STAGES="0,1,2,3,4,5"
+            STAGES="0,1,2,3,4"
           fi
           echo "stages=$STAGES" >> "$GITHUB_OUTPUT"
           echo "Stages: $STAGES"
@@ -114,15 +114,18 @@ jobs:
             -w /workspace/${VALIDATIONS_DIR}/01_rdma \
             ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE}
 
-  rdma-multi-node-cpu:
-    name: "RDMA: Multi-Node CPU"
+  # Stages 2 and 3 run in parallel after single-pod.
+  # They use different NICs (ionic_0 vs ionic_1) so they don't conflict.
+
+  rdma-multi-node-cpu-dra:
+    name: "RDMA: Multi-Node CPU + DRA"
     needs: [preflight, install-network-operator, rdma-single-pod]
     if: >-
       always()
       && contains(needs.preflight.outputs.stages, '2')
       && needs.install-network-operator.result == 'success'
     runs-on: self-hosted
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Test
@@ -131,34 +134,7 @@ jobs:
             -v "$GITHUB_WORKSPACE:/workspace:z" \
             -v "$HOME/.kube:/root/.kube:z" \
             -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make multi-node-cpu NAMESPACE=${NAMESPACE}
-      - name: Cleanup
-        if: always()
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE}
-
-  rdma-multi-node-gdr:
-    name: "RDMA: Multi-Node GDR"
-    needs: [preflight, install-network-operator, rdma-multi-node-cpu]
-    if: >-
-      always()
-      && contains(needs.preflight.outputs.stages, '3')
-      && needs.install-network-operator.result == 'success'
-    runs-on: self-hosted
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: |
-          podman run --rm --network=host \
-            -v "$GITHUB_WORKSPACE:/workspace:z" \
-            -v "$HOME/.kube:/root/.kube:z" \
-            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
-            ${CI_TOOLS_IMAGE} make multi-node-gdr NAMESPACE=${NAMESPACE}
+            ${CI_TOOLS_IMAGE} make multi-node-cpu-dra NAMESPACE=${NAMESPACE}
       - name: Cleanup
         if: always()
         run: |
@@ -170,10 +146,10 @@ jobs:
 
   rdma-multi-node-gdr-dra:
     name: "RDMA: Multi-Node GDR + DRA"
-    needs: [preflight, install-network-operator, rdma-multi-node-gdr]
+    needs: [preflight, install-network-operator, rdma-single-pod]
     if: >-
       always()
-      && contains(needs.preflight.outputs.stages, '4')
+      && contains(needs.preflight.outputs.stages, '3')
       && needs.install-network-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 10
@@ -201,10 +177,10 @@ jobs:
 
   cluster-validation:
     name: "CVF: RCCL Multi-Node Collective Comms"
-    needs: [preflight, install-network-operator, rdma-multi-node-gdr-dra]
+    needs: [preflight, install-network-operator, rdma-multi-node-cpu-dra, rdma-multi-node-gdr-dra]
     if: >-
       always()
-      && contains(needs.preflight.outputs.stages, '5')
+      && contains(needs.preflight.outputs.stages, '4')
       && needs.install-network-operator.result == 'success'
     runs-on: self-hosted
     timeout-minutes: 30

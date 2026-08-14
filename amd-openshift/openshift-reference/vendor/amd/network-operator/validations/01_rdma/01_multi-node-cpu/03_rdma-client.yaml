@@ -23,25 +23,36 @@ spec:
         - name: client
           image: quay.io/lochoa/amd-tools:latest
           imagePullPolicy: Always
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           command: ["sh", "-c"]
           args:
             - |
               echo "=== RDMA Multi-Node Bandwidth Validation ==="
-              echo "--- waiting for net1 ---"
-              timeout=60
-              while [ $timeout -gt 0 ]; do
-                if ip addr show net1 2>/dev/null | grep -q "inet "; then
-                  CLIENT_IP=$(ip addr show net1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
-                  echo "Client IP: $CLIENT_IP"
-                  break
-                fi
-                sleep 1
-                timeout=$((timeout - 1))
+
+              echo "--- configuring IP from NIC VLAN ---"
+              PCI=$(readlink /sys/class/net/net1/device 2>/dev/null | xargs basename | sed 's/^0000://')
+              case "$PCI" in
+                09:00.0) SUBNET=101 ;; 19:00.0) SUBNET=102 ;;
+                79:00.0) SUBNET=103 ;; 69:00.0) SUBNET=104 ;;
+                89:00.0) SUBNET=105 ;; 99:00.0) SUBNET=106 ;;
+                f9:00.0) SUBNET=107 ;;
+                *) echo "FAIL: unknown PCI $PCI"; exit 1 ;;
+              esac
+              case "$NODE_NAME" in *6216*) OCTET=11 ;; *6217*) OCTET=12 ;; *) echo "FAIL: unknown node $NODE_NAME"; exit 1 ;; esac
+              CLIENT_IP="192.168.${SUBNET}.${OCTET}"
+              ip addr flush dev net1 2>/dev/null || true
+              ip addr add "${CLIENT_IP}/24" dev net1
+              ip link set net1 up
+              GW="192.168.${SUBNET}.254"
+              for s in $(seq 101 107); do
+                [ "$s" = "$SUBNET" ] && continue
+                ip route add "192.168.${s}.0/24" via "$GW" dev net1 2>/dev/null || true
               done
-              if [ -z "$CLIENT_IP" ]; then
-                echo "FAIL: net1 not ready"
-                exit 1
-              fi
+              echo "Client IP: $CLIENT_IP (PCI: $PCI, VLAN: $SUBNET)"
 
               echo "--- RDMA device ---"
               RDMA_DEV=$(ibv_devices 2>/dev/null | awk '/ionic/{print $1}' | head -1)
@@ -53,21 +64,19 @@ spec:
               echo "Using: $RDMA_DEV"
               ibv_devinfo -d $RDMA_DEV 2>&1
 
-              echo "--- scanning for server ---"
-              sleep 10
-              for attempt in $(seq 1 5); do
-                for ip in $(seq 1 20); do
-                  TARGET="192.168.200.$ip"
-                  [ "$TARGET" = "$CLIENT_IP" ] && continue
-                  if ping -c 1 -W 2 $TARGET >/dev/null 2>&1; then
-                    SERVER_IP=$TARGET
-                    break 2
-                  fi
-                done
-                sleep 5
+              echo "--- finding server ---"
+              sleep 15
+              if [ "$OCTET" = "11" ]; then SERVER_OCTET=12; else SERVER_OCTET=11; fi
+              SERVER_IP=""
+              for s in $(seq 101 107); do
+                TARGET="192.168.${s}.${SERVER_OCTET}"
+                if ping -c 1 -W 1 $TARGET >/dev/null 2>&1; then
+                  SERVER_IP=$TARGET
+                  break
+                fi
               done
               if [ -z "$SERVER_IP" ]; then
-                echo "FAIL: Server not found on RDMA network"
+                echo "FAIL: Server not found"
                 exit 1
               fi
               echo "Server IP: $SERVER_IP"
@@ -93,7 +102,7 @@ spec:
               amd.com/nic: "1"
           securityContext:
             capabilities:
-              add: ["IPC_LOCK", "NET_RAW"]
+              add: ["IPC_LOCK", "NET_RAW", "NET_ADMIN"]
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

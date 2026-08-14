@@ -16,6 +16,7 @@ concurrency:
 
 env:
   NAMESPACE: openshift-amd-network
+  CI_TOOLS_IMAGE: quay.io/lochoa/ci-tools:latest
   OPERATOR_DIR: amd-openshift/openshift-reference/vendor/amd/network-operator
   VALIDATIONS_DIR: amd-openshift/openshift-reference/vendor/amd/network-operator/validations
 
@@ -83,7 +84,7 @@ jobs:
             --for=condition=ready --timeout=180s
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # RDMA Validations
+  # RDMA Validations (make runs inside ci-tools container)
   # ─────────────────────────────────────────────────────────────────────────────
 
   rdma-single-pod:
@@ -98,10 +99,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test
-        run: make -C ${VALIDATIONS_DIR}/01_rdma single-pod
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make single-pod NAMESPACE=${NAMESPACE}
       - name: Cleanup
         if: always()
-        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE}
 
   rdma-multi-node-cpu:
     name: "RDMA: Multi-Node CPU"
@@ -115,10 +126,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test
-        run: make -C ${VALIDATIONS_DIR}/01_rdma multi-node-cpu
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make multi-node-cpu NAMESPACE=${NAMESPACE}
       - name: Cleanup
         if: always()
-        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE}
 
   rdma-multi-node-gdr:
     name: "RDMA: Multi-Node GDR"
@@ -132,10 +153,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test
-        run: make -C ${VALIDATIONS_DIR}/01_rdma multi-node-gdr
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make multi-node-gdr NAMESPACE=${NAMESPACE}
       - name: Cleanup
         if: always()
-        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE}
 
   rdma-multi-node-gdr-dra:
     name: "RDMA: Multi-Node GDR + DRA"
@@ -149,10 +180,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test
-        run: make -C ${VALIDATIONS_DIR}/01_rdma multi-node-gdr-dra
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make multi-node-gdr-dra NAMESPACE=${NAMESPACE}
       - name: Cleanup
         if: always()
-        run: make -C ${VALIDATIONS_DIR}/01_rdma cleanup
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/01_rdma \
+            ${CI_TOOLS_IMAGE} make cleanup NAMESPACE=${NAMESPACE}
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Cluster Validation Framework (CVF)
@@ -170,11 +211,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Deploy
-        run: make -C ${VALIDATIONS_DIR}/02_cvf deploy
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
+            ${CI_TOOLS_IMAGE} make deploy
       - name: Run
-        run: make -C ${VALIDATIONS_DIR}/02_cvf run
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
+            ${CI_TOOLS_IMAGE} make run
       - name: Results
-        run: make -C ${VALIDATIONS_DIR}/02_cvf status
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
+            ${CI_TOOLS_IMAGE} make status
       - name: Teardown
         if: always()
-        run: make -C ${VALIDATIONS_DIR}/02_cvf teardown
+        run: |
+          podman run --rm --network=host \
+            -v "$GITHUB_WORKSPACE:/workspace:z" \
+            -v "$HOME/.kube:/root/.kube:z" \
+            -w /workspace/${VALIDATIONS_DIR}/02_cvf \
+            ${CI_TOOLS_IMAGE} make teardown

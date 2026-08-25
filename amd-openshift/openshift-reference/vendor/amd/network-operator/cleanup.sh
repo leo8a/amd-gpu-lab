@@ -7,7 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # 1. Remove /validations resources (reverse order of apply)
 oc delete -k "$SCRIPT_DIR"/validations/02_cvf --ignore-not-found
-oc delete -k "$SCRIPT_DIR"/validations/01_rdma/02_multi-node-gdr --ignore-not-found
+oc delete -k "$SCRIPT_DIR"/validations/01_rdma/04_multi-node-gdr-dra --ignore-not-found
+oc delete -k "$SCRIPT_DIR"/validations/01_rdma/03_multi-node-gdr --ignore-not-found
+oc delete -k "$SCRIPT_DIR"/validations/01_rdma/02_multi-node-cpu-dra --ignore-not-found
 oc delete -k "$SCRIPT_DIR"/validations/01_rdma/01_multi-node-cpu --ignore-not-found
 oc delete -k "$SCRIPT_DIR"/validations/01_rdma/00_single-pod --ignore-not-found
 

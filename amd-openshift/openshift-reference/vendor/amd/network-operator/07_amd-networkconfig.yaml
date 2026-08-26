@@ -24,7 +24,6 @@ spec:
     #
     # Available driver versions: https://repo.radeon.com/amdainic/pensando/el9/
     # OpenShift CoreOS requires packages with .el9 kernel variants (all versions seem to provide these).
-    # - 1.110.0: Has both .el9 and .uek.el9 variants, but uses old naming (tawk_ipc with underscore)
     # - RDMA minimum required version: 1.117.5-a-28
     #
     # Target NIC firmware version: 1.117.5-a-56 (matches current firmware on NICs)
@@ -32,8 +31,8 @@ spec:
 
     # NOTE: spec.driver.blacklist is NOT supported on OpenShift — use MachineConfig instead (see 04_amd-ionic-blacklist.yaml).
     # https://github.com/pensando/network-operator/blob/main/docs/drivers/drivers.md#out-of-tree-driver-installation-by-amd-network-operator
-    # https://github.com/pensando/network-operator/blob/main/docs/openshift/installation-guide.md#2-blacklist-in-tree-ionic-driver-recommended
-    blacklist: true
+    # https://github.com/pensando/network-operator/blob/main/docs/installation/openshift-olm.md#2-blacklist-in-tree-ionic-driver-recommended
+    # blacklist: true
 
     # Registry TLS configuration for OpenShift internal registry
     imageRegistryTLS:
@@ -43,25 +42,10 @@ spec:
   # -----------------------------------------------------------------------------
   # Device Plugin & Node Labeller - Detect and label AMD NICs
   # -----------------------------------------------------------------------------
-  # IMPORTANT: Match driver version with NIC firmware version to avoid IPC protocol errors
-  # when using the Node Labeller feature below.
-  # The nicctl tool version must be compatible with the firmware version running on the NICs.
+  # IMPORTANT: Driver version MUST MATCH with NIC firmware version to avoid IPC protocol errors,
+  # or incompatibility issues, when using the Node Labeller feature below.
   devicePlugin:
-    # Enable node labeller to add labels like amd.com/nic.* to nodes
     enableNodeLabeller: true
-
-    # Testing merged fix: NIC profile label (amd.com/nic.profile)
-    # https://github.com/pensando/k8s-network-node-labeller/pull/61
-    # https://github.com/pensando/network-operator/pull/327
-    nodeLabellerImage: quay.io/lochoa/k8s-network-node-labeller:pr-61
-    nodeLabellerImagePullPolicy: "Always"
-
-    devicePluginImagePullPolicy: "IfNotPresent"
-
-  # Issues:
-  # - It fails when the driver nicctl version is different than the firmware, it could
-  # automatically install the proper firmware version for the user.
-  # nicctl 1.117.5 won't work with firmware 1.110.1.
 
   # -----------------------------------------------------------------------------
   # Metrics Exporter - Prometheus-compatible metrics for AMD NICs

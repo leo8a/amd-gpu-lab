@@ -4,7 +4,7 @@
 # answers ARP from whichever interface it chooses, breaking RDMA connections.
 #
 # Switch prerequisites (tested on SONiC):
-#   - 7 VLANs (101-107), one per NIC pair across nodes
+#   - 8 VLANs (101-108), one per NIC pair across nodes
 #   - Each VLAN: exactly 2 untagged ports (one per server), SVI at .254/24
 #   - Proxy ARP enabled on each VLAN interface
 #

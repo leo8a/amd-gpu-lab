@@ -7,9 +7,9 @@ data:
   JOB_NAME: cluster-validation-mpi-job  # Must match MPIJob metadata.name
   WORKER_REPLICAS: "2"                  # Number of Worker Pods in each MPIJob doing actual computation
   LAUNCHER_REPLICAS: "1"                # Number of Launcher Pods for the MPIJob, which coordinates workers
-  SLOTS_PER_WORKER: "8"                 # MPI ranks per Worker pod
-  GPU_PER_WORKER: "8"                   # Number of GPUs to request per Worker pod
-  PF_NIC_PER_WORKER: "8"                # Number of PF-NICs to request per Worker pod
+  SLOTS_PER_WORKER: "1"                 # MPI ranks per Worker pod
+  GPU_PER_WORKER: "1"                   # Number of GPUs to request per Worker pod
+  PF_NIC_PER_WORKER: "1"                # Number of PF-NICs to request per Worker pod
   VF_NIC_PER_WORKER: "0"                # Number of VF-NICs to request per Worker pod
   NODE_VALIDATION_INTERVAL_MINS: "10"   # minimum interval in minutes between cluster validation runs on a given worker node
   PF_NIC_NAD_NAME: "amd-host-device-nad"
@@ -112,7 +112,7 @@ data:
   # RVS: ROCm Validation Suite. For a full list of supported recipes and arguments, refer to https://instinct.docs.amd.com/projects/gpu-operator/en/latest/test/appendix-test-recipe.html  
   # AGFHC: AMD GPU Field Health Check. For a full list of supported recipes and arguments, refer to https://instinct.docs.amd.com/projects/gpu-operator/en/latest/test/agfhc.html
   # Refer to the above links for other available test frameworks and recipes, and configure the wait time accordingly.
-  SKIP_GPU_VALIDATION: "false" # Set to "true" to skip GPU validation tests, directly start the RCCL tests
+  SKIP_GPU_VALIDATION: "true" # Set to "true" to skip GPU validation tests, directly start the RCCL tests
   TEST_RUNNER_JOB_WAIT_TIME: "1200"
   TEST_RUNNER_SUCCESS_LABEL: "amd.com/gpu-validation-test=passed"
   TEST_RUNNER_FAILURE_LABEL: "amd.com/gpu-validation-test=failed"

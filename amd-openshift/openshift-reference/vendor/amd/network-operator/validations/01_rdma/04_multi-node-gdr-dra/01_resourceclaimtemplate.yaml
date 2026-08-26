@@ -1,6 +1,11 @@
-# ResourceClaimTemplate requesting one AMD GPU and ionic_1 (PCI 0000:19:00.0),
-# constrained to the same PCIe root complex via DRA matchAttribute.
-# ionic_1 shares PCIe root pci0000:10 with GPU 0000:15:00.0.
+# ResourceClaimTemplate requesting one AMD GPU and the rail-1 RDMA NIC
+# (subnet 102), constrained to the same PCIe root complex via DRA matchAttribute
+# so GPUDirect RDMA stays on-root. Both server and client reference this same
+# template, so they pin the SAME rail -> same L2 segment, no cross-rail routing.
+# The rail-1 NIC PCI address differs per lab; only one exists on a given
+# cluster, so matching either is safe (both map to subnet 102, both GPU-aligned):
+#   - Supermicro MI325X (smc6216/smc6217): 0000:19:00.0 (root pci0000:10)
+#   - Dell MI355X (dell-mi355x-3/4):        0000:3a:00.0 (root pci0000:32)
 #
 # Requires: AMD GPU DRA driver (gpu.amd.com) + DRANET (dra.net) both
 # publishing resource.kubernetes.io/pcieRoot in their ResourceSlices.
@@ -29,7 +34,8 @@ spec:
               - cel:
                   expression: >-
                     device.attributes['dra.net'].rdma == true &&
-                    device.attributes['dra.net'].pciAddress == '0000:19:00.0'
+                    (device.attributes['dra.net'].pciAddress == '0000:19:00.0' ||
+                     device.attributes['dra.net'].pciAddress == '0000:3a:00.0')
       constraints:
         - requests: [gpu, nic]
           matchAttribute: "resource.kubernetes.io/pcieRoot"

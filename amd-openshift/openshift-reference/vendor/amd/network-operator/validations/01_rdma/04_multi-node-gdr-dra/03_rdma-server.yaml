@@ -39,9 +39,10 @@ spec:
           NIC_PCI=$(readlink -f /sys/class/infiniband/$RDMA_DEV/device 2>/dev/null | xargs basename)
           NIC_ROOT=$(readlink -f /sys/class/infiniband/$RDMA_DEV/device 2>/dev/null | sed 's|/sys/devices/||' | cut -d/ -f1-2)
           NIC_NUMA=$(cat /sys/class/infiniband/$RDMA_DEV/device/numa_node 2>/dev/null || echo "unknown")
-          if [ "$NIC_PCI" != "0000:19:00.0" ]; then
-            echo "WARN: Expected ionic_1 (0000:19:00.0), got $NIC_PCI"
-          fi
+          case "$NIC_PCI" in
+            0000:19:00.0|0000:3a:00.0) ;;
+            *) echo "WARN: Expected rail-1 NIC (SMC 0000:19:00.0 / Dell 0000:3a:00.0), got $NIC_PCI" ;;
+          esac
 
           echo "GPU: $GPU_PCI  root=$GPU_ROOT  numa=$GPU_NUMA"
           echo "NIC: $NIC_PCI  root=$NIC_ROOT  numa=$NIC_NUMA  rdma=$RDMA_DEV"

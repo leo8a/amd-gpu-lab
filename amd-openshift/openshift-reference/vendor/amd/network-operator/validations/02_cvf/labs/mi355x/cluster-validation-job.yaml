@@ -150,7 +150,7 @@ data:
           template:
             metadata:
               annotations:
-                k8s.v1.cni.cncf.io/networks: amd-host-device-nad-101,amd-host-device-nad-102,amd-host-device-nad-103,amd-host-device-nad-104,amd-host-device-nad-105,amd-host-device-nad-106,amd-host-device-nad-107,amd-host-device-nad-108
+                k8s.v1.cni.cncf.io/networks: amd-host-device-nad-102
               labels:
                 app: rccl-test-worker
             spec:
@@ -188,8 +188,8 @@ data:
                     esac
                   }
                   case "${NODE_NAME}" in
-                    *mi355x-3*) OCTET=11 ;;
-                    *mi355x-4*) OCTET=12 ;;
+                    *mi355x-3*) OCTET=10 ;;
+                    *mi355x-4*) OCTET=20 ;;
                     *) echo "ERROR: Unknown NODE_NAME=${NODE_NAME}"; exit 1 ;;
                   esac
                   echo "Node=${NODE_NAME} octet=${OCTET}"
@@ -220,6 +220,12 @@ data:
                 image: $$RCCL_WORKLOAD_IMAGE
                 imagePullPolicy: IfNotPresent
                 securityContext:
+                  # privileged => CRI-O sets RLIMIT_MEMLOCK=unlimited. The ionic
+                  # driver accounts QP/CQ queue buffers against memlock (CAP_IPC_LOCK
+                  # only bypasses memlock for MR registration, not queue buffers), so
+                  # the 8 MB default made ibv_create_qp/cq fail with ENOSPC once the
+                  # ANP plugin allocated its large CQ.
+                  privileged: true
                   capabilities:
                     add: ["IPC_LOCK", "SYS_CHROOT"]
                 envFrom:

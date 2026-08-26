@@ -38,9 +38,10 @@ spec:
               fi
               NIC_PCI=$(readlink -f /sys/class/infiniband/$RDMA_DEV/device 2>/dev/null | xargs basename)
               echo "Using: $RDMA_DEV (PCI: $NIC_PCI)"
-              if [ "$NIC_PCI" != "0000:09:00.0" ]; then
-                echo "WARN: Expected ionic_0 (0000:09:00.0), got $NIC_PCI"
-              fi
+              case "$NIC_PCI" in
+                0000:09:00.0|0000:06:00.0) ;;
+                *) echo "WARN: Expected rail-0 NIC (SMC 0000:09:00.0 / Dell 0000:06:00.0), got $NIC_PCI" ;;
+              esac
               ibv_devinfo -d $RDMA_DEV 2>&1
 
               echo "--- configuring RDMA NIC IP ---"

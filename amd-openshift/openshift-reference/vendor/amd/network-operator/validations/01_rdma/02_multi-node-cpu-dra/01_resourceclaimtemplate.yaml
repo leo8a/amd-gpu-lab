@@ -1,4 +1,10 @@
-# ResourceClaimTemplate requesting ionic_0 (PCI 0000:09:00.0) specifically.
+# ResourceClaimTemplate requesting the rail-0 RDMA NIC (subnet 101).
+# Both server and client reference this same template, so they pin the SAME
+# rail on their respective nodes -> same L2 segment, no cross-rail routing.
+# The PCI address of rail-0 differs per lab; only one exists on a given
+# cluster, so matching either is safe:
+#   - Supermicro MI325X (smc6216/smc6217): 0000:09:00.0
+#   - Dell MI355X (dell-mi355x-3/4):        0000:06:00.0
 # Requires: DRANET (dra.net) driver publishing device attributes including
 # pciAddress in its ResourceSlices.
 ---
@@ -19,4 +25,5 @@ spec:
               - cel:
                   expression: >-
                     device.attributes['dra.net'].rdma == true &&
-                    device.attributes['dra.net'].pciAddress == '0000:09:00.0'
+                    (device.attributes['dra.net'].pciAddress == '0000:09:00.0' ||
+                     device.attributes['dra.net'].pciAddress == '0000:06:00.0')

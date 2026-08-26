@@ -34,21 +34,31 @@ spec:
               echo "=== RDMA Multi-Node Bandwidth Validation ==="
 
               echo "--- configuring IP from NIC VLAN ---"
-              PCI=$(readlink /sys/class/net/net1/device 2>/dev/null | xargs basename | sed 's/^0000://')
+              PCI=$(readlink /sys/class/net/net1/device 2>/dev/null | xargs basename)
               case "$PCI" in
-                09:00.0) SUBNET=101 ;; 19:00.0) SUBNET=102 ;;
-                79:00.0) SUBNET=103 ;; 69:00.0) SUBNET=104 ;;
-                89:00.0) SUBNET=105 ;; 99:00.0) SUBNET=106 ;;
-                f9:00.0) SUBNET=107 ;;
+                # smc6216/smc6217 (Supermicro MI325X)
+                0000:09:00.0) SUBNET=101 ;; 0000:19:00.0) SUBNET=102 ;;
+                0000:79:00.0) SUBNET=103 ;; 0000:69:00.0) SUBNET=104 ;;
+                0000:89:00.0) SUBNET=105 ;; 0000:99:00.0) SUBNET=106 ;;
+                0000:f9:00.0) SUBNET=107 ;;
+                # dell-mi355x-3/dell-mi355x-4 (Dell MI355X)
+                0000:06:00.0) SUBNET=101 ;; 0000:3a:00.0) SUBNET=102 ;;
+                0000:ac:00.0) SUBNET=103 ;; 0000:d9:00.0) SUBNET=104 ;;
+                0001:06:00.0) SUBNET=105 ;; 0001:38:00.0) SUBNET=106 ;;
+                0001:a9:00.0) SUBNET=107 ;; 0001:d6:00.0) SUBNET=108 ;;
                 *) echo "FAIL: unknown PCI $PCI"; exit 1 ;;
               esac
-              case "$NODE_NAME" in *6216*) OCTET=11 ;; *6217*) OCTET=12 ;; *) echo "FAIL: unknown node $NODE_NAME"; exit 1 ;; esac
+              case "$NODE_NAME" in
+                *6216*) OCTET=11 ;; *6217*) OCTET=12 ;;
+                *mi355x-3*) OCTET=10 ;; *mi355x-4*) OCTET=20 ;;
+                *) echo "FAIL: unknown node $NODE_NAME"; exit 1 ;;
+              esac
               CLIENT_IP="192.168.${SUBNET}.${OCTET}"
               ip addr flush dev net1 2>/dev/null || true
               ip addr add "${CLIENT_IP}/24" dev net1
               ip link set net1 up
               GW="192.168.${SUBNET}.254"
-              for s in $(seq 101 107); do
+              for s in $(seq 101 108); do
                 [ "$s" = "$SUBNET" ] && continue
                 ip route add "192.168.${s}.0/24" via "$GW" dev net1 2>/dev/null || true
               done
@@ -66,9 +76,12 @@ spec:
 
               echo "--- finding server ---"
               sleep 15
-              if [ "$OCTET" = "11" ]; then SERVER_OCTET=12; else SERVER_OCTET=11; fi
+              case "$OCTET" in
+                11) SERVER_OCTET=12 ;; 12) SERVER_OCTET=11 ;;
+                10) SERVER_OCTET=20 ;; 20) SERVER_OCTET=10 ;;
+              esac
               SERVER_IP=""
-              for s in $(seq 101 107); do
+              for s in $(seq 101 108); do
                 TARGET="192.168.${s}.${SERVER_OCTET}"
                 if ping -c 1 -W 1 $TARGET >/dev/null 2>&1; then
                   SERVER_IP=$TARGET

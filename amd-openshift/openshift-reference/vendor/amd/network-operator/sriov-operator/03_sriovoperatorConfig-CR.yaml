@@ -6,6 +6,6 @@ metadata:
   namespace: openshift-sriov-network-operator
 spec:
   logLevel: 2
-  disableDrain: true        # We are testing this in SNOs
+  disableDrain: false        # true only if we are testing this in SNOs
   enableInjector: true
   enableOperatorWebhook: true

@@ -58,7 +58,7 @@ DRANET_MANIFEST := https://raw.githubusercontent.com/kubernetes-sigs/dranet/refs
 multi-node-cpu-dra: ## Run 02_multi-node-cpu-dra CPU test with DRA NIC pinning (ionic_0, experimental)
 	@echo "" ; echo "Running multi-node CPU-DRA bandwidth test..."
 	@echo "--- prerequisites: installing DRANET ---"
-	@kubectl apply -f $(DRANET_MANIFEST) 2>/dev/null || true
+	@oc apply -f $(DRANET_MANIFEST) 2>/dev/null || true
 	@oc adm policy add-scc-to-user privileged -z dranet -n kube-system 2>/dev/null || true
 	@echo "--- waiting for DRANET ---"
 	@sleep 15
@@ -74,7 +74,7 @@ multi-node-gdr-dra: ## Run 04_multi-node-gdr-dra GDR test with DRA PCIe root ali
 	@echo "--- prerequisites: enabling GPU DRA driver ---"
 	@oc patch deviceconfig amdgpu-driver-install -n openshift-amd-gpu --type merge -p "$$(cat $(DRA_PATCH))"
 	@echo "--- prerequisites: installing DRANET ---"
-	@kubectl apply -f $(DRANET_MANIFEST) 2>/dev/null || true
+	@oc apply -f $(DRANET_MANIFEST) 2>/dev/null || true
 	@oc adm policy add-scc-to-user privileged -z dranet -n kube-system 2>/dev/null || true
 	@echo "--- waiting for DRA drivers ---"
 	@sleep 15
@@ -102,7 +102,7 @@ cleanup: ## Delete all test resources
 	@echo "Restoring GPU device plugin (disabling DRA)..."
 	@oc apply -f ../../../gpu-operator/07_amd-deviceconfig.yaml 2>/dev/null || true
 	@echo "Removing DRANET..."
-	@kubectl delete -f https://raw.githubusercontent.com/kubernetes-sigs/dranet/refs/heads/main/install.yaml --ignore-not-found 2>/dev/null || true
+	@oc delete -f https://raw.githubusercontent.com/kubernetes-sigs/dranet/refs/heads/main/install.yaml --ignore-not-found 2>/dev/null || true
 	@oc adm policy remove-scc-from-user privileged -z dranet -n kube-system 2>/dev/null || true
 
 

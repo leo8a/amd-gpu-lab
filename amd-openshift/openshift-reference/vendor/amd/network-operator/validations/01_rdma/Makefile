@@ -14,9 +14,7 @@ default: help
 
 # Usage: $(call wait-for-job,<job-name>)
 define wait-for-job
-	@oc wait job/$(1) -n $(NAMESPACE) --for=condition=complete --timeout=$(TIMEOUT) 2>/dev/null & \
-	oc wait job/$(1) -n $(NAMESPACE) --for=condition=failed --timeout=$(TIMEOUT) 2>/dev/null & \
-	wait -n; \
+	@oc wait job/$(1) -n $(NAMESPACE) --for=jsonpath='{.status.succeeded}' 2>/dev/null; \
 	if [ "$$(oc get job/$(1) -n $(NAMESPACE) -o jsonpath='{.status.succeeded}')" = "1" ]; then \
 	  oc logs job/$(1) -n $(NAMESPACE); echo ; echo "✓ $(1) PASSED" ; exit 0; \
 	else \

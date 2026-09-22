@@ -44,6 +44,19 @@ nicctl update qos pfc --priority 3 --no-drop enable
 nicctl update qos scheduling --priority 3,0,6 --dwrr 99,1,0 --rate-limit 0,0,10
 ```
 
+**Apply per port, one UUID at a time.** Despite the `--help` text advertising `-p <uuid1,uuid2,...>`, the `nicctl update qos` subcommands reject a comma-separated port list with `ERROR - Invalid UUID`. Loop over each port UUID individually:
+
+```bash
+for p in $(nicctl show port | awk '/^Port :/{print $3}'); do
+  nicctl update qos dscp-to-priority -p "$p" --dscp 24 --priority 3
+  nicctl update qos dscp-to-priority -p "$p" --dscp 46 --priority 6
+  nicctl update qos pfc -p "$p" --priority 3 --no-drop enable
+  nicctl update qos scheduling -p "$p" --priority 3,0,6 --dwrr 99,1,0 --rate-limit 0,0,10
+done
+```
+
+`nicctl update dcqcn` (see below) *does* accept a single `-r <roce-device>` per call; loop over `ionic_0`–`ionic_7`.
+
 ## 3. DCQCN
 
 Per RDMA device (`ionic_0`–`ionic_7`).
@@ -84,3 +97,9 @@ nicctl show dcqcn                 # DCQCN profile 1 enabled on each RDMA device
 **Traffic class vs TOS.** The perftest `-T`/`--tos` flag sets the TOS byte, NOT the DSCP value. Use `--tclass 96` for DSCP 24 (96 = 24 << 2). The `-T` flag is only relevant with `-R` mode.
 
 **MTU.** The NIC default MTU is 9216. The AMD Benchmarking Guide recommends 9K on interfaces and switches for optimal performance.
+
+**DCQCN "Initialization error" on VF LIFs is benign.** If a NIC has an SR-IOV VF reserved (e.g. `eth0_vf0`, MAC one above the PF), `nicctl show dcqcn` lists a second LIF per NIC (`44000070-…`) with `Status: Initialization error` and `ROCE device: -`. This is expected for a `down/down` VF with no RoCE device bound — DCQCN only initializes on the PF RoCE devices (`ionic_0`–`ionic_7`, LIF `43000070-…`). It does not affect RDMA/RCCL tests, which use the PF NICs.
+
+This VF reservation lives in the **NIC device config on the card itself** — it is independent of the OpenShift SR-IOV Network Operator. Removing that operator does **not** clear it. Symptoms of a reserved VF: `nicctl show lif` shows `eth0_vf0`, `cat /sys/class/net/<pf>/device/sriov_totalvfs` returns `1` (vs. the file being absent when no VF is reserved), and the PF netdev is named `enoXXXXnp0` (representor-style) instead of `enoXXXX`. Note `nicctl show card profile` can still report `default` even when a stale VF is reserved, so check `sriov_totalvfs`/`show lif` rather than trusting the profile name alone.
+
+To clear it and make nodes symmetric, re-apply the default card profile with `nicctl update card profile … --profile default` (see `update-ai-nic-profile.md`; firmware A/B must match first), then **reboot the node**. PFC/QoS/DCQCN do not persist across reboots — re-apply §2–§3 afterwards.
